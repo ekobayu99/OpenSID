@@ -53,7 +53,7 @@ define('VERSI_DATABASE', '2022020101');
 define("LOKASI_LOGO_DESA", 'desa/logo/');
 define("LOKASI_ARSIP", 'desa/arsip/');
 define("LOKASI_CONFIG_DESA", 'desa/config/');
-define("LOKASI_SURAT_DESA", 'desa/template-surat/');
+define("LOKASI_SURAT_DESA", 'desa/template-surat-kp/');
 define("LOKASI_SURAT_FORM_DESA", 'desa/template-surat/form/');
 define("LOKASI_SURAT_PRINT_DESA", 'desa/template-surat/print/');
 define("LOKASI_SURAT_EXPORT_DESA", 'desa/template-surat/export/');
