@@ -110,6 +110,7 @@ class Kp_surat extends Admin_Controller {
 			$data['anggota'] = NULL;
 		}
 		$this->get_data_untuk_form($url, $data);
+		$this->load->helper('form');
 
 		$data['surat_url'] = rtrim($_SERVER['REQUEST_URI'], "/clear");
 		$data['form_action'] = site_url("kp/surat/doc/$url");
@@ -264,7 +265,7 @@ class Kp_surat extends Admin_Controller {
 		$this->redirect_hak_akses('u',  $_SERVER['HTTP_REFERER']);
 		$this->load->model('surat_master_model');
 		$this->surat_master_model->favorit($id, $k);
-		redirect("surat");
+		redirect("kp_surat");
 	}
 
 	/*

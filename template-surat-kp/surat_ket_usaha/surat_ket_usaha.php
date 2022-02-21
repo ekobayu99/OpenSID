@@ -11,7 +11,7 @@
 					</div>
 					<div class="box-body">
 						<form id="main" name="main" method="POST" class="form-horizontal">
-							<?php include("donjo-app/views/surat/form/_cari_nik.php"); ?>
+							<?php include("donjo-app/views/kp/surat/form/_cari_nik.php"); ?>
 						</form>
 						<form id="validasi" action="<?= $form_action ?>" method="POST" target="_blank" class="form-surat form-horizontal">
 							<input type="hidden" id="url_surat" name="url_surat" value="<?= $url ?>">
@@ -23,9 +23,9 @@
 								</div>
 							</div>
 							<?php if ($individu) : ?>
-								<?php include("donjo-app/views/surat/form/konfirmasi_pemohon.php"); ?>
+								<?php include("donjo-app/views/kp/surat/form/konfirmasi_pemohon.php"); ?>
 							<?php endif; ?>
-							<?php include("donjo-app/views/surat/form/nomor_surat.php"); ?>
+							<?php include("donjo-app/views/kp/surat/form/nomor_surat.php"); ?>
 							<div class="form-group">
 								<label for="usaha" class="col-sm-3 control-label">Nama/ Jenis Usaha</label>
 								<div class="col-sm-8">
@@ -33,18 +33,38 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="keterangan" class="col-sm-3 control-label">Keterangan</label>
+								<label for="usaha" class="col-sm-3 control-label">Lokasi Usaha</label>
 								<div class="col-sm-8">
-									<textarea name="keterangan" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Keterangan"></textarea>
+									<?= form_dropdown('jenis_lokasi', ['1' => 'Sama dengan KTP', '2' => 'Lokasi Baru'], '', 'class="form-control input-sm" id="jenis_lokasi"'); ?>
+									<?= form_textarea('lokasi_baru', '', 'class="form-control input-sm" placeholder="Masukkan lokasi usaha.." id="lokasi_baru" style="height: 50px;"'); ?>
 								</div>
 							</div>
-							<?php include("donjo-app/views/surat/form/tgl_berlaku.php"); ?>
-							<?php include("donjo-app/views/surat/form/_pamong.php"); ?>
+							<div class="form-group">
+								<label for="usaha" class="col-sm-3 control-label">Tanggal Berdirinya Usaha</label>
+								<div class="col-sm-2">
+									<input type="date" name="tgl_berdiri" class="form-control input-sm" required>
+								</div>
+							</div>
+							<?php include("donjo-app/views/kp/surat/form/tgl_berlaku.php"); ?>
+							<?php include("donjo-app/views/kp/surat/form/_pamong.php"); ?>
 						</form>
 					</div>
-					<?php include("donjo-app/views/surat/form/tombol_cetak.php"); ?>
+					<?php include("donjo-app/views/kp/surat/form/tombol_cetak.php"); ?>
 				</div>
 			</div>
 		</div>
 	</section>
 </div>
+
+<script type="text/javascript">
+	$("#jenis_lokasi").on('change', function() {
+		let jenis_lokasi = $("#jenis_lokasi").val();
+
+		if (jenis_lokasi == "2") {
+			// $("#lokasi_baru").show();
+			$("#lokasi_baru").focus();
+		} else {
+			// $("#lokasi_baru").hide();
+		}
+	})
+</script>
