@@ -55,6 +55,7 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 		$this->load->helper('form');
 		$this->load->model('pamong_model');
 		$this->load->model('config_model');
+		$this->load->model('kp/surat_masuk_suratku_model');
 		$this->modul_ini = 4;
 		$this->sub_modul_ini = 334;
 	}
@@ -63,10 +64,114 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 	{
 		$user_id = intval($this->session->userdata('user'));
 
-			
+
 		$data['main'] = [];
 		$this->render('kp/suratku/surat_masuk', $data);
 	}
 
+
+	public function dashboard()
+	{
+		$config = $this->config_model->get_data();
+		$kode_prov = $config['kode_propinsi'];
+		$kode_kab = str_pad($config['kode_kabupaten'], 2, '0', STR_PAD_LEFT);
+		$kode_kec = $config['kode_kecamatan'];
+		$kode_desa = $config['kode_desa'];
+
+		$username = '003' . $kode_prov . $kode_kab . $kode_kec . $kode_desa;
+		$get_dashboard = $this->surat_masuk_suratku_model->get_dashboard($username);
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode($get_dashboard));
+	}
+
+	public function index_ajax($tahun = 0)
+	{
+		$config = $this->config_model->get_data();
+		$kode_desa = $config['kode_desa'];
+
+		if ($tahun == 0) {
+			$tahun = date('Y');
+		} else {
+			$tahun = $tahun;
+		}
+
+		$username = '003' . $kode_desa;
+		// $username = '003' . $kode_prov . $kode_kab . $kode_kec . $kode_desa;
+		$get_surat = $this->surat_masuk_suratku_model->get_list_surat_masuk($username, $tahun);
+
+		$this->output
+		->set_content_type('application/json')
+		->set_output(json_encode($get_surat));
+	}
+
+	public function detil_surat($tahun = 0)
+	{
+		$p = $this->input->post();
+
+		$config = $this->config_model->get_data();
+		$kode_desa = $config['kode_desa'];
+
+		$params = [
+			'id_surat' => $p['id_surat'],
+			'penerima_id_instansi' => $p['penerima_id_instansi'],
+			'penerima_id_user' => $p['penerima_id_user']
+		];
+
+		if ($tahun == 0) {
+			$tahun = date('Y');
+		} else {
+			$tahun = $tahun;
+		}
+
+
+		$username = '003' . $kode_desa;
+		$get_surat = $this->surat_masuk_suratku_model->get_list_surat_masuk_detil($username, $params, $tahun);
+		$set_status_baca = $this->surat_masuk_suratku_model->set_status_baca($username, $params, $tahun);
+
+
+
+		$get_nomor_surat = $this->penomoran_surat_model->get_surat_terakhir('surat_masuk');
+		$get_surat['nomor_surat_preview'] = $get_nomor_surat['no_surat'] + 1;
+
+		$this->output
+		->set_content_type('application/json')
+		->set_output(json_encode($get_surat));
+	}
+
+	public function simpan_surat_masuk($tahun = 0)
+	{
+		$simpan_surat = $this->surat_masuk_suratku_model->insert();
+
+		$p = $this->input->post();
+
+		$config = $this->config_model->get_data();
+		$kode_prov = $config['kode_propinsi'];
+		$kode_kab = str_pad($config['kode_kabupaten'], 2, '0', STR_PAD_LEFT);
+		$kode_kec = $config['kode_kecamatan'];
+		$kode_desa = $config['kode_desa'];
+
+		$params = [
+			'id_surat' => $p['mdl_detil_surat_id_surat'],
+			'penerima_id_instansi' => $p['mdl_detil_surat_penerima_id_instansi'],
+			'penerima_id_user' => $p['mdl_detil_surat_penerima_id_user']
+		];
+
+		if ($tahun == 0) {
+			$tahun = date('Y');
+		} else {
+			$tahun = $tahun;
+		}
+
+		$username = '003' . $kode_prov . $kode_kab . $kode_kec . $kode_desa;
+		$set_status_berinomor = $this->surat_masuk_suratku_model->set_status_berinomor($username, $params, $tahun);
+
+		$this->output
+		->set_content_type('application/json')
+		->set_output(json_encode($simpan_surat));
+	}
+
+	
 	
 }
