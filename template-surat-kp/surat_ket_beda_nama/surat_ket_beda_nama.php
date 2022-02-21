@@ -12,7 +12,7 @@
 					<div class="box-body">
 						<form id="main" name="main" method="POST" class="form-horizontal">
 							<div class="col-md-12">
-								<?php include("donjo-app/views/surat/form/_cari_nik.php"); ?>
+								<?php include("donjo-app/views/kp/surat/form/_cari_nik.php"); ?>
 							</div>
 						</form>
 						<form id="validasi" action="<?= $form_action ?>" method="POST" target="_blank" class="form-surat form-horizontal">
@@ -26,88 +26,131 @@
 									</div>
 								</div>
 								<?php if ($individu) : ?>
-									<?php include("donjo-app/views/surat/form/konfirmasi_pemohon.php"); ?>
+									<?php include("donjo-app/views/kp/surat/form/konfirmasi_pemohon.php"); ?>
 								<?php endif; ?>
-								<?php include("donjo-app/views/surat/form/nomor_surat.php"); ?>
+								<?php include("donjo-app/views/kp/surat/form/nomor_surat.php"); ?>
+
 								<div class="form-group subtitle_head">
-									<label class="col-sm-3 text-right"><strong>IDENTITAS KEDUA</strong></label>
+									<label class="text-left"><strong>IDENTITAS 1</strong></label>
 								</div>
 								<div class="form-group">
-									<label for="kartu" class="col-sm-3 control-label">Identitas dalam (nama kartu)</label>
+									<label for="kartu" class="col-sm-3 control-label">Nama Kartu Identitas</label>
 									<div class="col-sm-8">
-										<input type="text" name="kartu" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Nama Kartu Identitas"></input>
+										<input type="text" name="kartu1" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Nama Kartu Identitas"></input>
 									</div>
 								</div>
 								<div class="form-group">
-									<label for="identitas" class="col-sm-3 control-label">Nomor Identitas</label>
-									<div class="col-sm-4">
-										<input id="identitas" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvnumber'); ?>" type="text" placeholder="Nomor Identitas" name="identitas">
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="nama" class="col-sm-3 control-label">Nama</label>
+									<label for="kartu" class="col-sm-3 control-label">Identitas yang berbeda</label>
 									<div class="col-sm-8">
-										<input type="text" name="nama" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Nama"></input>
+										<?= form_dropdown('opsi_perbedaan1', ['' => '', 'Nama' => 'Nama', 'TTL' => 'TTL', 'Alamat' => 'Alamat'], '', 'class="form-control input-sm"'); ?>
 									</div>
 								</div>
 								<div class="form-group">
-									<label for="ttl" class="col-sm-3 control-label">Tempat Tanggal Lahir</label>
-									<div class="col-sm-4">
-										<input id="tempatlahir" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" type="text" placeholder="Tempat Lahir" name="tempatlahir">
-									</div>
-									<div class="col-sm-4 col-lg-2">
-										<div class="input-group input-group-sm date">
-											<div class="input-group-addon">
-												<i class="fa fa-calendar"></i>
-											</div>
-											<input title="Pilih Tanggal" title="Pilih Tanggal" class="form-control input-sm datepicker required" name="tanggallahir" type="text" />
-										</div>
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="sex" class="col-sm-3 control-label">Jenis Kelamin</label>
+									<label for="kartu" class="col-sm-3 control-label">Perbedaan</label>
 									<div class="col-sm-8">
-										<input type="text" name="sex" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Jenis Kelamin"></input>
+										<?= form_input('perbedaan1', '', 'class="form-control input-sm"'); ?>
 									</div>
 								</div>
 								<div class="form-group">
-									<label for="alamat" class="col-sm-3 control-label">Alamat</label>
-									<div class="col-sm-8">
-										<textarea name="alamat" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Alamat"></textarea>
+									<label for="kartu" class="col-sm-3 control-label">Tempat Tanggal Lahir</label>
+									<div class="col-sm-2">
+										<?= form_input('tempatlahir1', '', 'class="form-control input-sm"'); ?>
+									</div>
+									<div class="col-sm-2">
+										<input type="date" name="tanggallahir1" value="" class="form-control input-sm">
 									</div>
 								</div>
 								<div class="form-group">
-									<label for="agama" class="col-sm-3 control-label">Agama</label>
+									<label for="kartu" class="col-sm-3 control-label">Sebab terjadi perbedaan</label>
 									<div class="col-sm-8">
-										<input type="text" name="agama" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Agama"></input>
+										<?= form_input('sebab1', '', 'class="form-control input-sm"'); ?>
+									</div>
+								</div>
+
+
+								<div class="form-group subtitle_head">
+									<label class="text-left"><strong>IDENTITAS 2</strong></label>
+								</div>
+								<div class="form-group">
+									<label for="kartu" class="col-sm-3 control-label">Nama Kartu Identitas</label>
+									<div class="col-sm-8">
+										<input type="text" name="kartu2" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Nama Kartu Identitas"></input>
 									</div>
 								</div>
 								<div class="form-group">
-									<label for="pekerjaan" class="col-sm-3 control-label">Pekerjaan</label>
+									<label for="kartu" class="col-sm-3 control-label">Identitas yang berbeda</label>
 									<div class="col-sm-8">
-										<input type="text" name="pekerjaan" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Pekerjaan"></input>
+										<?= form_dropdown('opsi_perbedaan2', ['' => '', 'Nama' => 'Nama', 'TTL' => 'TTL', 'Alamat' => 'Alamat'], '', 'class="form-control input-sm"'); ?>
 									</div>
 								</div>
 								<div class="form-group">
-									<label for="keterangan" class="col-sm-3 control-label">Keterangan</label>
+									<label for="kartu" class="col-sm-3 control-label">Perbedaan</label>
 									<div class="col-sm-8">
-										<textarea name="keterangan" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Keterangan"></textarea>
+										<?= form_input('perbedaan2', '', 'class="form-control input-sm"'); ?>
 									</div>
 								</div>
 								<div class="form-group">
-									<label for="perbedaan" class="col-sm-3 control-label">Perbedaan</label>
-									<div class="col-sm-8">
-										<input type="text" name="perbedaan" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Perbedaan"></input>
+									<label for="kartu" class="col-sm-3 control-label">Tempat Tanggal Lahir</label>
+									<div class="col-sm-2">
+										<?= form_input('tempatlahir2', '', 'class="form-control input-sm"'); ?>
+									</div>
+									<div class="col-sm-2">
+										<input type="date" name="tanggallahir2" value="" class="form-control input-sm">
 									</div>
 								</div>
+								<div class="form-group">
+									<label for="kartu" class="col-sm-3 control-label">Sebab terjadi perbedaan</label>
+									<div class="col-sm-8">
+										<?= form_input('sebab2', '', 'class="form-control input-sm"'); ?>
+									</div>
+								</div>
+
+
+								<div class="form-group subtitle_head">
+									<label class="text-left"><strong>IDENTITAS 3</strong></label>
+								</div>
+								<div class="form-group">
+									<label for="kartu" class="col-sm-3 control-label">Nama Kartu Identitas</label>
+									<div class="col-sm-8">
+										<input type="text" name="kartu3" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Nama Kartu Identitas"></input>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="kartu" class="col-sm-3 control-label">Identitas yang berbeda</label>
+									<div class="col-sm-8">
+										<?= form_dropdown('opsi_perbedaan3', ['' => '', 'Nama' => 'Nama', 'TTL' => 'TTL', 'Alamat' => 'Alamat'], '', 'class="form-control input-sm"'); ?>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="kartu" class="col-sm-3 control-label">Perbedaan</label>
+									<div class="col-sm-8">
+										<?= form_input('perbedaan3', '', 'class="form-control input-sm"'); ?>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="kartu" class="col-sm-3 control-label">Tempat Tanggal Lahir</label>
+									<div class="col-sm-2">
+										<?= form_input('tempatlahir3', '', 'class="form-control input-sm"'); ?>
+									</div>
+									<div class="col-sm-2">
+										<input type="date" name="tanggallahir3" value="" class="form-control input-sm">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="kartu" class="col-sm-3 control-label">Sebab terjadi perbedaan</label>
+									<div class="col-sm-8">
+										<?= form_input('sebab3', '', 'class="form-control input-sm"'); ?>
+									</div>
+								</div>
+
 								<div class="form-group subtitle_head tdk-permohonan tdk-periksa">
-									<label class="col-sm-3 text-right"><strong>PENANDA TANGAN</strong></label>
+									<label class="text-left"><strong>PENANDA TANGAN</strong></label>
 								</div>
-								<?php include("donjo-app/views/surat/form/_pamong.php"); ?>
+								<?php include("donjo-app/views/kp/surat/form/_pamong.php"); ?>
 							</div>
 						</form>
 					</div>
-					<?php include("donjo-app/views/surat/form/tombol_cetak.php"); ?>
+					<?php include("donjo-app/views/kp/surat/form/tombol_cetak.php"); ?>
 				</div>
 			</div>
 		</div>
