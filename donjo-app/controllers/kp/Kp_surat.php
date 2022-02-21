@@ -434,19 +434,16 @@ class Kp_surat extends Admin_Controller {
 				')
 				->get('log_surat')->row_array();
 
-				$data_kk = [];
-				if ($get_detil_format_surat->url_surat == "surat_bio_penduduk") {
-					$data_kk = $this->db
-					->where('tweb_keluarga.id', $data_detil_surat['id_kk'])
-					->join('tweb_penduduk', 'tweb_keluarga.nik_kepala = tweb_penduduk.id')
-					->join('tweb_wil_clusterdesa', 'tweb_keluarga.id_cluster = tweb_keluarga.id_cluster')
-					->select('
-						tweb_keluarga.*,
-						tweb_penduduk.nama nama_kepala_kk,
-						tweb_wil_clusterdesa.dusun alamat_kk
-					')
-					->get('tweb_keluarga')->row_array();
-				}
+				$data_kk = $this->db
+				->where('tweb_keluarga.id', $data_detil_surat['id_kk'])
+				->join('tweb_penduduk', 'tweb_keluarga.nik_kepala = tweb_penduduk.id')
+				->join('tweb_wil_clusterdesa', 'tweb_keluarga.id_cluster = tweb_keluarga.id_cluster')
+				->select('
+					tweb_keluarga.*,
+					tweb_penduduk.nama nama_kepala_kk,
+					tweb_wil_clusterdesa.dusun alamat_kk
+				')
+				->get('tweb_keluarga')->row_array();
 
 				$data = $data_detil_surat;
 				$tanggal_sekarang = tgl_indo(date('Y-m-d'));
