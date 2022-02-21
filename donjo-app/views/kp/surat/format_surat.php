@@ -49,8 +49,8 @@
 																	<tr <?php if ($data['jenis'] != 1) : ?>style='background-color:#f8deb5 !important;' <?php endif; ?>>
 																		<td><?= $i; ?></td>
 																		<td class="nostretch">
-																			<a href="<?= site_url() ?>kp/surat/form/<?= $data['url_surat'] ?>" class="btn btn-social btn-flat bg-olive btn-sm" title="Buat Surat"><i class="fa fa-file-word-o"></i>Buat Surat</a>
-																			<a href="<?= site_url("kp/surat/favorit/$data[id]/$data[favorit]") ?>" class="btn bg-purple btn-flat btn-sm" title="Keluarkan dari Daftar Favorit"><i class="fa fa-star"></i></a>
+																			<a href="<?= site_url() ?>kp_surat/form/<?= $data['url_surat'] ?>" class="btn btn-social btn-flat bg-olive btn-sm" title="Buat Surat"><i class="fa fa-file-word-o"></i>Buat Surat</a>
+																			<a href="<?= site_url("kp_surat/favorit/$data[id]/$data[favorit]") ?>" class="btn bg-purple btn-flat btn-sm" title="Keluarkan dari Daftar Favorit"><i class="fa fa-star"></i></a>
 																		</td>
 																		<td><?= $data['nama'] ?></td>
 																		<td><?= $data['kode_surat'] ?></td>
@@ -100,9 +100,9 @@
 																<tr <?php if ($data['jenis'] != 1) : ?>style='background-color:#f8deb5 !important;' <?php endif; ?>>
 																	<td><?= $nomer; ?></td>
 																	<td class="nostretch">
-																		<a href="<?= site_url() ?>kp/surat/form/<?= $data['url_surat'] ?>" class="btn btn-social btn-flat bg-purple btn-sm" title="Buat Surat"><i class="fa fa-file-word-o"></i>Buat Surat</a>
+																		<a href="<?= site_url() ?>kp_surat/form/<?= $data['url_surat'] ?>" class="btn btn-social btn-flat bg-purple btn-sm" title="Buat Surat"><i class="fa fa-file-word-o"></i>Buat Surat</a>
 																		<?php if ($this->CI->cek_hak_akses('u')) : ?>
-																			<a href="<?= site_url("kp/surat/favorit/$data[id]/$data[favorit]") ?>" class="btn bg-purple btn-flat btn-sm" title="Tambahkan ke Daftar Favorit"><i class="fa fa-star-o"></i></a>
+																			<a href="<?= site_url("kp_surat/favorit/$data[id]/$data[favorit]") ?>" class="btn bg-purple btn-flat btn-sm" title="Tambahkan ke Daftar Favorit"><i class="fa fa-star-o"></i></a>
 																		<?php endif; ?>
 																	</td>
 																	<td><?= $data['nama'] ?></td>

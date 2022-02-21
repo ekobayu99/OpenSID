@@ -1,7 +1,11 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 12pt;
-    width: 8.5in;
-    border: dashed 1px rgb(71, 69, 69);
-    padding: 1cm;
+    font-size: 11pt;
+    width: 100%;
+    /* border: dashed 1px rgb(71, 69, 69); */
+    /* margin: 0.5cm; */
+}
+
+.menjorok_ke_dalam {
+    margin-left: 1cm !important;
 }

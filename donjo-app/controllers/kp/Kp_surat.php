@@ -47,7 +47,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require('./vendor/html2pdf/vendor/spipu/html2pdf/src/Html2Pdf.php');
 use \Spipu\Html2Pdf\Html2Pdf;
 
-class Surat extends Admin_Controller {
+class Kp_surat extends Admin_Controller {
 
 	public function __construct()
 	{
@@ -114,6 +114,8 @@ class Surat extends Admin_Controller {
 		$data['surat_url'] = rtrim($_SERVER['REQUEST_URI'], "/clear");
 		$data['form_action'] = site_url("kp/surat/doc/$url");
 		$data['masa_berlaku'] = $this->surat_model->masa_berlaku_surat($url);
+		$data['is_dari_permohonan'] = 0;
+		$data['id_permohonan'] = 0;
 
 		$this->set_minsidebar(1);
 		$this->render("kp/surat/form_surat", $data);
@@ -338,6 +340,9 @@ class Surat extends Admin_Controller {
 		$insert_to_akp_log_surat_detil = $this->db->insert('akp_log_surat_detil', [
 			'id_log_surat'=>$last_id,
 			'detil'=>json_encode($p),
+			'is_ttd' => 0,
+			'is_dari_layanan_mandiri'=>$p['is_dari_permohonan'],
+			'id_permohonan_surat'=>$p['id_permohonan'],
 		]);
 
 		$ret = [
@@ -359,44 +364,89 @@ class Surat extends Admin_Controller {
 			->get('log_surat')->row();
 
 		if (!empty($get_log_surat)) {
-			// get log surat detil 
-			$get_log_surat_detil = $this->db
+			$get_dari_tabel_tte = $this->db
 				->where('id_log_surat', $id_log_surat)
-				->get('akp_log_surat_detil')->row();
+				->get('akp_surat_tte')->row();
 
-			$get_detil_format_surat = $this->db
-				->where('id', $get_log_surat->id_format_surat)
-				->get('tweb_surat_format')->row();
+			if (is_file('./desa/upload/dokumen/' . $get_dari_tabel_tte->file_surat)) {
+				header("Content-type: application/pdf");
+				header("Content-Disposition: inline; filename=File_surat_unsigned_".$id_log_surat.".pdf");
+				@readfile('./desa/upload/dokumen/'.$get_dari_tabel_tte->file_surat);
+			} else {
+				// exit('File surat tidak ditemukan..');
 
-			$nama_surat = $get_detil_format_surat->url_surat;
+				// get log surat detil 
+				$get_log_surat_detil = $this->db
+					->where('id_log_surat', $id_log_surat)
+					->get('akp_log_surat_detil')->row();
 
-			$file_format_surat = "./template-surat-kp/" . $nama_surat . "/print_" . $nama_surat . ".php";
+				$log_surat_detil = json_decode($get_log_surat_detil->detil, true);
 
-			$get_desa = $this->db
-				->where('id', 1)
-				->get('config')->row_array();
+				$get_detil_format_surat = $this->db
+					->where('id', $get_log_surat->id_format_surat)
+					->get('tweb_surat_format')->row();
 
-			$desa = $get_desa;
+				$nama_surat = $get_detil_format_surat->url_surat;
 
+				$file_format_surat = "./template-surat-kp/" . $nama_surat . "/print_" . $nama_surat . ".php";
 
-			$data_detil_surat = $this->db
-				->where('log_surat.id', $id_log_surat)
-				->join('tweb_penduduk', 'log_surat.id_pend = tweb_penduduk.id')	
-				->get('log_surat')->row_array();
+				$get_desa = $this->db
+					->where('id', 1)
+					->get('config')->row_array();
 
-			$input = $data_detil_surat;
-			$data = $data_detil_surat;
+				$desa = $get_desa;
 
+				// echo json_encode($desa);
+				// exit;
 
-			include($file_format_surat);
+				$data_detil_surat = $this->db
+					->where('log_surat.id', $id_log_surat)
+					->join('tweb_penduduk', 'log_surat.id_pend = tweb_penduduk.id')
+					->join('tweb_desa_pamong', 'log_surat.id_pamong = tweb_desa_pamong.pamong_id')
+					->join('tweb_penduduk_sex', 'tweb_penduduk.sex = tweb_penduduk_sex.id')
+					->join('tweb_penduduk_agama', 'tweb_penduduk.agama_id = tweb_penduduk_agama.id')
+					->join('tweb_penduduk_kawin', 'tweb_penduduk.status_kawin = tweb_penduduk_kawin.id')
+					->join('tweb_penduduk_pendidikan_kk', 'tweb_penduduk.pendidikan_kk_id = tweb_penduduk_pendidikan_kk.id')
+					->join('tweb_penduduk_pekerjaan', 'tweb_penduduk.pekerjaan_id = tweb_penduduk_pekerjaan.id')
+					->join('tweb_penduduk_warganegara', 'tweb_penduduk.warganegara_id = tweb_penduduk_warganegara.id')
+					->join('tweb_wil_clusterdesa', 'tweb_penduduk.id_cluster = tweb_wil_clusterdesa.id')
+					->select('
+					log_surat.*,
+					tweb_penduduk.nama,
+					tweb_penduduk.nik,
+					tweb_penduduk.tempatlahir,
+					tweb_penduduk.tanggallahir,
+					tweb_penduduk.sex,
+					tweb_desa_pamong.pamong_nama AS pamong,
+					tweb_desa_pamong.jabatan,
+					tweb_desa_pamong.pamong_nik,
+					tweb_penduduk_sex.nama sex,
+					tweb_penduduk_agama.nama agama,
+					tweb_penduduk_kawin.nama status_kawin,
+					tweb_penduduk_pendidikan_kk.nama pendidikan,
+					tweb_penduduk_pekerjaan.nama pekerjaan,
+					tweb_penduduk_warganegara.nama warganegara,
+					tweb_wil_clusterdesa.rt no_rt,
+					tweb_wil_clusterdesa.rw no_rw,
+					tweb_wil_clusterdesa.dusun alamat_sekarang
+				')
+					->get('log_surat')->row_array();
 
-			if ($to_pdf) {
-				$html2pdf = new \Spipu\Html2Pdf\Html2Pdf('P', 'A4', 'en');
+				$data = $data_detil_surat;
+				$tanggal_sekarang = tgl_indo(date('Y-m-d'));
 
-				$html2pdf->writeHTML($get_log_surat_detil->detil);
-				$html2pdf->output();
+				// QR Code 
+				$pathqr = LOKASI_MEDIA;
+				$namaqr1 = "qr_surat_" . $id_log_surat;
+				$isi_qr = base_url() . "surat/detil/" . $id_log_surat;
+				$logoqr1 = gambar_desa($desa['logo'], false, $file = true);
+
+				$create_qr_code = qrcode_generate($pathqr, $namaqr1, $isi_qr, $logoqr1, 3, "#000000");
+				$alamat_qr_code = base_url() . "desa/upload/media/" . $namaqr1 . ".png";
+
+				ob_start();
+				include $file_format_surat;
 			}
-
 		} else {
 			exit('Arsip surat tidak ditemukan..');
 		}

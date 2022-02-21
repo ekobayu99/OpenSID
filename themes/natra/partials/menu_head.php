@@ -39,7 +39,7 @@
                     <ul class="dropdown-menu">
                         <li>
                             <a href="<?= site_url('siteman'); ?>" rel="noopener noreferrer" target="_blank">Administrator</a>
-                            <a href="<?= site_url('layanan-mandiri'); ?>" rel="noopener noreferrer" target="_blank">Layanan Mandiri</a>
+                            <a href="<?= site_url('layanan-mandiri-kp'); ?>" rel="noopener noreferrer" target="_blank">Layanan Mandiri</a>
                         </li>
                     </ul>
                 </li>                

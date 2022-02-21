@@ -155,3 +155,5 @@ $route['layanan-mandiri/surat/form'] = 'layanan_mandiri/surat/form';
 $route['layanan-mandiri/surat/form/(:num)'] = 'layanan_mandiri/surat/form/$1';
 // Bantuan
 $route['layanan-mandiri/bantuan'] = 'layanan_mandiri/bantuan';
+
+include 'config_kp.php';

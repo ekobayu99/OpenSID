@@ -1,13 +1,8 @@
-<table width="100%">
-    <tr>
-        <td width="30%"></td>
-        <td width="20%"></td>
-        <td width="50%" style="text-align: center;">
-            <?= unpenetration($desa['nama_desa']) ?>, <?= $tanggal_sekarang ?><br>
-            <?= unpenetration($input['pilih_atas_nama']) ?><br>
-            <?= unpenetration($input['jabatan']) ?> <?= unpenetration($desa['nama_desa']) ?>
-            <br><br><br><br><br><br>
-            ( <?= unpenetration($input['pamong']) ?> )
-        </td>
-    </tr>
-</table>
+<div style="margin-left: 50%; margin-top: 20pt">
+    <?= unpenetration($desa['nama_desa']) ?>, <?= $tanggal_sekarang ?><br>
+    <?= unpenetration($data['pilih_atas_nama']) ?><br>
+    <span style="color:#999">Ditandatangani secara elektronik oleh : </span><br/>
+    <?= unpenetration($data['jabatan']) ?> <?= unpenetration($desa['nama_desa']) ?><br /><br />
+    <img src="<?= $alamat_qr_code; ?>"><br /><br />
+    <b style="text-transform: uppercase"><?= unpenetration($data['pamong']) ?></b>
+</div>

@@ -26,12 +26,13 @@
 
 		$.ajax({
 			type: "POST",
-			url: base_url + "index.php/kp/surat/simpan_data_surat",
+			url: base_url + "index.php/kp_surat/simpan_data_surat",
 			data: data,
 			success: function(res) {
 				console.log(res);
 				if (res.success) {
-					window.open(base_url + "index.php/kp/surat/log_surat_preview/" + res.id_log_surat, '_blank');
+					alert(res.message);
+					window.open(base_url + "index.php/kp_keluar", "_self");
 				} else {
 					alert('Arsip surat gagal disimpan');
 				}

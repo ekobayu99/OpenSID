@@ -11,7 +11,7 @@
 			<div class="col-md-12">
 				<div class="box box-info">
 					<div class="box-header with-border tdk-permohonan tdk-periksa">
-						<a href="<?=site_url("surat")?>" class="btn btn-social btn-flat btn-info btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block"  title="Kembali Ke Daftar Wilayah">
+						<a href="<?=site_url("kp_surat")?>" class="btn btn-social btn-flat btn-info btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block"  title="Kembali Ke Daftar Wilayah">
 							<i class="fa fa-arrow-circle-left "></i>Kembali Ke Daftar Cetak Surat
 						</a>
 					</div>
@@ -22,6 +22,8 @@
 						<form id="validasi" action="<?= $form_action?>" method="POST" target="_blank" class="form-surat form-horizontal">
 							<input type="hidden" id="url_surat" name="url_surat" value="<?= $url ?>">
 							<input type="hidden" id="url_remote" name="url_remote" value="<?= site_url('surat/nomor_surat_duplikat')?>">
+							<input type="hidden" id="is_dari_permohonan" name="is_dari_permohonan" value="<?= $is_dari_permohonan?>">
+							<input type="hidden" id="id_permohonan" name="id_permohonan" value="<?= $id_permohonan?>">
 							<?php if ($individu): ?>
 								<?php include("donjo-app/views/kp/surat/form/konfirmasi_pemohon.php"); ?>
 							<?php	endif; ?>
