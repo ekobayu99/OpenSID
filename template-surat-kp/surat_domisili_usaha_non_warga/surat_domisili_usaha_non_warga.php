@@ -5,90 +5,90 @@
 			<div class="col-md-12">
 				<div class="box box-info">
 					<div class="box-header with-border">
-						<a href="<?=site_url("surat")?>" class="btn btn-social btn-flat btn-info btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block"  title="Kembali Ke Daftar Wilayah">
+						<a href="<?= site_url("kp_surat") ?>" class="btn btn-social btn-flat btn-info btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Kembali Ke Daftar Wilayah">
 							<i class="fa fa-arrow-circle-left "></i>Kembali Ke Daftar Cetak Surat
-           	</a>
+						</a>
 					</div>
 					<div class="box-body">
-						<form id="validasi" action="<?= $form_action?>" method="POST" target="_blank" class="form-surat form-horizontal">
+						<form id="validasi" action="<?= $form_action ?>" method="POST" target="_blank" class="form-surat form-horizontal">
 							<input type="hidden" id="url_surat" name="url_surat" value="<?= $url ?>">
-							<input type="hidden" id="url_remote" name="url_remote" value="<?= site_url('surat/nomor_surat_duplikat')?>">
-							<?php include("donjo-app/views/surat/form/nomor_surat.php"); ?>
+							<input type="hidden" id="url_remote" name="url_remote" value="<?= site_url('surat/nomor_surat_duplikat') ?>">
+							<?php include("donjo-app/views/kp/surat/form/nomor_surat.php"); ?>
 							<div class="form-group">
-								<label for="nama_non_warga"  class="col-sm-3 control-label">Nama</label>
+								<label for="nama_non_warga" class="col-sm-3 control-label">Nama</label>
 								<div class="col-sm-8">
-									<input  id="nama_non_warga" class="form-control input-sm required" type="text" placeholder="Nama" name="nama_non_warga">
+									<input id="nama_non_warga" class="form-control input-sm required" type="text" placeholder="Nama" name="nama_non_warga">
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="nik_non_warga"  class="col-sm-3 control-label">Identitas (KTP / KK)</label>
+								<label for="nik_non_warga" class="col-sm-3 control-label">Identitas (KTP / KK)</label>
 								<div class="col-sm-4">
-									<input class="form-control input-sm required" placeholder="Nomor KTP" name="nik_non_warga" type="text"/>
+									<input class="form-control input-sm required" placeholder="Nomor KTP" name="nik_non_warga" type="text" />
 								</div>
 								<div class="col-sm-4">
-									<input class="form-control input-sm required" placeholder="Nomor KK" name="kk_non_warga"  type="text"/>
+									<input class="form-control input-sm required" placeholder="Nomor KK" name="kk_non_warga" type="text" />
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="lahir"  class="col-sm-3 control-label">Tempat / Tanggal Lahir</label>
+								<label for="lahir" class="col-sm-3 control-label">Tempat / Tanggal Lahir</label>
 								<div class="col-sm-5 col-lg-4">
-									<input type="text"  name="tempatlahir" class="form-control input-sm required" placeholder="Tempat Lahir"></input>
+									<input type="text" name="tempatlahir" class="form-control input-sm required" placeholder="Tempat Lahir"></input>
 								</div>
 								<div class="col-sm-3 col-lg-2">
 									<div class="input-group input-group-sm date">
 										<div class="input-group-addon">
 											<i class="fa fa-calendar"></i>
 										</div>
-										<input title="Pilih Tanggal" class="form-control input-sm datepicker required" name="tanggallahir" type="text"/>
+										<input title="Pilih Tanggal" class="form-control input-sm datepicker required" name="tanggallahir" type="text" />
 									</div>
 								</div>
 							</div>
 							<div class="form-group">
-                <label for="sex" class="col-sm-3 control-label" >Jenis Kelamin / Warga Negara / Agama</label>
-                <div class="col-sm-3">
-                  <select class="form-control input-sm" name="sex" id="sex">
+								<label for="sex" class="col-sm-3 control-label">Jenis Kelamin / Warga Negara / Agama</label>
+								<div class="col-sm-3">
+									<select class="form-control input-sm" name="sex" id="sex">
 										<option value="">Pilih Jenis Kelamin</option>
-										<?php foreach ($sex as $data): ?>
-											<option value="<?= ucwords(strtolower($data['nama']))?>"><?= $data['nama']?></option>
-										<?php endforeach;?>
-                  </select>
-                </div>
-                <div class="col-sm-2">
-                  <select class="form-control input-sm" name="warga_negara" id="warga_negara">
+										<?php foreach ($sex as $data) : ?>
+											<option value="<?= ucwords(strtolower($data['nama'])) ?>"><?= $data['nama'] ?></option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<select class="form-control input-sm" name="warga_negara" id="warga_negara">
 										<option value="">Pilih Warganegara</option>
-										<?php foreach ($warganegara as $data): ?>
-											<option value="<?= $data['id']=='3' ? ucwords(strtolower($data['nama'])): strtoupper($data['nama'])?>"><?= $data['nama']?></option>
-										<?php endforeach;?>
-                  </select>
-                </div>
-                <div class="col-sm-3">
-                  <select class="form-control input-sm" name="agama" id="agama">
+										<?php foreach ($warganegara as $data) : ?>
+											<option value="<?= $data['id'] == '3' ? ucwords(strtolower($data['nama'])) : strtoupper($data['nama']) ?>"><?= $data['nama'] ?></option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<select class="form-control input-sm" name="agama" id="agama">
 										<option value="">Pilih Agama</option>
-										<?php foreach ($agama as $data): ?>
-											<option value="<?= $data['id']=='7' ? $data['nama'] : ucwords(strtolower($data['nama']))?>"><?= $data['nama']?></option>
-										<?php endforeach;?>
-                  </select>
-                </div>
-              </div>
-							<div class="form-group">
-                <label for="pekerjaan" class="col-sm-3 control-label" >Pekerjaan</label>
-                <div class="col-sm-4">
-                  <select class="form-control input-sm" name="pekerjaan" id="pekerjaan">
-										<option value="">Pilih Pekerjaan</option>
-										<?php foreach ($pekerjaan as $data): ?>
-											<option value="<?= $data['nama']?>"><?= $data['nama']?></option>
-										<?php endforeach;?>
-                  </select>
-                </div>
-              </div>
-							<div class="form-group">
-								<label for="alamat"  class="col-sm-3 control-label">Tempat Tinggal</label>
-								<div class="col-sm-8">
-									<input  id="alamat" class="form-control input-sm required" type="text" placeholder="Tempat Tinggal" name="alamat">
+										<?php foreach ($agama as $data) : ?>
+											<option value="<?= $data['id'] == '7' ? $data['nama'] : ucwords(strtolower($data['nama'])) ?>"><?= $data['nama'] ?></option>
+										<?php endforeach; ?>
+									</select>
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="nama_usaha"  class="col-sm-3 control-label">Nama Usaha / Jenis Usaha</label>
+								<label for="pekerjaan" class="col-sm-3 control-label">Pekerjaan</label>
+								<div class="col-sm-4">
+									<select class="form-control input-sm" name="pekerjaan" id="pekerjaan">
+										<option value="">Pilih Pekerjaan</option>
+										<?php foreach ($pekerjaan as $data) : ?>
+											<option value="<?= $data['nama'] ?>"><?= $data['nama'] ?></option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="alamat" class="col-sm-3 control-label">Tempat Tinggal</label>
+								<div class="col-sm-8">
+									<input id="alamat" class="form-control input-sm required" type="text" placeholder="Tempat Tinggal" name="alamat">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="nama_usaha" class="col-sm-3 control-label">Nama Usaha / Jenis Usaha</label>
 								<div class="col-sm-4">
 									<input id="nama_usaha" class="form-control input-sm required" type="text" placeholder="Nama Usaha" name="nama_usaha">
 								</div>
@@ -97,7 +97,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="akta_usaha"  class="col-sm-3 control-label">Nomor Akta / Tahun / Notaris</label>
+								<label for="akta_usaha" class="col-sm-3 control-label">Nomor Akta / Tahun / Notaris</label>
 								<div class="col-sm-3">
 									<input id="akta_usaha" class="form-control input-sm required" type="text" placeholder="Nomor Akta" name="akta_usaha">
 								</div>
@@ -109,7 +109,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="bangunan"  class="col-sm-3 control-label">Jenis Bangunan / Peruntukan Bangunan / Status Bangunan</label>
+								<label for="bangunan" class="col-sm-3 control-label">Jenis Bangunan / Peruntukan Bangunan / Status Bangunan</label>
 								<div class="col-sm-3">
 									<input id="bangunan" class="form-control input-sm required" type="text" placeholder="Jenis Bangunan" name="bangunan">
 								</div>
@@ -121,15 +121,15 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="alamat_usaha"  class="col-sm-3 control-label">Alamat Usaha</label>
+								<label for="alamat_usaha" class="col-sm-3 control-label">Alamat Usaha</label>
 								<div class="col-sm-8">
-									<input  id="alamat_usaha" class="form-control input-sm required" type="text" placeholder="Alamat Usaha" name="alamat_usaha">
+									<input id="alamat_usaha" class="form-control input-sm required" type="text" placeholder="Alamat Usaha" name="alamat_usaha">
 								</div>
 							</div>
-							<?php include("donjo-app/views/surat/form/_pamong.php"); ?>
+							<?php include("donjo-app/views/kp/surat/form/_pamong.php"); ?>
 						</form>
 					</div>
-					<?php include("donjo-app/views/surat/form/tombol_cetak.php"); ?>
+					<?php include("donjo-app/views/kp/surat/form/tombol_cetak.php"); ?>
 				</div>
 			</div>
 		</div>
