@@ -60,7 +60,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				elseif (is_file(LOKASI_SURAT_FORM_DESA . $nama_surat . ".php"))
 					include(LOKASI_SURAT_FORM_DESA . $nama_surat . ".php");
 				else
-					include("template-surat/$nama_surat/$nama_surat.php");
+					include("template-surat-kp/$nama_surat/$nama_surat.php");
 			?>
 			<textarea id="isian_form" hidden="hidden"><?= $isian_form; ?></textarea>
 		</div>
