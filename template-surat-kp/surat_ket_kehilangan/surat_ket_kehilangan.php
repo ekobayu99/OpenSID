@@ -5,13 +5,13 @@
 			<div class="col-md-12">
 				<div class="box box-info">
 					<div class="box-header with-border tdk-permohonan tdk-periksa">
-						<a href="<?= site_url("surat") ?>" class="btn btn-social btn-flat btn-info btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Kembali Ke Daftar Wilayah">
+						<a href="<?= site_url("kp_surat") ?>" class="btn btn-social btn-flat btn-info btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Kembali Ke Daftar Wilayah">
 							<i class="fa fa-arrow-circle-left "></i>Kembali Ke Daftar Cetak Surat
 						</a>
 					</div>
 					<div class="box-body">
 						<form id="main" name="main" method="POST" class="form-horizontal">
-							<?php include("donjo-app/views/surat/form/_cari_nik.php"); ?>
+							<?php include("donjo-app/views/kp/surat/form/_cari_nik.php"); ?>
 						</form>
 						<form id="validasi" action="<?= $form_action ?>" method="POST" target="_blank" class="form-surat form-horizontal">
 							<input type="hidden" id="url_surat" name="url_surat" value="<?= $url ?>">
@@ -23,9 +23,9 @@
 								</div>
 							</div>
 							<?php if ($individu) : ?>
-								<?php include("donjo-app/views/surat/form/konfirmasi_pemohon.php"); ?>
+								<?php include("donjo-app/views/kp/surat/form/konfirmasi_pemohon.php"); ?>
 							<?php endif; ?>
-							<?php include("donjo-app/views/surat/form/nomor_surat.php"); ?>
+							<?php include("donjo-app/views/kp/surat/form/nomor_surat.php"); ?>
 							<div class="form-group">
 								<label for="barang" class="col-sm-3 control-label">Barang Yang Hilang</label>
 								<div class="col-sm-8">
@@ -44,10 +44,10 @@
 									<textarea name="keterangan" class="form-control input-sm required <?= jecho($cek_anjungan['keyboard'] == 1, TRUE, 'kbvtext'); ?>" placeholder="Keterangan Kejadian"></textarea>
 								</div>
 							</div>
-							<?php include("donjo-app/views/surat/form/_pamong.php"); ?>
+							<?php include("donjo-app/views/kp/surat/form/_pamong.php"); ?>
 						</form>
 					</div>
-					<?php include("donjo-app/views/surat/form/tombol_cetak.php"); ?>
+					<?php include("donjo-app/views/kp/surat/form/tombol_cetak.php"); ?>
 				</div>
 			</div>
 		</div>
