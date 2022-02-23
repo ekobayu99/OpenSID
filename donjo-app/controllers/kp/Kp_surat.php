@@ -410,7 +410,7 @@ class Kp_surat extends Admin_Controller {
 					->join('tweb_penduduk_pendidikan_kk', 'tweb_penduduk.pendidikan_kk_id = tweb_penduduk_pendidikan_kk.id')
 					->join('tweb_penduduk_pekerjaan', 'tweb_penduduk.pekerjaan_id = tweb_penduduk_pekerjaan.id')
 					->join('tweb_penduduk_warganegara', 'tweb_penduduk.warganegara_id = tweb_penduduk_warganegara.id')
-					->join('tweb_wil_clusterdesa', 'tweb_penduduk.id_cluster = tweb_wil_clusterdesa.id')
+					->join('tweb_wil_clusterdesa', 'tweb_penduduk.id_cluster = tweb_wil_clusterdesa.id', 'left')
 					->select('
 					log_surat.*,
 					tweb_penduduk.nama,
