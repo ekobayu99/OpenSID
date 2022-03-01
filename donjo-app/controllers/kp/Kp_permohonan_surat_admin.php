@@ -115,6 +115,12 @@ class Kp_permohonan_surat_admin extends Admin_Controller {
 		$surat = $this->surat_model->cek_surat_mandiri($periksa['id_surat']);
 		$url = $surat['url_surat'];
 
+		// tambah jika dari layanan mandiri
+		$isian_form = json_decode($periksa['isian_form'], true);
+		$isian_form['is_dari_permohonan'] = 1;
+		$isian_form['id_permohonan'] = $id;
+		$periksa['isian_form'] = json_encode($isian_form);
+
 		$data['periksa'] = $periksa;
 		$data['url'] = $url;
 		$data['list_dokumen'] = $this->penduduk_model->list_dokumen($periksa['id_pemohon']);

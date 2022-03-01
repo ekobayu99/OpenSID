@@ -387,9 +387,12 @@ class Kp_keluar extends Admin_Controller
 
 	public function kosongkan_tabel_log_surat_dan_relasi()
 	{
-		$this->db->query("TRUNCATE TABLE log_surat");
 		$this->db->query("TRUNCATE TABLE akp_log_surat_detil");
+		$this->db->query("TRUNCATE TABLE akp_log_tte");
 		$this->db->query("TRUNCATE TABLE akp_surat_tte");
+		$this->db->query("TRUNCATE TABLE akp_surat_tte");
+		$this->db->query("TRUNCATE TABLE log_surat");
+		$this->db->query("TRUNCATE TABLE permohonan_surat");
 		redirect('kp_keluar');
 	}
 }

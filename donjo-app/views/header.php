@@ -173,7 +173,7 @@
 							<?php endif; ?>
 							<?php if ($this->CI->cek_hak_akses('b', 'permohonan_surat_admin')): ?>
 								<li>
-									<a href="<?= site_url('permohonan_surat_admin/clear'); ?>">
+									<a href="<?= site_url('kp_permohonan_surat_admin/clear'); ?>">
 										<span><i class="fa fa-print fa-lg" title="Permohonan Surat"></i>&nbsp;</span>
 										<?php if ($notif_permohonan_surat) : ?>
 											<span class="badge" id="b_permohonan_surat"><?= $notif_permohonan_surat ?></span>
