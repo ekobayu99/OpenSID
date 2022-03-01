@@ -5,64 +5,64 @@
 			<div class="col-md-12">
 				<div class="box box-info">
 					<div class="box-header with-border">
-						<a href="<?=site_url("surat")?>" class="btn btn-social btn-flat btn-info btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block"  title="Kembali Ke Daftar Wilayah">
+						<a href="<?= site_url("kp_surat") ?>" class="btn btn-social btn-flat btn-info btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Kembali Ke Daftar Wilayah">
 							<i class="fa fa-arrow-circle-left "></i>Kembali Ke Daftar Cetak Surat
-           	</a>
-						<a href="#" class="btn btn-social btn-flat btn-primary btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Lihat Info Isian Surat"  data-toggle="modal" data-target="#infoBox" data-title="Lihat Info Isian Surat">
-						 	<i class="fa fa-info-circle"></i> Info Isian Surat
+						</a>
+						<a href="#" class="btn btn-social btn-flat btn-primary btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Lihat Info Isian Surat" data-toggle="modal" data-target="#infoBox" data-title="Lihat Info Isian Surat">
+							<i class="fa fa-info-circle"></i> Info Isian Surat
 						</a>
 					</div>
 					<div class="box-body">
 						<form id="main" name="main" method="POST" class="form-horizontal">
 							<div class="form-group">
-								<label for="nik"  class="col-sm-3 control-label">NIK / Nama KK</label>
+								<label for="nik" class="col-sm-3 control-label">NIK / Nama KK</label>
 								<div class="col-sm-6 col-lg-4">
-									<select class="form-control  input-sm select2-nik" id="nik" name="nik" style ="width:100%;" onchange="formAction('main')">
+									<select class="form-control  input-sm select2-nik" id="nik" name="nik" style="width:100%;" onchange="formAction('main')">
 										<option value="">-- Cari NIK / Nama Kepala Keluarga --</option>
-										<?php foreach ($kepala_keluarga as $data): ?>
-											<option value="<?= $data['id']?>" <?php selected($individu['nik'], $data['nik']); ?>><?= $data['info_pilihan_penduduk']?></option>
-										<?php endforeach;?>
+										<?php foreach ($kepala_keluarga as $data) : ?>
+											<option value="<?= $data['id'] ?>" <?php selected($individu['nik'], $data['nik']); ?>><?= $data['info_pilihan_penduduk'] ?></option>
+										<?php endforeach; ?>
 									</select>
 								</div>
 							</div>
 						</form>
-						<form id="validasi" action="<?= $form_action?>" method="POST" target="_blank" class="form-surat form-horizontal">
+						<form id="validasi" action="<?= $form_action ?>" method="POST" target="_blank" class="form-surat form-horizontal">
 							<input type="hidden" id="url_surat" name="url_surat" value="<?= $url ?>">
-							<input type="hidden" id="url_remote" name="url_remote" value="<?= site_url('surat/nomor_surat_duplikat')?>">
+							<input type="hidden" id="url_remote" name="url_remote" value="<?= site_url('surat/nomor_surat_duplikat') ?>">
 							<div class="row jar_form">
 								<label for="nomor" class="col-sm-3"></label>
 								<div class="col-sm-8">
-									<input class="required" type="hidden" name="nik" value="<?= $individu['id']?>">
+									<input class="required" type="hidden" name="nik" value="<?= $individu['id'] ?>">
 								</div>
 							</div>
-							<?php if ($individu): ?>
-								<?php include("donjo-app/views/surat/form/konfirmasi_pemohon.php"); ?>
-							<?php	endif; ?>
-							<?php include("donjo-app/views/surat/form/nomor_surat.php"); ?>
+							<?php if ($individu) : ?>
+								<?php include("donjo-app/views/kp/surat/form/konfirmasi_pemohon.php"); ?>
+							<?php endif; ?>
+							<?php include("donjo-app/views/kp/surat/form/nomor_surat.php"); ?>
 							<div class="form-group">
-								<label for="alasan"  class="col-sm-3 control-label">Alasan Permohonan</label>
+								<label for="alasan" class="col-sm-3 control-label">Alasan Permohonan</label>
 								<div class="col-sm-6 col-lg-4">
-									<select class="form-control input-sm" name="alasan_permohonan_id" >
-									<option value="">Pilih Alasan Permohonan</option>
-						      <?php foreach ($kode['alasan_permohonan'] as $key => $value): ?>
-						        <option value="<?= $key?>"><?= strtoupper($value)?></option>
-						      <?php endforeach;?>
+									<select class="form-control input-sm" name="alasan_permohonan_id">
+										<option value="">Pilih Alasan Permohonan</option>
+										<?php foreach ($kode['alasan_permohonan'] as $key => $value) : ?>
+											<option value="<?= $key ?>"><?= strtoupper($value) ?></option>
+										<?php endforeach; ?>
 									</select>
 								</div>
 							</div>
 							<div class="form-group">
-								<label for="nomor"  class="col-sm-3 control-label">Nomor Kartu Keluarga Semula</label>
+								<label for="nomor" class="col-sm-3 control-label">Nomor Kartu Keluarga Semula</label>
 								<div class="col-sm-8">
-									<input  id="no_kk_semula" class="form-control input-sm required" type="text" placeholder="Nomor Kartu Keluarga Semula" name="no_kk_semula">
-									<?php if ($individu['no_kk_sebelumnya']): ?>
-										&nbsp;(No. KK sebelumnya: <?= $individu['no_kk_sebelumnya']?>)
+									<input id="no_kk_semula" class="form-control input-sm required" type="text" placeholder="Nomor Kartu Keluarga Semula" name="no_kk_semula">
+									<?php if ($individu['no_kk_sebelumnya']) : ?>
+										&nbsp;(No. KK sebelumnya: <?= $individu['no_kk_sebelumnya'] ?>)
 									<?php endif; ?>
 								</div>
 							</div>
-							<?php include("donjo-app/views/surat/form/_pamong.php"); ?>
+							<?php include("donjo-app/views/kp/surat/form/_pamong.php"); ?>
 						</form>
 					</div>
-					<?php include("donjo-app/views/surat/form/tombol_cetak.php"); ?>
+					<?php include("donjo-app/views/kp/surat/form/tombol_cetak.php"); ?>
 				</div>
 				<div class='modal fade' id='infoBox' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
 					<div class='modal-dialog'>
@@ -74,7 +74,7 @@
 							<div class='modal-body small'>
 								<h5><strong>Form ini menghasilkan:</strong></h5>
 								<ol>
-                	<li>Surat keterangan permohonan kartu keluarga untuk pemohon</li>
+									<li>Surat keterangan permohonan kartu keluarga untuk pemohon</li>
 									<li>Lampiran F-1.15 FORMULIR PERMOHOHAN KARTU KELUARGA (KK) BARU WARGA NEGARA INDONESIA untuk keluarga pemohon</li>
 									<li>Lampiran F-1.01 FORMULIR ISIAN BIODATA PENDUDUK UNTUK WNI (PER KELUARGA) untuk keluarga pemohon</li>
 								</ol>
