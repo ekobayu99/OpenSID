@@ -55,6 +55,9 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 		$this->load->helper('form');
 		$this->load->model('pamong_model');
 		$this->load->model('config_model');
+		$this->load->model('kp/surat_masuk_suratku_model', 'suratku_model');
+		$this->load->model('klasifikasi_model');
+		$this->load->model('surat_keluar_model');
 		$this->modul_ini = 4;
 		$this->sub_modul_ini = 335;
 	}
@@ -65,7 +68,64 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 
 			
 		$data['main'] = [];
-		$this->render('kp/suratku/surat_masuk', $data);
+		$this->render('kp/suratku/surat_keluar', $data);
+	}
+
+	public function add()
+	{
+		$config = $this->config_model->get_data();
+		$kode_desa = $config['kode_desa'];
+		$username = '003' . $kode_desa;
+	
+		$get_list_opd = $this->suratku_model->get_list_opd($username, 2022);
+		$get_klasifikasi_surat = $this->klasifikasi_model->list_kode();
+
+
+		// $get_list_opd = json_decode($get_list_opd, true);
+
+		// echo var_dump($get_list_opd);
+		// exit;
+
+		$last_surat = $this->penomoran_surat_model->get_surat_terakhir('surat_keluar');
+		$data['nomor_urut'] = $last_surat['no_surat'] + 1;
+
+		$p_list_opd = [];
+		$p_list_klasifikasi = [''=>'-'];
+		if (!empty($get_list_opd['data'])) {
+			foreach ($get_list_opd['data'] as $opd) {
+				$username_pimpinan = $opd['nip_pimpinan_asli'];
+				if (empty($opd['nip_pimpinan_asli'])) {
+					$username_pimpinan = $opd['nip_plt'];
+				}
+				$idx = $opd['instansi_id']."-".$username_pimpinan;
+				$p_list_opd[$idx] = $opd['instansi_nama'];
+			}
+		}
+
+		if (!empty($get_klasifikasi_surat)) {
+			foreach ($get_klasifikasi_surat as $klasifikasi) {
+				$idx = $klasifikasi['kode'];
+				$p_list_klasifikasi[$idx] = $klasifikasi['kode']." - ".$klasifikasi['nama'];
+			}
+		}
+
+		$data['main'] = [];
+		$data['p_list_opd'] = $p_list_opd;
+		$data['p_list_klasifikasi'] = $p_list_klasifikasi;
+
+		$this->render('kp/suratku/surat_keluar_form', $data);
+	}
+
+	public function insert()
+	{
+		// $this->redirect_hak_akses('u');
+		// $this->surat_keluar_model->insert();
+
+		echo var_dump($_FILES);
+
+
+
+		// redirect('surat_keluar');
 	}
 
 	

@@ -161,6 +161,37 @@ class Surat_masuk_suratku_model extends CI_Model {
         }
     }
 
+    public function get_list_opd($username, $tahun = "")
+    {
+        // set post fields
+        $post = [
+            'username' => $username,
+            'password' => $username,
+        ];
+
+        if ($tahun == "2022" || empty($tahun)) {
+            $ch = curl_init($this->uri_suratku . 'index.php/surat_desa/get_list_opd');
+        } else if ($tahun == "2021" || empty($tahun)) {
+            $ch = curl_init($this->uri_suratku . '2021/index.php/surat_desa/get_list_opd');
+        } else if ($tahun == "2020") {
+            $ch = curl_init($this->uri_suratku . '2020/index.php/surat_desa/get_list_opd');
+        }
+
+        // $ch = curl_init($this->uri_suratku.'set_status_berinomor');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        $response = curl_exec($ch);
+
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpcode != 200) {
+            return false;
+        } else {
+            return json_decode($response, true);
+        }
+    }
+
 
     public function insert()
     {
