@@ -65,9 +65,8 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 	public function index()
 	{
 		$user_id = intval($this->session->userdata('user'));
-
 			
-		$data['main'] = [];
+		$data['main'] = $this->db->get('surat_keluar')->result_array();
 		$this->render('kp/suratku/surat_keluar', $data);
 	}
 
@@ -80,11 +79,6 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 		$get_list_opd = $this->suratku_model->get_list_opd($username, 2022);
 		$get_klasifikasi_surat = $this->klasifikasi_model->list_kode();
 
-
-		// $get_list_opd = json_decode($get_list_opd, true);
-
-		// echo var_dump($get_list_opd);
-		// exit;
 
 		$last_surat = $this->penomoran_surat_model->get_surat_terakhir('surat_keluar');
 		$data['nomor_urut'] = $last_surat['no_surat'] + 1;
@@ -118,14 +112,61 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 
 	public function insert()
 	{
-		// $this->redirect_hak_akses('u');
-		// $this->surat_keluar_model->insert();
+		
+		$pdata = $this->input->post(NULL);
+		$pdata['tanggal_surat'] = strip_tags($pdata['tanggal_surat']);
+		// // Bersihkan data
+		$pdata['nomor_surat'] = nomor_surat_keputusan(strip_tags($pdata['nomor_surat']));
+		$pdata['isi_singkat'] = strip_tags($pdata['isi_singkat']);
 
-		echo var_dump($_FILES);
+		$this->load->helper('string');
+		$this->load->library('upload');
+		
+		$uploadConfig = array(
+			'upload_path' => './desa/upload/surat_keluar/',
+			'allowed_types' => 'pdf',
+			'max_size' =>2048,
+			'encrypt_name'=>true,
+		);
 
+		$this->upload->initialize($uploadConfig);
+		
+		if ($this->upload->do_upload('satuan')) {
+			$upload_data = $this->upload->data();
+			$file_name = $upload_data['file_name'];
 
+			$this->db->trans_begin();
+			$insert_data = [
+				'nomor_urut' => $pdata['nomor_urut'],
+				'nomor_surat' => $pdata['nomor_surat'],
+				'kode_surat' => $pdata['kode_surat'],
+				'tanggal_surat' => $pdata['tanggal_surat'],
+				'tanggal_catat' => date('Y-m-d H:i:s'),
+				'isi_singkat' => $pdata['isi_singkat'],
+				'berkas_scan' => $file_name,
+				'created_at' => date('Y-m-d H:i:s'),
+				'created_by' => $this->session->user,
+				'updated_by' => $this->session->user,
+			];
+			$insert = $this->db->insert('surat_keluar', $insert_data);
+			$insert_id = $this->db->insert_id();
 
-		// redirect('surat_keluar');
+			$insert_detil = $this->db->insert('akp_surat_keluar_detil', [
+				'id_surat_keluar' => $insert_id,
+				'kode_tambahan' => $pdata['opd_tujuan'],
+				'teks' => 'OPD Suratku',
+			]);
+
+			if ($this->db->trans_status() === false) {
+				$this->session->set_flashdata('info', '<div class="alert alert-danger">Terjadi kesalahan</div>');
+				redirect('kp_suratku_surat_keluar/add');
+			} else {
+				$this->db->trans_commit();	
+				redirect('kp_suratku_surat_keluar');
+			}
+		} else {
+			redirect('kp_suratku_surat_keluar/add');
+		}
 	}
 
 	
