@@ -86,13 +86,25 @@
 								<?php endif; ?>
 								<?php include("donjo-app/views/kp/surat/form/nomor_surat.php"); ?>
 								<!-- Tambahan -->
-								<!-- <div class="form-group">
+								<div class="form-group">
 									<label for="nik_non_warga" class="col-sm-3 control-label">Identitas (KTP / KK) Pemohon</label>
 									<div class="col-sm-4">
 										<input class="form-control input-sm required" placeholder="Nomor KTP" name="nik_non_warga" type="text" />
 									</div>
 									<div class="col-sm-4">
 										<input class="form-control input-sm required" placeholder="Nomor KK" name="kk_non_warga" type="text" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="nik_non_warga" class="col-sm-3 control-label">Nama Pemohon</label>
+									<div class="col-sm-4">
+										<input class="form-control input-sm required" placeholder="Nama Pemohon" name="nama_non_warga" type="text" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="nik_non_warga" class="col-sm-3 control-label">Jenis Kelamin</label>
+									<div class="col-sm-4">
+										<input class="form-control input-sm required" placeholder="Jenis Kelamin" name="sex" type="text" />
 									</div>
 								</div>
 								<div class="form-group">
@@ -111,31 +123,49 @@
 								</div>
 								<div class="form-group">
 									<label for="sex" class="col-sm-3 control-label">Jenis Kelamin / Warga Negara / Agama</label>
-									<div class="col-sm-3">
-										<select class="form-control input-sm" name="sex" id="sex">
-											<option value="">Pilih Jenis Kelamin</option>
-											<?php foreach ($sex as $data) : ?>
-												<option value="<?= ucwords(strtolower($data['nama'])) ?>"><?= $data['nama'] ?></option>
-											<?php endforeach; ?>
-										</select>
-									</div>
 									<div class="col-sm-2">
-										<select class="form-control input-sm" name="warga_negara" id="warga_negara">
+										<input type="text" name="warga_negara" class="form-control input-sm required" placeholder="Warga Negara"></input>
+										<!-- <select class="form-control input-sm" name="warga_negara" id="warga_negara">
 											<option value="">Pilih Warganegara</option>
 											<?php foreach ($warganegara as $data) : ?>
 												<option value="<?= $data['id'] == '3' ? ucwords(strtolower($data['nama'])) : strtoupper($data['nama']) ?>"><?= $data['nama'] ?></option>
 											<?php endforeach; ?>
-										</select>
+										</select> -->
 									</div>
 									<div class="col-sm-3">
-										<select class="form-control input-sm" name="agama" id="agama">
+										<input type="text" name="agama" class="form-control input-sm required" placeholder="Agama"></input>
+										<!-- <select class="form-control input-sm" name="agama" id="agama">
 											<option value="">Pilih Agama</option>
 											<?php foreach ($agama as $data) : ?>
 												<option value="<?= $data['id'] == '7' ? $data['nama'] : ucwords(strtolower($data['nama'])) ?>"><?= $data['nama'] ?></option>
 											<?php endforeach; ?>
-										</select>
+										</select> -->
 									</div>
-								</div> -->
+								</div>
+								<div class="form-group">
+									<label for="nik_non_warga" class="col-sm-3 control-label">Hubungan Dengan Keluarga</label>
+									<div class="col-sm-4">
+										<input class="form-control input-sm required" placeholder="Hubungan Dengan Keluarga" name="hub_kel" type="text" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="nik_non_warga" class="col-sm-3 control-label">Jumlah Anggota Keluarga</label>
+									<div class="col-sm-4">
+										<input class="form-control input-sm required" placeholder="Jumlah Anggota Keluarga" name="jml_anggota_keluarga" type="number" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="nik_non_warga" class="col-sm-3 control-label">Penghasilan Per Bulan</label>
+									<div class="col-sm-4">
+										<input class="form-control input-sm required" placeholder="Penghasilan Per Bulan" name="penghasilan_per_bulan" type="number" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="nik_non_warga" class="col-sm-3 control-label">Pengeluaran Per Bulan</label>
+									<div class="col-sm-4">
+										<input class="form-control input-sm required" placeholder="Pengeluaran Per Bulan" name="pengeluaran_per_bulan" type="number" />
+									</div>
+								</div>
 								<!-- Tambahan -->
 								<div class="form-group">
 									<label for="keperluan" class="col-sm-3 control-label">Keperluan</label>
