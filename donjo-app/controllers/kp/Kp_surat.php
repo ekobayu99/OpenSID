@@ -467,4 +467,131 @@ class Kp_surat extends Admin_Controller {
 
 
 	}
+
+	public function get_data_master()
+	{
+		$this->load->helper('kp_helper');
+		
+		$get_data_master = curl_get(config_item('api_data_master'));
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode($get_data_master));
+	}
+
+	public function validasi_penduduk()
+	{
+		$post = $this->input->post();
+
+		$this->load->helper('kp_helper');
+		$pc_tgl_lahir = explode("-", $post['tgl_lhr']);
+		$new_tgl_lahir = $pc_tgl_lahir[2]."-".$pc_tgl_lahir[1]."-".$pc_tgl_lahir[0];
+
+		$data_divalidasi = [
+			'nik' => $post['nik'],
+			'nama_lgkp' => strtoupper($post['nama_lgkp']),
+			'alamat' => strtoupper($post['alamat']),
+			'jenis_klmin' => strtoupper($post['jenis_klmin']),
+			'tmpt_lhr' => strtoupper($post['tmpt_lhr']),
+			'tgl_lhr' => $new_tgl_lahir,
+			'agama' => strtoupper($post['agama']),
+			// 'agama'=> 'ISLAM',
+			'pddk_akh' => strtoupper($post['pddk_akh']),
+			'jenis_pkrjn' => strtoupper($post['jenis_pkrjn']),
+
+			'user_id' => config_item('dukcapil_api_username'),
+			'password' => config_item('dukcapil_api_password'),
+			'threshold' => config_item('dukcapil_api_treshold'),
+		];
+
+		$cek_penduduk = cek_penduduk($data_divalidasi);
+
+		
+		$nik_ok = false;
+		$nama_lgkp_ok = false;
+		$alamat_ok = false;
+		$jenis_klmin_ok = false;
+		$tmpt_lhr_ok = false;
+		$tgl_lhr_ok = false;
+		$agama_ok = false;
+		$pddk_akh_ok = false;
+		$jenis_pkrjn_ok = false;
+
+		$status_lain = false;
+		if (!empty($cek_penduduk['result']['content'][0]['nik'])) {
+			$status_nik = $cek_penduduk['result']['content'][0]['nik'];
+			if ($post['nik'] == $status_nik) {
+				$nik_ok = true;
+				$status_lain = $cek_penduduk['result']['content'][0];
+				
+				if (substr($status_lain['nama_lgkp'], 0, 6) == "Sesuai") {
+					$nama_lgkp_ok = true;
+				}
+			}
+		}
+
+		$this->output
+		->set_content_type('application/json')
+		->set_output(json_encode([
+			'success'=>true,
+			'status_nik'=>$nik_ok,
+			'status_nama_lgkp'=>$nama_lgkp_ok,
+			'status_lain'=> $status_lain,
+			// 'data_dikirim'=> $data_divalidasi,
+		]));
+
+		// echo var_dump($cek_penduduk['result']['content'][0]['nik']);
+		// echo json_encode($cek_penduduk->result->content[0]);
+	}
+
+	public function simpan_penduduk()
+	{
+		$post = $this->input->post();
+		// echo json_encode($this->session->userdata());
+		// exit;
+
+		$data_to_tweb_penduduk = [
+			'nik'=>$post['nik'],
+			'nama'=>strtoupper($post['nama_lgkp']),
+			'alamat_sekarang'=>strtoupper($post['alamat']),
+			'sex'=>$post['jenis_klmin'],
+			'tempatlahir'=>strtoupper($post['tmpt_lhr']),
+			'tanggallahir'=>$post['tgl_lhr'],
+			'agama_id'=>$post['agama'],
+			'pendidikan_kk_id'=>$post['pddk_akh'],
+			'pekerjaan_id'=>$post['jenis_pkrjn'],
+			'warganegara_id'=>1,
+			'id_cluster'=>0,
+			'created_by'=>$this->session->userdata('user'),
+		];
+
+		// cek nik sudah ada 
+		$cek_nik = $this->db->where('nik', $post['nik'])->get('tweb_penduduk')->num_rows();
+
+		$insert = false;
+		if ($cek_nik < 1) {
+			$insert = $this->db->insert('tweb_penduduk', $data_to_tweb_penduduk);
+		} 
+
+		if ($insert) {
+			$ret = [
+				'success'=>true,
+				'message'=>'Berhasil disimpan',
+				'nik'=>$post['nik'],
+				'nama_lgkp'=>$post['nama_lgkp'],
+				'insert_id'=>$this->db->insert_id(),
+			];
+		} else {
+			$ret = [
+				'success' => false,
+				'message' => 'Gagal disimpan'
+			];
+		}
+
+
+		$this->output
+		->set_content_type('application/json')
+		->set_output(json_encode($ret));
+
+	}
 }
