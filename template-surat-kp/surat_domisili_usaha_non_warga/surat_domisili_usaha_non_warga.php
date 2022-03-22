@@ -13,6 +13,8 @@
 						<form id="validasi" action="<?= $form_action ?>" method="POST" target="_blank" class="form-surat form-horizontal">
 							<input type="hidden" id="url_surat" name="url_surat" value="<?= $url ?>">
 							<input type="hidden" id="url_remote" name="url_remote" value="<?= site_url('surat/nomor_surat_duplikat') ?>">
+							<input type="hidden" id="is_dari_permohonan" name="is_dari_permohonan" value="<?= $is_dari_permohonan ?>">
+							<input type="hidden" id="id_permohonan" name="id_permohonan" value="<?= $id_permohonan ?>">
 							<?php include("donjo-app/views/kp/surat/form/nomor_surat.php"); ?>
 							<div class="form-group">
 								<label for="nama_non_warga" class="col-sm-3 control-label">Nama</label>

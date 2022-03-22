@@ -566,10 +566,10 @@ class Kp_surat extends Admin_Controller {
 		];
 
 		// cek nik sudah ada 
-		$cek_nik = $this->db->where('nik', $post['nik'])->get('tweb_penduduk')->num_rows();
+		$cek_nik = $this->db->where('nik', $post['nik'])->get('tweb_penduduk')->row();
 
 		$insert = false;
-		if ($cek_nik < 1) {
+		if (empty($cek_nik)) {
 			$insert = $this->db->insert('tweb_penduduk', $data_to_tweb_penduduk);
 		} 
 
@@ -583,8 +583,11 @@ class Kp_surat extends Admin_Controller {
 			];
 		} else {
 			$ret = [
-				'success' => false,
-				'message' => 'Gagal disimpan'
+				'success' => true,
+				'message' => 'Gagal disimpan',
+				'nik'=>$cek_nik->nik,
+				'nama_lgkp'=> $cek_nik->nama,
+				'insert_id'=> $cek_nik->id,
 			];
 		}
 

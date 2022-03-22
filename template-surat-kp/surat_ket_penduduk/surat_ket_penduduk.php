@@ -16,6 +16,8 @@
 						<form id="validasi" action="<?= $form_action ?>" method="POST" target="_blank" class="form-surat form-horizontal">
 							<input type="hidden" id="url_surat" name="url_surat" value="<?= $url ?>">
 							<input type="hidden" id="url_remote" name="url_remote" value="<?= site_url('surat/nomor_surat_duplikat') ?>">
+							<input type="hidden" id="is_dari_permohonan" name="is_dari_permohonan" value="<?= $is_dari_permohonan ?>">
+							<input type="hidden" id="id_permohonan" name="id_permohonan" value="<?= $id_permohonan ?>">
 							<div class="row jar_form">
 								<label class="col-sm-3"></label>
 								<div class="col-sm-8">
@@ -34,7 +36,7 @@
 							</div>
 							<?php include("donjo-app/views/kp/surat/form/tgl_berlaku.php"); ?>
 							<?php include("donjo-app/views/kp/surat/form/_pamong.php"); ?>
-							<?php include("donjo-app/views/kp/surat/form/tampil_foto.php"); ?>
+							<?php // include("donjo-app/views/kp/surat/form/tampil_foto.php"); ?>
 					</div>
 					<?php include("donjo-app/views/kp/surat/form/tombol_cetak.php"); ?>
 					</form>

@@ -135,7 +135,7 @@
 						// Append it to the select
 						$('#nik').append(newOption).trigger('change');
 					}
-
+					
 					// var newOption = new Option(data.text, data.id, false, false);
 					// $('#nik').append(newOption);
 				}
@@ -161,13 +161,13 @@
 					<div class="form-group">
 						<label class="control-label col-lg-3 col-md-3">NIK</label>
 						<div class="col-lg-9 col-md-9">
-							<input type="text" class="form-control input-sm" name="cek_penduduk_nik" value="3401112603900001" id="cek_nik" required>
+							<input type="text" class="form-control input-sm" name="cek_penduduk_nik" value="" id="cek_nik" required>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="control-label col-lg-3 col-md-3">Nama Lengkap</label>
 						<div class="col-lg-9 col-md-9">
-							<input type="text" class="form-control input-sm" name="cek_penduduk_nama_lgkp" value="nur akhwan" id="cek_nama_lgkp" required>
+							<input type="text" class="form-control input-sm" name="cek_penduduk_nama_lgkp" value="" id="cek_nama_lgkp" required>
 						</div>
 					</div>
 					<div class="form-group">
@@ -218,7 +218,6 @@
 				</div>
 				<div class='modal-footer'>
 					<button type="button" class="btn btn-flat btn-warning btn-sm" id="btn_cek" onclick="return cek_penduduk();"><i class='fa fa-sign-out'></i> Cek NIK</button>
-					<button type="button" class="btn btn-flat btn-success btn-sm" id="btn_simpan"><i class='fa fa-check'></i> Tambahkan Penduduk</button>
 				</div>
 			</form>
 		</div>
