@@ -127,6 +127,7 @@ class Kp_setting_tte extends Admin_Controller
                 $this->db->insert('akp_user_pamong', [
                     'user_id'=>$p['user_id'],
                     'pamong_id'=>$p['pamong_id'],
+                    'esign_username'=>'',
                 ]);
             } else {
                 $this->session->set_flashdata('info', '<div class="alert alert-danger">Sudah ada</div>');
