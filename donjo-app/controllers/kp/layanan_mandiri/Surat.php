@@ -250,7 +250,8 @@ class Surat extends Mandiri_Controller
 	public function form($id = '')
 	{
 		$id_pend = $this->is_login->id_pend;
-
+		$this->load->helper('form');
+		
 		// Simpan data dari buat surat
 		$post = $this->input->post();
 		$post = ($post) ? $post : $this->session->data_permohonan;

@@ -7,9 +7,11 @@
 			<?php endif; ?>
 		</select>
 	</div>
+	<?php if ($this->uri->segment(1) == "kp_surat"): ?>
 	<div class="col-sm-2 col-lg-2">
 		<a href="" class="btn btn-warning btn-sm btn-flat" onclick="return new_penduduk();"><i class="fa fa-plus"></i> Tambah Penduduk</a>
 	</div>
+	<?php endif ?>
 </div>
 <script type="text/javascript">
 	$(document).ready(function() {
