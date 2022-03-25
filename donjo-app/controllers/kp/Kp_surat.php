@@ -597,4 +597,64 @@ class Kp_surat extends Admin_Controller {
 		->set_output(json_encode($ret));
 
 	}
+
+	public function get_data_wilayah()
+	{
+
+		$data = $this->db
+			->select('w.*')
+			->select("(CASE WHEN w.rw = '0' THEN '' ELSE w.rw END) AS rw")
+			->select("(CASE WHEN w.rt = '0' THEN '' ELSE w.rt END) AS rt")
+			->from('tweb_wil_clusterdesa w')
+			// ->join('penduduk_hidup p', 'w.id_kepala = p.id', 'left')
+
+			->group_start()
+			->where("w.rt = '0' and w.rw = '0'")
+			->or_where("w.rw <> '-' and w.rt = '0'")
+			->or_where("w.rt <> '0' and w.rt <> '-'")
+			->group_end()
+
+			->order_by('w.urut_cetak, w.dusun, rw, rt')
+			->get()
+			->result_array();
+
+
+		$semua_wilayah = $data;
+
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode($semua_wilayah));
+
+	}
+
+	public function update_alamat()
+	{
+		$post = $this->input->post();
+
+		$this->db
+		->where('id', intval($post['id_pend']))
+		->update('tweb_penduduk', [
+			'id_cluster'=>intval($post['id_cluster'])
+		]);
+
+		$affected_rows = $this->db->affected_rows();
+
+		$get_nama_penduduk = $this->db 
+		->where('id', intval($post['id_pend']))
+		->select('nama')
+		->get('tweb_penduduk')->row();
+
+		$ret = [
+			'success'=>true,
+			'message'=>'Berhasil diupdate',
+			'id_pend'=>intval($post['id_pend']),
+			'nama_lgkp'=>$get_nama_penduduk->nama,
+		];
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode($ret));
+
+	}
 }
