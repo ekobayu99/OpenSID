@@ -41,6 +41,10 @@
                             <?= form_dropdown('kode_surat', $p_list_klasifikasi, '', 'class="form-control select2" required'); ?>
                         </div>
                         <div class="form-group">
+                            <label for="">Pemeriksa</label>
+                            <?= form_dropdown('pemeriksa', $p_list_user_penandatangan, '', 'class="form-control select2" required'); ?>
+                        </div>
+                        <div class="form-group">
                             <label for="">Nomor Surat</label>
                             <?= form_input('nomor_surat', '', 'class="form-control input-sm" required'); ?>
                         </div>

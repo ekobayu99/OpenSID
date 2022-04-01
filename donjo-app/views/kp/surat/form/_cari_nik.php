@@ -7,10 +7,10 @@
 			<?php endif; ?>
 		</select>
 	</div>
-	<?php if ($this->uri->segment(1) == "kp_surat"): ?>
-	<div class="col-sm-2 col-lg-2">
-		<a href="" class="btn btn-warning btn-sm btn-flat" onclick="return new_penduduk();"><i class="fa fa-plus"></i> Tambah Penduduk</a>
-	</div>
+	<?php if ($this->uri->segment(1) == "kp_surat") : ?>
+		<div class="col-sm-2 col-lg-2">
+			<a href="" class="btn btn-warning btn-sm btn-flat" onclick="return new_penduduk();"><i class="fa fa-plus"></i> Tambah Penduduk</a>
+		</div>
 	<?php endif ?>
 </div>
 <script type="text/javascript">
@@ -135,7 +135,7 @@
 						// Append it to the select
 						$('#nik').append(newOption).trigger('change');
 					}
-					
+
 					// var newOption = new Option(data.text, data.id, false, false);
 					// $('#nik').append(newOption);
 				}
@@ -146,6 +146,78 @@
 		});
 
 		return false;
+	}
+
+	function edit_alamat(id_penduduk) {
+		$("#modal_edit_alamat_id_pend").val(id_penduduk);
+
+		$.ajax({
+			type: "GET",
+			url: base_url + 'index.php/kp_surat/get_data_wilayah',
+			success: function(res) {
+				let opt_alamat = '<option value="">-</option>';
+
+				$.each(res, function(index, val) {
+					opt_alamat += '<option value="' + val.id + '">RT : ' + val.rt + ', RW : ' + val.rw + ', Dusun : ' + val.dusun + '</option>';
+				});
+
+				$("#modal_edit_alamat_id_cluster").html(opt_alamat);
+				$("#modal_edit_alamat_id_cluster").select2({
+					dropdownParent: $("#modal_edit_alamat")
+				});
+
+				$("#modal_edit_alamat").modal('show');
+			},
+			error: function(xhr) {
+				console.log(xhr.responseText);
+			}
+		});
+		return false;
+	}
+
+	function update_penduduk() {
+		var formData = new FormData();
+		formData.append('id_pend', $("#modal_edit_alamat_id_pend").val());
+		formData.append('id_cluster', $("#modal_edit_alamat_id_cluster").val());
+
+		$.ajax({
+			type: "POST",
+			url: base_url + 'index.php/kp_surat/update_alamat',
+			data: formData,
+			contentType: false,
+			processData: false,
+			beforeSend: function() {
+				$("#btn_simpan").attr('disabled', true);
+				$("#btn_simpan").html('<i class="fa fa-spin fa-spinner"></i> Menyimpan');
+			},
+			success: function(res) {
+				alert(res.message);
+
+				$("#btn_simpan").attr('disabled', false);
+				$("#btn_simpan").html('<i class="fa fa-check"></i> Simpan');
+
+				if (res.success) {
+					var data = {
+						id: res.id_pend,
+						text: res.nama_lgkp
+					};
+					if ($('#nik').find("option[value='" + data.id + "']").length) {
+						$('#nik').val(data.id).trigger('change');
+					} else {
+						// Create a DOM Option and pre-select by default
+						var newOption = new Option(data.text, data.id, true, true);
+						// Append it to the select
+						$('#nik').append(newOption).trigger('change');
+					}
+				}
+			},
+			error: function(xhr) {
+				$("#btn_simpan").attr('disabled', false);
+				$("#btn_simpan").html('<i class="fa fa-check"></i> Simpan');
+				console.log(xhr.responseText);
+
+			}
+		});
 	}
 </script>
 
@@ -218,6 +290,33 @@
 				</div>
 				<div class='modal-footer'>
 					<button type="button" class="btn btn-flat btn-warning btn-sm" id="btn_cek" onclick="return cek_penduduk();"><i class='fa fa-sign-out'></i> Cek NIK</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
+<div class='modal fade' id='modal_edit_alamat' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
+	<div class='modal-dialog'>
+		<div class='modal-content'>
+			<form action="#" method="post" id="modal_edit_alamat_form">
+				<input type="hidden" id="modal_edit_alamat_id_pend" name="modal_edit_alamat_id_pend">
+				<div class='modal-header'>
+					<button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
+					<h4 class='modal-title' id='myModalLabel'><i class='fa fa-edit'></i> &nbsp;&nbsp;Edit Alamat</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label class="control-label col-lg-3 col-md-3">Alamat</label>
+						<div class="col-lg-9 col-md-9">
+							<?= form_dropdown('modal_edit_alamat_id_cluster', [], '', 'class="form-control input-sm" id="modal_edit_alamat_id_cluster"'); ?>
+						</div>
+					</div>
+				</div>
+				<div class='modal-footer'>
+					<button type="button" class="btn btn-flat btn-warning btn-sm" id="btn_simpan" onclick="return update_penduduk();"><i class='fa fa-check'></i> Simpan</button>
 				</div>
 			</form>
 		</div>

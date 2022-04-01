@@ -65,8 +65,23 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 	public function index()
 	{
 		$user_id = intval($this->session->userdata('user'));
-			
-		$data['main'] = $this->db->get('surat_keluar')->result_array();
+		
+		// echo json_encode($this->session->userdata());
+		// exit;
+
+		$data['main'] = $this->db
+			->where('surat_keluar.created_by', $this->session->userdata('user'))
+			->or_group_start()
+			->where('akp_surat_keluar_detil_surat.pemeriksa_id', $this->session->userdata('user'))
+			->where('akp_surat_keluar_detil_surat.is_pemeriksa_setuju', 0)
+			->group_end()
+			->join('akp_surat_keluar_detil_surat', 'surat_keluar.id = akp_surat_keluar_detil_surat.id_surat_keluar')
+			->get('surat_keluar')
+			->result_array();
+
+		// echo $this->db->last_query();
+		// exit;
+
 		$this->render('kp/suratku/surat_keluar', $data);
 	}
 
@@ -100,6 +115,19 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 			foreach ($get_klasifikasi_surat as $klasifikasi) {
 				$idx = $klasifikasi['kode'];
 				$p_list_klasifikasi[$idx] = $klasifikasi['kode']." - ".$klasifikasi['nama'];
+			}
+		}
+
+		$list_user_penandatangan = $this->db
+			->where('id_grup', 6)
+			->get('user')->result_array();
+
+
+		$data['p_list_user_penandatangan'] = ['' => '-'];
+		if (!empty($list_user_penandatangan)) {
+			foreach ($list_user_penandatangan as $lup) {
+				$idx = $lup['id'];
+				$data['p_list_user_penandatangan'][$idx] = $lup['username'] . " - " . $lup['nama'];
 			}
 		}
 
@@ -157,6 +185,14 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 				'teks' => 'OPD Suratku',
 			]);
 
+			$insert_detil_surat = $this->db->insert('akp_surat_keluar_detil_surat', [
+				'id_surat_keluar' => $insert_id,
+				'pemeriksa_id' => $pdata['pemeriksa'],
+				'is_setuju_pembuat' => 0,
+				'is_pemeriksa_setuju' => 0,
+				'is_kirim' => 0,
+			]);
+
 			if ($this->db->trans_status() === false) {
 				$this->session->set_flashdata('info', '<div class="alert alert-danger">Terjadi kesalahan</div>');
 				redirect('kp_suratku_surat_keluar/add');
@@ -169,5 +205,77 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 		}
 	}
 
+
+	public function update_db()
+	{
+		$satu = $this->db->query("ALTER TABLE `akp_surat_keluar_detil` ADD FOREIGN KEY (`id_surat_keluar`) REFERENCES `surat_keluar`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;");
+
+	}
+
+	public function to_pemeriksa($id_surat_keluar)
+	{
+		$this->db
+			->where('id_surat_keluar', $id_surat_keluar)
+			->update('akp_surat_keluar_detil_surat', [
+				'is_setuju_pembuat'=>1,
+				'tgl_setuju_pembuat'=>date('Y-m-d H:i:s')
+			]);
+
+
+		// echo $this->db->last_query();
+		// exit;
+
+		redirect('kp_suratku_surat_keluar');
+	}
+
+	public function detil_surat_keluar($id_surat_keluar)
+	{
+		$ret = $this->db 
+		->where('id', $id_surat_keluar)
+		->get('surat_keluar')->row();
+
+		$this->output
+		->set_content_type('application/json')
+		->set_output(json_encode($ret));
+	}
 	
+	public function pemeriksa_ok()
+	{
+		$p = $this->input->post();
+		$id_surat_keluar = intval($p['mdl_detil_surat_id_surat_keluar']);
+
+		$this->db
+			->where('id_surat_keluar', $id_surat_keluar)
+			->update('akp_surat_keluar_detil_surat', [
+				'is_pemeriksa_setuju' => 1,
+				'tgl_setuju' => date('Y-m-d H:i:s')
+			]);
+
+		$this->output
+		->set_content_type('application/json')
+		->set_output(json_encode([
+			'success'=>true,
+			'message'=>'Berhasil disetujui',
+		]));
+
+	}
+
+	public function kirim($id_surat_keluar)
+	{
+		// TODO 
+		// Tambah aksi untuk kirim ke suratku 
+		
+		$this->db
+			->where('id_surat_keluar', $id_surat_keluar)
+			->update('akp_surat_keluar_detil_surat', [
+				'is_kirim' => 1,
+				'tgl_kirim' => date('Y-m-d H:i:s')
+			]);
+
+
+		// echo $this->db->last_query();
+		// exit;
+
+		redirect('kp_suratku_surat_keluar');
+	}
 }
