@@ -122,6 +122,7 @@
 																			<a href="#" data-href="<?= site_url("kp_keluar/delete/$p/$o/$data[id]") ?>" class="btn bg-maroon btn-flat btn-sm" title="Hapus Data" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i></a>
 																		<?php endif; ?>
 																		<a href="<?= site_url("kp_surat/log_surat_preview/$data[id]") ?>" target="_blank" class="btn bg-primary btn-flat btn-sm" title="Cetak Data"><i class="fa fa-print"></i></a>
+																		<a href="<?= site_url("kp_surat/log_surat_preview/$data[id]?is_manual=1") ?>" target="_blank" class="btn bg-primary btn-flat btn-sm" title="Cetak Data Tanpa TTE">Cetak Manual (Tanpa TTE)</a>
 																		<?php if (intval($data['is_ajukan']) == 0) : ?>
 																			<?php if ($this->CI->cek_hak_akses('u')) : ?>
 																				<a href="<?= site_url("kp_keluar/edit_keterangan/$data[id]") ?>" title="Ubah Data" data-remote="false" data-toggle="modal" data-target="#modalBox" data-title="Ubah Keterangan" class="btn bg-orange btn-flat btn-sm"><i class="fa fa-edit"></i></a>

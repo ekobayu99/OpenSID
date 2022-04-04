@@ -15,6 +15,8 @@
                     </div>
                     <div class="box-body">
                         <a href="<?= base_url('index.php/kp_setting_tte/add'); ?>" class="btn btn-primary btn-flat"><i class="fa fa-plus"></i> Tambahkan</a>
+                        <a href="<?= base_url('index.php/man_user'); ?>" class="btn btn-primary btn-flat" target="_blank"><i class="fa fa-users"></i> Tambahkan User</a>
+
                         <?= $this->session->flashdata('info'); ?>
                         <div class="row">
                             <div class="col-sm-12">
