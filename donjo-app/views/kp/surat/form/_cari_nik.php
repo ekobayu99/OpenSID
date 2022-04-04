@@ -50,6 +50,17 @@
 				$("#cek_pddk_akh").html(opt_pekerjaan);
 				$("#cek_jenis_pkrjn").html(opt_pendidikan);
 
+				$("#cek_agama").select2({
+					dropdownParent: $("#modal_new_penduduk")
+				});
+				$("#cek_pddk_akh").select2({
+					dropdownParent: $("#modal_new_penduduk")
+				});
+				$("#cek_jenis_pkrjn").select2({
+					dropdownParent: $("#modal_new_penduduk")
+				});
+
+
 				$("#modal_new_penduduk").modal('show');
 			},
 			error: function(xhr) {
