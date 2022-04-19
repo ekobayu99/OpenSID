@@ -59,6 +59,12 @@
 				$("#cek_jenis_pkrjn").select2({
 					dropdownParent: $("#modal_new_penduduk")
 				});
+				$("#cek_penduduk_status_kawin").select2({
+					dropdownParent: $("#modal_new_penduduk")
+				});
+				$("#cek_penduduk_alamat_id_cluster").select2({
+					dropdownParent: $("#modal_new_penduduk")
+				});
 
 
 				$("#modal_new_penduduk").modal('show');
@@ -98,7 +104,7 @@
 					// alert('OK');
 					simpan_penduduk();
 				} else {
-					alert('NIP tidak ditemukan');
+					alert('NIK tidak ditemukan');
 				}
 			},
 			error: function(xhr) {
@@ -121,6 +127,8 @@
 		formData.append('agama', $("#cek_agama").val());
 		formData.append('pddk_akh', $("#cek_pddk_akh").val());
 		formData.append('jenis_pkrjn', $("#cek_jenis_pkrjn").val());
+		formData.append('status_kawin', $("#cek_penduduk_status_kawin").val());
+		formData.append('id_cluster', $("#cek_penduduk_alamat_id_cluster").val());
 
 		$.ajax({
 			type: "POST",
@@ -296,6 +304,27 @@
 						<div class="col-lg-9 col-md-9">
 							<select class="form-control input-sm" name="cek_penduduk_jenis_pkrjn" id="cek_jenis_pkrjn">
 							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-lg-3 col-md-3">Status Perkawinan</label>
+						<div class="col-lg-9 col-md-9">
+							<?= form_dropdown(
+								'cek_penduduk_status_kawin',
+								[
+									'1' => 'Belum Kawin',
+									'2' => 'Sudah Kawin',
+									'3' => 'Cerai'
+								],
+								'',
+								'class="form-control input-sm" id="cek_penduduk_status_kawin"'
+							); ?>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-lg-3 col-md-3">Alamat</label>
+						<div class="col-lg-9 col-md-9">
+							<?= form_dropdown('cek_penduduk_alamat_id_cluster', $p_cluster, '', 'class="form-control input-sm" id="cek_penduduk_alamat_id_cluster"'); ?>
 						</div>
 					</div>
 				</div>

@@ -118,6 +118,32 @@ class Kp_surat extends Admin_Controller {
 		$data['is_dari_permohonan'] = 0;
 		$data['id_permohonan'] = 0;
 
+		// get data cluster / wilayaha
+		$get_cluster = $this->db
+			->select('w.*')
+			->select("(CASE WHEN w.rw = '0' THEN '' ELSE w.rw END) AS rw")
+			->select("(CASE WHEN w.rt = '0' THEN '' ELSE w.rt END) AS rt")
+			->from('tweb_wil_clusterdesa w')
+			// ->join('penduduk_hidup p', 'w.id_kepala = p.id', 'left')
+
+			->group_start()
+			->where("w.rt = '0' and w.rw = '0'")
+			->or_where("w.rw <> '-' and w.rt = '0'")
+			->or_where("w.rt <> '0' and w.rt <> '-'")
+			->group_end()
+
+			->order_by('w.urut_cetak, w.dusun, rw, rt')
+			->get()
+			->result_array();
+		
+		$data['p_cluster'] = [];
+		if (!empty($get_cluster)) {
+			foreach ($get_cluster as $cl) {
+				$idx = $cl['id'];
+				$data['p_cluster'][$idx] = 'RT : '.$cl['rt'].', RW : '.$cl['rw'].', Dusun : '.$cl['dusun'];
+			}
+		}
+
 		$this->set_minsidebar(1);
 		$this->render("kp/surat/form_surat", $data);
 	}
@@ -406,7 +432,7 @@ class Kp_surat extends Admin_Controller {
 					->join('tweb_desa_pamong', 'log_surat.id_pamong = tweb_desa_pamong.pamong_id')
 					->join('tweb_penduduk_sex', 'tweb_penduduk.sex = tweb_penduduk_sex.id')
 					->join('tweb_penduduk_agama', 'tweb_penduduk.agama_id = tweb_penduduk_agama.id')
-					->join('tweb_penduduk_kawin', 'tweb_penduduk.status_kawin = tweb_penduduk_kawin.id')
+					->join('tweb_penduduk_kawin', 'tweb_penduduk.status_kawin = tweb_penduduk_kawin.id', 'left')
 					->join('tweb_penduduk_pendidikan_kk', 'tweb_penduduk.pendidikan_kk_id = tweb_penduduk_pendidikan_kk.id')
 					->join('tweb_penduduk_pekerjaan', 'tweb_penduduk.pekerjaan_id = tweb_penduduk_pekerjaan.id')
 					->join('tweb_penduduk_warganegara', 'tweb_penduduk.warganegara_id = tweb_penduduk_warganegara.id')
@@ -561,7 +587,8 @@ class Kp_surat extends Admin_Controller {
 			'pendidikan_kk_id'=>$post['pddk_akh'],
 			'pekerjaan_id'=>$post['jenis_pkrjn'],
 			'warganegara_id'=>1,
-			'id_cluster'=>0,
+			'id_cluster'=> $post['id_cluster'],
+			'status_kawin'=> $post['status_kawin'],
 			'created_by'=>$this->session->userdata('user'),
 		];
 
@@ -571,6 +598,18 @@ class Kp_surat extends Admin_Controller {
 		$insert = false;
 		if (empty($cek_nik)) {
 			$insert = $this->db->insert('tweb_penduduk', $data_to_tweb_penduduk);
+
+			$id_pend = $this->db->insert_id();
+
+			// insert to tabel log penduduk
+			$this->db->insert('log_penduduk', [
+				'id_pend'=>$id_pend,
+				'kode_peristiwa'=>5,
+				'tgl_lapor'=>date('Y-m-d H:i:s'),
+				'tgl_peristiwa'=>date('Y-m-d H:i:s'),
+				'created_at'=>date('Y-m-d H:i:s'),
+				'updated_at'=>date('Y-m-d H:i:s'),
+			]);
 		} 
 
 		if ($insert) {
