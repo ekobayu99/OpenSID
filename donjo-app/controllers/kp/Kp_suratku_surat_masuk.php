@@ -164,8 +164,9 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 			$tahun = $tahun;
 		}
 
-		$username = '003' . $kode_prov . $kode_kab . $kode_kec . $kode_desa;
+		$username = '003' . $kode_desa;
 		$set_status_berinomor = $this->surat_masuk_suratku_model->set_status_berinomor($username, $params, $tahun);
+
 
 		$this->output
 		->set_content_type('application/json')
