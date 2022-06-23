@@ -64,7 +64,6 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 	{
 		$user_id = intval($this->session->userdata('user'));
 
-
 		$data['main'] = [];
 		$this->render('kp/suratku/surat_masuk', $data);
 	}
@@ -73,12 +72,9 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 	public function dashboard()
 	{
 		$config = $this->config_model->get_data();
-		$kode_prov = $config['kode_propinsi'];
-		$kode_kab = str_pad($config['kode_kabupaten'], 2, '0', STR_PAD_LEFT);
-		$kode_kec = $config['kode_kecamatan'];
 		$kode_desa = $config['kode_desa'];
 
-		$username = '003' . $kode_prov . $kode_kab . $kode_kec . $kode_desa;
+		$username = '003' . $kode_desa;
 		$get_dashboard = $this->surat_masuk_suratku_model->get_dashboard($username);
 
 		$this->output
@@ -86,7 +82,7 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 			->set_output(json_encode($get_dashboard));
 	}
 
-	public function index_ajax($tahun = 0)
+	public function index_ajax($tahun)
 	{
 		$config = $this->config_model->get_data();
 		$kode_desa = $config['kode_desa'];
@@ -106,7 +102,7 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 		->set_output(json_encode($get_surat));
 	}
 
-	public function detil_surat($tahun = 0)
+	public function detil_surat($tahun)
 	{
 		$p = $this->input->post();
 
@@ -140,16 +136,13 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 		->set_output(json_encode($get_surat));
 	}
 
-	public function simpan_surat_masuk($tahun = 0)
+	public function simpan_surat_masuk($tahun)
 	{
 		$simpan_surat = $this->surat_masuk_suratku_model->insert();
 
 		$p = $this->input->post();
 
 		$config = $this->config_model->get_data();
-		$kode_prov = $config['kode_propinsi'];
-		$kode_kab = str_pad($config['kode_kabupaten'], 2, '0', STR_PAD_LEFT);
-		$kode_kec = $config['kode_kecamatan'];
 		$kode_desa = $config['kode_desa'];
 
 		$params = [

@@ -264,18 +264,74 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 	{
 		// TODO 
 		// Tambah aksi untuk kirim ke suratku 
+
+		$config = $this->config_model->get_data();
+		$kode_desa = $config['kode_desa'];
+
+		$username = '003' . $kode_desa;
+
+		$get_detil_surat_keluar = $this->db 
+		->where('id', $id_surat_keluar)
+		->get('surat_keluar')->row();
+		$file_surat = "";
+		if (is_file('./desa/upload/surat_keluar/'.$get_detil_surat_keluar->berkas_scan)) {
+			$file_surat = './desa/upload/surat_keluar/' . $get_detil_surat_keluar->berkas_scan;
+		}
+
+		if (!empty($file_surat)) {
+			$get_tujuan_surat_keluar = $this->db 
+				->where('id_surat_keluar', $id_surat_keluar)
+				->get('akp_surat_keluar_detil')->result();
+
+			$pdata = [
+				'perihal' => $get_detil_surat_keluar->isi_singkat,
+				'opd_tujuan' => $tujuan,
+				'deskripsi' => $get_detil_surat_keluar->isi_singkat,
+				'klasifikasi' => $get_detil_surat_keluar->kode_surat,
+				'nomor_asal' => $get_detil_surat_keluar->nomor_surat,
+				'tgl_asal' => $get_detil_surat_keluar->tanggal_surat,
+				'sifat' => 'Biasa',
+				'berkas_scan' => $get_detil_surat_keluar->berkas_scan
+			];
+
+			$no = 0;
+			if (!empty($get_tujuan_surat_keluar)) {
+				foreach ($get_tujuan_surat_keluar as $tujuan_surat) {
+					$pecah_kode_instansi_tujuan = explode("-", $tujuan_surat->kode_tambahan);
+					$pdata['opd_tujuan['.$no.']'] = $pecah_kode_instansi_tujuan[0]; 
+					$no++;
+				}
+			}
+
+			
+			$send_to_suratku = $this->suratku_model->kirim_surat($username, date('Y'), $pdata);
+			
+			if ($send_to_suratku) {
+				$this->db
+				->where('id_surat_keluar', $id_surat_keluar)
+				->update('akp_surat_keluar_detil_surat', [
+					'is_kirim'=>1,
+					'tgl_kirim'=>date('Y-m-d H:i:s'),
+				]);
+
+				$this->session->set_flashdata('notif', '<div class="alert alert-success">'.$send_to_suratku['message'].'</div>');
+				redirect('kp_suratku_surat_keluar');
+			}
 		
+		}
+
+		/* 
 		$this->db
 			->where('id_surat_keluar', $id_surat_keluar)
 			->update('akp_surat_keluar_detil_surat', [
 				'is_kirim' => 1,
 				'tgl_kirim' => date('Y-m-d H:i:s')
 			]);
-
+ 		*/
 
 		// echo $this->db->last_query();
 		// exit;
 
-		redirect('kp_suratku_surat_keluar');
+		// redirect('kp_suratku_surat_keluar');
 	}
 }

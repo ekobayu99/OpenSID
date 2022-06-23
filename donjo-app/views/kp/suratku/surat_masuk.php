@@ -105,6 +105,7 @@
 
     function dt_surat() {
         let tahun = $("#tahun").val();
+        // console.log(tahun);
 
         let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/index_ajax/'); ?>" + tahun;
 
@@ -163,11 +164,8 @@
 
         let tahun = $("#tahun").val();
 
-        let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/detil_surat'); ?>";
-        if (tahun == "2020") {
-            uri = "<?= base_url('index.php/kp_suratku_surat_masuk/detil_surat/2020'); ?>";
-        }
-
+        let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/detil_surat/'); ?>" + tahun;
+        
         $.ajax({
             type: "POST",
             data: {

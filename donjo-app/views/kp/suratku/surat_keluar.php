@@ -33,11 +33,10 @@
                                             </div>
                                         </div>
                                     </div>
-
-
-
+                                        
                                     <div class="row">
                                         <div class="col-sm-12">
+                                            <?= $this->session->flashdata('notif'); ?>
                                             <div class="table-responsive">
                                                 <table class="table table-bordered dataTable table-striped table-hover">
                                                     <thead class="bg-gray disabled color-palette">
@@ -63,7 +62,7 @@
                                                                             <a href="#" class="btn btn-danger btn-sm btn-flat"><i class="fa fa-times"></i> Hapus</a>
                                                                             <a href="<?= site_url('kp_suratku_surat_keluar/to_pemeriksa/' . $data['id_surat_keluar']); ?>" class="btn btn-warning btn-sm btn-flat"><i class="fa fa-send"></i> Kirim Ke Pemeriksa</a>
                                                                         <?php elseif ($data['is_setuju_pembuat'] == 1 && $data['is_pemeriksa_setuju'] == 0 && $data['pemeriksa_id'] == $this->session->userdata('user')) : ?>
-                                                                            <a href="#" class="btn btn-warning btn-sm btn-flat" onclick="return detil_surat(<?=$data['id_surat_keluar'];?>);"><i class=" fa fa-spin fa-spinner"></i> Periksa Surat</a>
+                                                                            <a href="#" class="btn btn-warning btn-sm btn-flat" onclick="return detil_surat(<?= $data['id_surat_keluar']; ?>);"><i class=" fa fa-spin fa-spinner"></i> Periksa Surat</a>
                                                                         <?php elseif ($data['is_setuju_pembuat'] == 1 && $data['is_pemeriksa_setuju'] == 0 && $data['pemeriksa_id'] != $this->session->userdata('user')) : ?>
                                                                             <a href="#" class="btn btn-warning btn-sm btn-flat"><i class=" fa fa-spin fa-spinner"></i> Sedang diperiksa</a>
                                                                         <?php endif ?>
@@ -71,7 +70,7 @@
                                                                             <a href="<?= site_url('kp_suratku_surat_keluar/kirim/' . $data['id_surat_keluar']); ?>" class="btn btn-danger btn-sm btn-flat" onclick="return confirm('Anda yakin..?');"><i class=" fa fa-arrow-right"></i> Kirim</a>
                                                                         <?php endif ?>
                                                                         <?php if ($data['is_kirim'] == 1) : ?>
-                                                                            <a href="#" title="Dikirim pada <?=$data['tgl_kirim'];?>" class="btn btn-success btn-sm btn-flat"><i class=" fa fa-check"></i> Terkirim</a>
+                                                                            <a href="#" title="Dikirim pada <?= $data['tgl_kirim']; ?>" class="btn btn-success btn-sm btn-flat"><i class=" fa fa-check"></i> Terkirim</a>
                                                                         <?php endif ?>
 
                                                                         <!-- <a href="#" class="btn btn-danger btn-sm btn-flat" onclick="return detil_surat(<?= $data['id_surat_keluar'] ?>);"><i class=" fa fa-spin fa-spinner"></i> Menunggu Disetujui</a> -->
