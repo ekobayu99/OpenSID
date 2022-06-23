@@ -1,4 +1,7 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+
+defined('BASEPATH') or exit('No direct script access allowed');
+
 /*
  * File ini:
  *
@@ -7,6 +10,7 @@
  * donjo-app/controllers/Analisis_laporan.php
  *
  */
+
 /*
  * File ini bagian dari:
  *
@@ -48,10 +52,11 @@ class Analisis_laporan extends Admin_Controller {
 	function __construct()
 	{
 		parent::__construct();
-		$this->load->model(['pamong_model', 'wilayah_model', 'analisis_laporan_model', 'analisis_respon_model']);
-		$this->modul_ini = 5;
+		$this->load->model(['pamong_model', 'wilayah_model', 'analisis_laporan_model', 'analisis_respon_model', 'analisis_master_model']);
 		$this->session->submenu = "Laporan Analisis";
 		$this->session->asubmenu = "analisis_laporan";
+		$this->modul_ini = 5;
+		$this->sub_modul_ini = 110;
 		$this->_set_page = ['50', '100', '200'];
 		$this->_list_session = ['cari', 'klasifikasi', 'dusun', 'rw', 'rt', 'jawab'];
 	}
@@ -60,22 +65,17 @@ class Analisis_laporan extends Admin_Controller {
 	{
 		$this->session->unset_userdata($this->_list_session);
 		$this->session->per_page = $this->_set_page[0];
-		redirect('analisis_laporan');
-	}
 
-	public function leave()
-	{
-		$id = $this->session->analisis_master;
-		$this->session->unset_userdata(['analisis_master']);
-		redirect("analisis_master/menu/$id");
+		redirect($this->controller);
 	}
 
 	public function index($p = 1, $o = 0)
 	{
-		if (empty($this->analisis_respon_model->get_periode()))
+		if (empty($this->analisis_master_model->get_aktif_periode()))
 		{
 			$this->session->success = -1;
 			$this->session->error_msg = 'Tidak ada periode aktif. Untuk laporan ini harus ada periode aktif.';
+
 			redirect('analisis_periode');
 		}
 		$this->session->unset_userdata(['cari2']); // cari2 gunanya apa???
@@ -123,20 +123,20 @@ class Analisis_laporan extends Admin_Controller {
 		$data['paging'] = $this->analisis_laporan_model->paging($p, $o);
 		$data['main']  = $this->analisis_laporan_model->list_data($o, $data['paging']->offset, $data['paging']->per_page);
 		$data['keyword'] = $this->analisis_laporan_model->autocomplete();
-		$data['analisis_master'] = $this->analisis_laporan_model->get_analisis_master();
-		$data['analisis_periode'] = $this->analisis_laporan_model->get_periode();
+		$data['analisis_master'] = $this->analisis_master_model->analisis_master;
+		$data['analisis_periode'] = $this->analisis_master_model->periode;
 
 		$this->set_minsidebar(1);
 		$this->render('analisis_laporan/table', $data);
 	}
 
-	public function kuisioner($p = 1, $o = 0, $id = '')
+	public function kuisioner($p = 1, $o = 0, $id = 0)
 	{
 		$data['p'] = $p;
 		$data['o'] = $o;
 		$data['id'] = $id;
 
-		$data['analisis_master'] = $this->analisis_laporan_model->get_analisis_master();
+		$data['analisis_master'] = $this->analisis_master_model->analisis_master;
 		$data['subjek'] = $this->analisis_laporan_model->get_subjek($id);
 		$data['total'] = $this->analisis_laporan_model->get_total($id);
 
@@ -145,6 +145,10 @@ class Analisis_laporan extends Admin_Controller {
 		$data['list_anggota'] = $this->analisis_respon_model->list_anggota($id);
 		$data['list_jawab'] = $this->analisis_laporan_model->list_indikator($id);
 		$data['form_action'] = site_url("analisis_laporan/update_kuisioner/$p/$o/$id");
+		if ($master['subjek_tipe'] == 5)
+			$data['asubjek'] = ucwords($this->setting->sebutan_desa);
+		else
+			$data['asubjek'] = $this->referensi_model->list_by_id('analisis_ref_subjek')[$master['subjek_tipe']]['subjek'];
 
 		$this->set_minsidebar(1);
 		$this->render('analisis_laporan/form', $data);
@@ -153,7 +157,7 @@ class Analisis_laporan extends Admin_Controller {
 	/*
 	* $aksi = cetak/unduh
 	*/
-	public function dialog_kuisioner($p = 1, $o = 0, $id = '', $aksi = '')
+	public function dialog_kuisioner($p = 1, $o = 0, $id = 0, $aksi = '')
 	{
 		$data['aksi'] = ucwords($aksi);
 		$data['pamong'] = $this->pamong_model->list_data();
@@ -176,13 +180,13 @@ class Analisis_laporan extends Admin_Controller {
 		return $asubjek;
 	}
 
-	public function daftar($p = 1, $o = 0, $id = '', $aksi = '')
+	public function daftar($p = 1, $o = 0, $id = 0, $aksi = '')
 	{
 		$post = $this->input->post();
 		$data['p'] = $p;
 		$data['o'] = $o;
 
-		$data['analisis_master'] = $this->analisis_laporan_model->get_analisis_master();
+		$data['analisis_master'] = $this->analisis_master_model->analisis_master;
 		$data['subjek'] = $this->analisis_laporan_model->get_subjek($id);
 		$data['asubjek'] = $this->subjek_tipe();
 		$data['total'] = $this->analisis_laporan_model->get_total($id);
@@ -224,7 +228,7 @@ class Analisis_laporan extends Admin_Controller {
 		$data['judul'] = $this->analisis_laporan_model->get_judul();
 		$data['file'] = "Laporan Hasil Analisis " . $data['judul']['asubjek'];
 		$data['isi'] = "analisis_laporan/table_print";
-		$data['analisis_master'] = $this->analisis_laporan_model->get_analisis_master();
+		$data['analisis_master'] = $this->analisis_master_model->analisis_master;
 		$data['main'] = $this->analisis_laporan_model->list_data($o, 0, 10000);
 		$data['letak_ttd'] = ['2', '2', '1'];
 
@@ -235,6 +239,7 @@ class Analisis_laporan extends Admin_Controller {
 	{
 		$data['form_action'] = site_url("analisis_laporan/multi_exec");
 		$data['main'] = $this->analisis_laporan_model->multi_jawab(1, 1);
+		
 		$this->load->view('analisis_laporan/ajax_multi', $data);
 	}
 
@@ -242,21 +247,22 @@ class Analisis_laporan extends Admin_Controller {
 	{
 		$idcb = $_POST['id_cb'];
 		print_r($idcb);
-		//redirect('analisis_laporan');
+		//redirect($this->controller);
 	}
 
 	public function ajax_multi_jawab()
 	{
 		if (isset($_SESSION['jawab']))
 		{
-		 $data['jawab'] = $_SESSION['jawab'];
+			$data['jawab'] = $_SESSION['jawab'];
 		}
 		else
 		{
-		 $data['jawab'] = '';
+			$data['jawab'] = '';
 		}
 		$data['main'] = $this->analisis_laporan_model->multi_jawab(1, 1);
 		$data['form_action'] = site_url("analisis_laporan/multi_jawab_proses");
+
 		$this->load->view("analisis_laporan/ajax_multi", $data);
 	}
 
@@ -280,7 +286,8 @@ class Analisis_laporan extends Admin_Controller {
 			$jmkf = $this->analisis_laporan_model->group_parameter();
 			$_SESSION['jmkf'] = count($jmkf);
 		}
-		redirect('analisis_laporan');
+
+		redirect($this->controller);
 	}
 
 	public function filter($filter)
@@ -292,7 +299,8 @@ class Analisis_laporan extends Admin_Controller {
 		if ($value != "")
 			$this->session->$filter = $value;
 		else $this->session->unset_userdata($filter);
-		redirect('analisis_laporan');
+
+		redirect($this->controller);
 	}
 
 }

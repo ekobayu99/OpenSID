@@ -65,7 +65,8 @@ class MY_Controller extends CI_Controller {
 	function __construct()
 	{
 		parent::__construct();
-		$this->load->model(['setting_model']);
+		$this->load->model(['config_model', 'setting_model']);
+		$this->header = $this->config_model->get_data();
 		$this->setting_model->init();
 	}
 
@@ -163,6 +164,55 @@ class Web_Controller extends MY_Controller {
 			$this->template = '../../themes/klasik/' . $template_file;
 	}
 
+	public function _get_common_data(&$data)
+	{
+		$this->load->library('statistik_pengunjung');
+
+		$this->load->model('theme_model');
+		$this->load->model('first_menu_m');
+		$this->load->model('teks_berjalan_model');
+		$this->load->model('first_artikel_m');
+		$this->load->model('web_widget_model');
+		$this->load->model('anjungan_model');
+		$this->load->model('keuangan_grafik_manual_model');
+		$this->load->model('keuangan_grafik_model');
+
+		// Counter statistik pengunjung
+		$this->statistik_pengunjung->counter_visitor();
+
+		// Data statistik pengunjung
+		$data['statistik_pengunjung'] = $this->statistik_pengunjung->get_statistik();
+
+		$data['latar_website'] = $this->theme_model->latar_website();
+		$data['desa'] = $this->header;
+		$data['menu_atas'] = $this->first_menu_m->list_menu_atas();
+		$data['menu_atas'] = $this->first_menu_m->list_menu_atas();
+		$data['menu_kiri'] = $this->first_menu_m->list_menu_kiri();
+		$data['teks_berjalan'] = $this->teks_berjalan_model->list_data(TRUE);
+		$data['slide_artikel'] = $this->first_artikel_m->slide_show();
+		$data['slider_gambar'] = $this->first_artikel_m->slider_gambar();
+		$data['w_cos'] = $this->web_widget_model->get_widget_aktif();
+		$data['cek_anjungan'] = $this->anjungan_model->cek_anjungan();
+
+		$this->web_widget_model->get_widget_data($data);
+		$data['data_config'] = $this->header;
+		if ($this->setting->apbdes_footer AND $this->setting->apbdes_footer_all)
+		{
+			$data['transparansi'] = $this->setting->apbdes_manual_input
+				? $this->keuangan_grafik_manual_model->grafik_keuangan_tema()
+				: $this->keuangan_grafik_model->grafik_keuangan_tema();
+		}
+		// Pembersihan tidak dilakukan global, karena artikel yang dibuat oleh
+		// petugas terpecaya diperbolehkan menampilkan <iframe> dsbnya..
+		$list_kolom = array(
+			'arsip',
+			'w_cos'
+		);
+		foreach ($list_kolom as $kolom)
+		{
+			$data[$kolom] = $this->security->xss_clean($data[$kolom]);
+		}
+	}
 }
 
 class Mandiri_Controller extends MY_Controller
@@ -268,11 +318,14 @@ class Admin_Controller extends MY_Controller {
 
 	private function cek_pengumuman()
 	{
-		if ($this->grup == 1) // hanya utk user administrator
-		{
+		if (config_item('demo_mode') || ENVIRONMENT === 'development') {
+			return null;
+		}
+
+		// Hanya untuk user administrator
+		if ($this->grup == 1) {
 			$notifikasi = $this->notif_model->get_semua_notif();
-			foreach($notifikasi as $notif)
-			{
+			foreach($notifikasi as $notif) {
 				$this->pengumuman = $this->notif_model->notifikasi($notif);
 				if ($notif['jenis'] == 'persetujuan') break;
 			}
@@ -321,6 +374,15 @@ class Admin_Controller extends MY_Controller {
 		if (empty($controller))
 			$controller = $this->controller;
 		return $this->user_model->hak_akses($this->grup, $controller, $akses);
+	}
+
+	public function redirect_tidak_valid($valid)
+	{
+		if ($valid) return;
+
+		$this->session->success = -1;
+		$this->session->error_msg = "Aksi ini tidak diperbolehkan";
+		redirect($_SERVER['HTTP_REFERER']);
 	}
 
 	public function render($view, Array $data = NULL)

@@ -3,6 +3,7 @@
 	public function __construct()
 	{
 		parent::__construct();
+		$this->hapus_data_kosong();
 	}
 
 	public function autocomplete()
@@ -155,7 +156,7 @@
 		$data = $query->result_array();
 
 
-		$per = $this->get_aktif_periode();
+		$per = $this->analisis_master_model->get_aktif_periode();
 		$j = $offset;
 		for ($i=0; $i<count($data); $i++)
 		{
@@ -213,7 +214,7 @@
 		$sql = "SELECT * FROM analisis_parameter WHERE id_indikator = ? ORDER BY kode_jawaban ASC ";
 		$query = $this->db->query($sql, $id);
 		$data= $query->result_array();
-		$per = $this->get_aktif_periode();
+		$per = $this->analisis_master_model->get_aktif_periode();
 
 		for ($i=0; $i<count($data); $i++)
 		{
@@ -233,7 +234,7 @@
 
 	public function list_subjek($id=0)
 	{
-		$per = $this->get_aktif_periode();
+		$per = $this->analisis_master_model->get_aktif_periode();
 
 		$subjek = $_SESSION['subjek_tipe'];
 		switch ($subjek)
@@ -272,13 +273,6 @@
 		return $data;
 	}
 
-	public function get_analisis_master()
-	{
-		$sql = "SELECT * FROM analisis_master WHERE id = ?";
-		$query = $this->db->query($sql,$_SESSION['analisis_master']);
-		return $query->row_array();
-	}
-
 	public function get_analisis_parameter($id='')
 	{
 		$sql = "SELECT * FROM analisis_parameter WHERE id = ?";
@@ -300,13 +294,27 @@
 		$query = $this->db->query($sql);
 		return $query->result_array();
 	}
-
-	public function get_aktif_periode()
-	{
-		$sql = "SELECT * FROM analisis_periode WHERE aktif = 1 AND id_master = ?";
-		$query = $this->db->query($sql, $_SESSION['analisis_master']);
-		$data = $query->row_array();
-		return $data['id'];
-	}
 	
+	public function hapus_data_kosong()
+	{
+		// Hapus data analisis_parameter dengan responden 0 untuk tipe pertanyaan 3 dan 4
+		$hapus = $this->db
+			->select('ap.id')
+			->from('analisis_respon ar')
+			->join('analisis_parameter ap', 'ar.id_parameter = ap.id', 'right')
+			->join('analisis_indikator ai', 'ai.id = ap.id_indikator', 'left')
+			->where_in('ai.id_tipe', [3, 4])
+			->where('id_subjek', null)
+			->get()
+			->result_array();
+
+		if ($hapus)
+		{
+			return $this->db
+				->where_in('id', array_column($hapus, 'id'))
+				->delete('analisis_parameter');
+		}
+
+		return true;
+	}
 }

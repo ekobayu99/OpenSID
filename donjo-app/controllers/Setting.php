@@ -84,21 +84,6 @@ class Setting extends Admin_Controller {
 		$this->db->where('kode', 'tracking_off')->update('notifikasi', ['aktif' => 0]);
 	}
 
-	public function info_sistem()
-	{
-		$this->set_minsidebar(1);
-		$this->sub_modul_ini = 46;
-
-		// Logs viewer
-		$this->load->library('Log_Viewer');
-		$data = $this->log_viewer->showLogs();
-
-		$data['ekstensi'] = $this->setting_model->cek_ekstensi();
-		$data['php'] = $this->setting_model->cek_php();
-		$data['mysql'] = $this->setting_model->cek_mysql();
-		$this->render('setting/info_php', $data);
-	}
-
 	/* Pengaturan web */
 	public function web()
 	{
@@ -227,5 +212,5 @@ class Setting extends Admin_Controller {
 			$this->session->success = -1;
 		}
 	}
-	
+
 }

@@ -1,4 +1,7 @@
-<?php if(!defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+
+defined('BASEPATH') or exit('No direct script access allowed');
+
 /*
  *  File ini:
  *
@@ -7,6 +10,7 @@
  * donjo-app/controllers/Analisis_master.php
  *
  */
+
 /*
  *  File ini bagian dari:
  *
@@ -41,6 +45,13 @@
  */
 
 require_once 'vendor/google-api-php-client/vendor/autoload.php';
+require_once 'vendor/spout/src/Spout/Autoloader/autoload.php';
+
+use Box\Spout\Common\Entity\Style\Border;
+use Box\Spout\Writer\Common\Creator\Style\BorderBuilder;
+use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
+use Box\Spout\Common\Entity\Row;
 
 class Analisis_master extends Admin_Controller
 {
@@ -50,59 +61,65 @@ class Analisis_master extends Admin_Controller
 		parent::__construct();
 		$this->load->model('analisis_master_model');
 		$this->load->model('analisis_import_model');
-
-		unset($_SESSION['submenu']);
-		unset($_SESSION['asubmenu']);
+		$this->load->model('analisis_indikator_model');
+		$this->load->model('analisis_parameter_model');
+		$this->load->model('analisis_klasifikasi_model');
+		$this->load->model('referensi_model');
+		$this->session->unset_userdata(['submenu', 'asubmenu']);
 		$this->modul_ini = 5;
 		$this->sub_modul_ini = 110;
+		$this->set_page = ['20', '50', '100'];
+		$this->list_session = ['cari', 'filter', 'state'];
 	}
 
 	public function clear()
 	{
-		unset($_SESSION['cari']);
-		unset($_SESSION['filter']);
-		unset($_SESSION['state']);
-		redirect('analisis_master');
+		$this->session->unset_userdata($this->list_session);
+		$this->session->per_page = $this->set_page[0];
+		
+		redirect($this->controller);
 	}
 
-	public function index($p=1, $o=0)
+	public function leave()
+	{
+		$id = $this->session->analisis_master;
+		$this->session->unset_userdata(['analisis_master']);
+
+		redirect("{$this->controller}/menu/{$id}");
+	}
+
+	public function index($p = 1, $o = 0)
 	{
 		$this->session->unset_userdata(['analisis_master', 'analisis_nama']);
 
 		$data['p'] = $p;
 		$data['o'] = $o;
 
-		if (isset($_SESSION['cari']))
-			$data['cari'] = $_SESSION['cari'];
-		else $data['cari'] = '';
+		foreach ($this->list_session as $list)
+		{
+			$data[$list] = $this->session->$list ?: '';
+		}
 
-		if (isset($_SESSION['filter']))
-			$data['filter'] = $_SESSION['filter'];
-		else $data['filter'] = '';
-
-		if (isset($_SESSION['state']))
-			$data['state'] = $_SESSION['state'];
-		else $data['state'] = '';
-
-		if (isset($_POST['per_page']))
-			$_SESSION['per_page']=$_POST['per_page'];
-		$data['per_page'] = $_SESSION['per_page'];
-
+		$per_page = $this->input->post('per_page');
+		if (isset($per_page))
+			$this->session->per_page = $per_page;
+		$data['func'] = 'index';
+		$data['set_page'] = $this->set_page;
+		$data['per_page'] = $this->session->per_page;
 		$data['paging'] = $this->analisis_master_model->paging($p,$o);
 		$data['data_import'] = $this->session->data_import;
 		$data['list_error'] = $this->session->list_error;
 		$data['keyword'] = $this->analisis_master_model->autocomplete();
 		$data['list_subjek'] = $this->analisis_master_model->list_subjek();
 		$data['main'] = $this->analisis_master_model->list_data($o, $data['paging']->offset, $data['paging']->per_page);
-
+		
 		$this->session->unset_userdata('list_error');
 
 		$this->set_minsidebar(1);
-
 		$this->render('analisis_master/table', $data);
 	}
 
-	public function form($p=1, $o=0, $id='')
+	public function form($p = 1, $o = 0, $id = 0)
 	{
 		$this->redirect_hak_akses('u');
 		$data['p'] = $p;
@@ -111,17 +128,19 @@ class Analisis_master extends Admin_Controller
 		if ($id)
 		{
 			$data['analisis_master'] = $this->analisis_master_model->get_analisis_master($id);
-			$data['form_action'] = site_url("analisis_master/update/$p/$o/$id");
+			$data['form_action'] = site_url("{$this->controller}/update/$p/$o/$id");
 		}
 		else
 		{
 			$data['analisis_master'] = null;
-			$data['form_action'] = site_url("analisis_master/insert");
+			$data['form_action'] = site_url("{$this->controller}/insert");
 		}
 
 		$data['list_format_impor'] = array('1' => 'BDT 2015');
+		$data['list_subjek'] = $this->analisis_master_model->list_subjek();
 		$data['list_kelompok'] = $this->analisis_master_model->list_kelompok();
 		$data['list_analisis'] = $this->analisis_master_model->list_analisis_child();
+
 		$this->set_minsidebar(1);
 		$this->render('analisis_master/form', $data);
 	}
@@ -136,54 +155,205 @@ class Analisis_master extends Admin_Controller
 	{
 		$this->redirect_hak_akses('u');
 		$this->set_minsidebar(1);
-		$data['form_action'] = site_url("analisis_master/import");
+		$data['form_action'] = site_url("{$this->controller}/import");
+
 		$this->load->view('analisis_master/import', $data);
+	}
+
+	public function import()
+	{
+		$this->redirect_hak_akses('u');
+		$this->analisis_import_model->impor_analisis();
+		
+		redirect($this->controller);
+	}
+
+	public function ekspor($id)
+	{
+		$writer = WriterEntityFactory::createXLSXWriter();
+		$master = $this->analisis_master_model->get_analisis_master($id);
+		//Nama File
+		$tgl =  date('Y_m_d');
+		$fileName = 'analisis_' . urlencode($master['nama']) . '_' . $tgl . '.xlsx';
+		$writer->openToBrowser($fileName); // stream data directly to the browser
+
+		$this->ekspor_master($writer, $master);
+		$this->ekspor_pertanyaan($writer, $master);
+		$this->ekspor_jawaban($writer, $master);
+		$this->ekspor_klasifikasi($writer, $master);
+
+		$writer->close();
+
+		redirect($this->controller);
+	}
+
+	private function style_judul()
+	{
+		$border = (new BorderBuilder())
+			->setBorderBottom()
+			->setBorderTop()
+			->setBorderRight()
+			->setBorderLeft()
+			->build();
+
+		$style = (new StyleBuilder())
+			->setFontBold()
+			->setFontSize(14)
+			->setBorder($border)
+			->build();
+
+    return $style;
+	}
+
+	private function style_baris()
+	{
+		$border = (new BorderBuilder())
+			->setBorderBottom(null, Border::WIDTH_THIN)
+			->setBorderRight(null, Border::WIDTH_THIN)
+			->setBorderLeft(null, Border::WIDTH_THIN)
+			->build();
+
+		$style = (new StyleBuilder())
+			->setBorder($border)
+			->build();
+
+    return $style;
+	}
+
+	private function ekspor_master($writer, $master)
+	{
+		$sheet = $writer->getCurrentSheet();
+		$sheet->setName('master');
+		$periode = $this->analisis_master_model->get_periode($master['id']);
+		//Tulis judul
+		$master_analisis = [
+			['NAMA ANALISIS', $master['nama']],
+			['SUBJEK', $master['subjek_tipe']],
+			['STATUS', $master['lock']],
+			['BILANGAN PEMBAGI', $master['pembagi']],
+			['DESKRIPSI ANALISIS', $master['deskripsi']],
+			['NAMA PERIODE', $periode->nama],
+			['TAHUN PENDATAAN', $periode->tahun_pelaksanaan]
+		];
+
+		foreach ($master_analisis as $baris_master)
+		{
+			$baris = [
+				WriterEntityFactory::createCell($baris_master[0], $this->style_judul()),
+				WriterEntityFactory::createCell($baris_master[1], $this->style_baris()),
+			];
+			$row = WriterEntityFactory::createRow($baris);
+			$writer->addRow($row);
+		}
+	}
+
+	private function ekspor_pertanyaan($writer, $master)
+	{
+		$sheet = $writer->addNewSheetAndMakeItCurrent();
+		$sheet->setName('pertanyaan');
+		//Tulis judul
+		$daftar_kolom = [
+			['NO / KODE', 'nomor'],
+			['PERTANYAAN / INDIKATOR', 'pertanyaan'],
+			['KATEGORI / ASPEK', 'kategori'],
+			['TIPE PERTANYAAN', 'id_tipe'],
+			['BOBOT', 'bobot'],
+			['AKSI ANALISIS', 'act_analisis'],
+		];
+		$judul = array_column($daftar_kolom, 0);
+		$header = WriterEntityFactory::createRowFromArray($judul, $this->style_judul());
+		$writer->addRow($header);
+		// Tulis data
+		$indikator = $this->analisis_indikator_model->raw_analisis_indikator_by_id_master($master['id']);
+
+		foreach ($indikator as $p)
+		{
+			$baris_data = [$p['nomor'], $p['pertanyaan'], $p['kategori'], $p['id_tipe'], $p['bobot'], $p['act_analisis']];
+			$baris = WriterEntityFactory::createRowFromArray($baris_data, $this->style_baris());
+			$writer->addRow($baris);
+		}
+	}
+
+	private function ekspor_jawaban($writer, $master)
+	{
+		$jawaban = $writer->addNewSheetAndMakeItCurrent();
+		$jawaban->setName('jawaban');
+		//Tulis judul
+		$daftar_kolom = [
+			['KODE PERTANYAAN', 'nomor'],
+			['KODE JAWABAN', 'kode_jawaban'],
+			['ISI JAWABAN', 'jawaban'],
+			['NILAI', 'nilai'],
+		];
+		$judul = array_column($daftar_kolom, 0);
+		$header = WriterEntityFactory::createRowFromArray($judul, $this->style_judul());
+		$writer->addRow($header);
+		// Tulis data
+		$parameter = $this->analisis_parameter_model->list_parameter_by_id_master($master['id']);
+
+		foreach ($parameter as $p)
+		{
+			$baris_data = [$p['nomor'], $p['kode_jawaban'], $p['jawaban'], $p['nilai']];
+			$baris = WriterEntityFactory::createRowFromArray($baris_data, $this->style_baris());
+			$writer->addRow($baris);
+		}
+	}
+
+	private function ekspor_klasifikasi($writer, $master)
+	{
+		$klasifikasi = $writer->addNewSheetAndMakeItCurrent();
+		$klasifikasi->setName('klasifikasi');
+		//Tulis judul
+		$daftar_kolom = [
+			['KLASIFIKASI', 'nama'],
+			['NILAI MINIMAL', 'minval'],
+			['NILAI MAKSIMAL', 'maxval'],
+		];
+		$judul = array_column($daftar_kolom, 0);
+		$header = WriterEntityFactory::createRowFromArray($judul, $this->style_judul());
+		$writer->addRow($header);
+		// Tulis data
+		$klasifikasi = $this->analisis_klasifikasi_model->list_klasifikasi_by_id_master($master['id']);
+
+		foreach ($klasifikasi as $k)
+		{
+			$baris_data = [$k['nama'], $k['minval'], $k['maxval']];
+			$baris = WriterEntityFactory::createRowFromArray($baris_data, $this->style_baris());
+			$writer->addRow($baris);
+		}
 	}
 
 	public function import_gform()
 	{
 		$this->redirect_hak_akses('u');
 		$this->set_minsidebar(1);
-		$data['form_action'] = site_url("analisis_master/exec_import_gform");
+		$data['form_action'] = site_url("{$this->controller}/exec_import_gform");
+
 		$this->load->view('analisis_master/import_gform', $data);
 	}
 
-	public function menu($id='')
+	public function menu($id = 0)
 	{
-		$_SESSION['analisis_master'] = $id;
+		$this->session->analisis_master = $id;
 		$data['analisis_master'] = $this->analisis_master_model->get_analisis_master($id);
-		$_SESSION['analisis_nama'] = $data['analisis_master']['nama'];
-		$da = $data['analisis_master'];
-		$subjek = $da['subjek_tipe'];
-		$_SESSION['subjek_tipe'] = $subjek;
+		$master = $data['analisis_master'];
+		$this->session->analisis_nama = $master['nama'];
+		$this->session->subjek_tipe = $master['subjek_tipe'];
 
-		switch ($subjek)
-		{
-			case 1:
-				$data['menu_respon'] = "analisis_respon_penduduk";
-				$data['menu_laporan'] = "analisis_laporan_penduduk";
-				break;
-			case 2:
-				$data['menu_respon'] = "analisis_respon_keluarga";
-				$data['menu_laporan'] = "analisis_laporan_keluarga";
-				break;
-			case 3:
-				$data['menu_respon'] = "analisis_respon_rtm";
-				$data['menu_laporan'] = "analisis_laporan_rtm";
-				break;
-			case 4:
-				$data['menu_respon'] = "analisis_respon_kelompok";
-				$data['menu_laporan'] = "analisis_laporan_kelompok";
-				break;
-			default:
-				redirect('analisis_master');
-		}
 		$data['menu_respon'] = "analisis_respon";
 		$data['menu_laporan'] = "analisis_laporan";
+
+		if ($master['subjek_tipe'] == 5)
+			$data['subjek'] = ucwords($this->setting->sebutan_desa);
+		elseif ($master['subjek_tipe'] == 6)
+			$data['subjek'] = ucwords($this->setting->sebutan_dusun);
+		else
+			$data['subjek'] = $this->referensi_model->list_by_id('analisis_ref_subjek')[$master['subjek_tipe']]['subjek'];
 
 		/* TODO: Periksa apakah perlu lakukan pre_update */
 		// $this->load->model('analisis_respon_model');
 		// $this->analisis_respon_model->pre_update();
+
 		$this->set_minsidebar(1);
 		$this->render('analisis_master/menu', $data);
 	}
@@ -194,7 +364,8 @@ class Analisis_master extends Admin_Controller
 		if ($cari != '')
 			$_SESSION['cari']=$cari;
 		else unset($_SESSION['cari']);
-		redirect('analisis_master');
+		
+		redirect($this->controller);
 	}
 
 	public function filter()
@@ -203,7 +374,8 @@ class Analisis_master extends Admin_Controller
 		if ($filter != 0)
 			$_SESSION['filter']=$filter;
 		else unset($_SESSION['filter']);
-		redirect('analisis_master');
+		
+		redirect($this->controller);
 	}
 
 	public function state()
@@ -212,32 +384,27 @@ class Analisis_master extends Admin_Controller
 		if ($filter != 0)
 			$_SESSION['state']=$filter;
 		else unset($_SESSION['state']);
-		redirect('analisis_master');
+		
+		redirect($this->controller);
 	}
 
 	public function insert()
 	{
 		$this->redirect_hak_akses('u');
 		$this->analisis_master_model->insert();
-		redirect('analisis_master');
-	}
-
-	public function import()
-	{
-		$this->redirect_hak_akses('u');
-		$this->analisis_import_model->import_excel();
-		redirect('analisis_master');
+		
+		redirect($this->controller);
 	}
 
 	/**
-		1. Credential
-		2. Id script
-		3. Redirect URI
-
-		- Jika 1 dan 2 diisi (asumsi user pakai akun google sendiri) eksekusi dari nilai yg diisi user. Abaikan isisan 3. Redirect ambil dari isian 1
-		- Jika 1 dan 2 kosong. 3 diisi. Import gform langsung menuju redirect field 3
-		- Jika semua tidak terisi (asumsi opensid ini yang jalan di server OpenDesa) ambil credential setting di file config
-	*/
+	 * 1. Credential
+	 * 2. Id script
+	 * 3. Redirect URI
+	 * 
+	 * - Jika 1 dan 2 diisi (asumsi user pakai akun google sendiri) eksekusi dari nilai yg diisi user. Abaikan isisan 3. Redirect ambil dari isian 1
+	 * - Jika 1 dan 2 kosong. 3 diisi. Import gform langsung menuju redirect field 3
+	 * - Jika semua tidak terisi (asumsi opensid ini yang jalan di server OpenDesa) ambil credential setting di file config
+	 */
 	private function get_redirect_uri()
 	{
 		if ($this->setting->api_gform_credential)
@@ -279,7 +446,8 @@ class Analisis_master extends Admin_Controller
 			$this->session->data_import = $variabel;
 			$this->session->gform_id = $this->input->get('formId');
 			$this->session->success = 5;
-			redirect('analisis_master');
+			
+			redirect($this->controller);
 		}
 		else
 		{
@@ -288,25 +456,28 @@ class Analisis_master extends Admin_Controller
 		}
 	}
 
-	public function update($p=1, $o=0, $id='')
+	public function update($p = 1, $o = 0, $id = 0)
 	{
 		$this->redirect_hak_akses('u');
 		$this->analisis_master_model->update($id);
-		redirect("analisis_master/index/$p/$o");
+
+		redirect("{$this->controller}/index/$p/$o");
 	}
 
-	public function delete($p=1, $o=0, $id='')
+	public function delete($p = 1, $o = 0, $id = 0)
 	{
-		$this->redirect_hak_akses('h', "analisis_master/index/$p/$o");
+		$this->redirect_hak_akses('h');
 		$this->analisis_master_model->delete($id);
-		redirect("analisis_master/index/$p/$o");
+
+		redirect("{$this->controller}/index/$p/$o");
 	}
 
-	public function delete_all($p=1, $o=0)
+	public function delete_all($p = 1, $o = 0)
 	{
-		$this->redirect_hak_akses('h', "analisis_master/index/$p/$o");
+		$this->redirect_hak_akses('h');
 		$this->analisis_master_model->delete_all();
-		redirect("analisis_master/index/$p/$o");
+
+		redirect("{$this->controller}/index/$p/$o");
 	}
 
 	public function save_import_gform()
@@ -314,10 +485,11 @@ class Analisis_master extends Admin_Controller
 		$this->redirect_hak_akses('u');
 		$this->analisis_import_model->save_import_gform();
 		$this->session->unset_userdata('data_import');
-		redirect('analisis_master');
+		
+		redirect($this->controller);
 	}
 
-	public function update_gform($id=0)
+	public function update_gform($id = 0)
 	{
 		$this->redirect_hak_akses('u');
 		$this->session->google_form_id = $this->analisis_master_model->get_analisis_master($id)['gform_id'];
@@ -337,14 +509,13 @@ class Analisis_master extends Admin_Controller
 			$variabel = json_decode($response->getBody(), true);
 			$this->session->data_import = $variabel;
 			$this->analisis_import_model->update_import_gform($id, $variabel);
-
-			redirect('analisis_master');
+			
+			redirect($this->controller);
 		}
 		else
 		{
 			$url = $REDIRECT_URI . '?formId=' . $this->session->google_form_id . '&redirectLink=' . $self_link ;
 			header('Location: ' . $url);
 		}
-
 	}
 }

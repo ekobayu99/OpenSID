@@ -59,7 +59,6 @@ class Migrasi_fitur_premium_2109 extends MY_Model
 		$hasil = $hasil && $this->migrasi_2021082972($hasil);
 		$hasil = $hasil && $this->migrasi_2021082951($hasil);
 		$hasil = $hasil && $this->migrasi_2021082952($hasil);
-		$hasil = $hasil && $this->migrasi_2021091751($hasil);
 
 		status_sukses($hasil);
 		return $hasil;
@@ -132,10 +131,13 @@ class Migrasi_fitur_premium_2109 extends MY_Model
 
 		// Ubah NIK 0 jadi 0[kode-desa-10-digit];
 		$list_data = $this->db->select('id, nik')->get_where('tweb_penduduk', ['nik' => '0'])->result();
-		foreach ($list_data as $data)
+		if ($list_data)
 		{
-			$nik_sementara = $this->penduduk_model->nik_sementara();
-			$hasil = $hasil && $this->db->where('id', $data->id)->update('tweb_penduduk', ['nik' => $nik_sementara]);
+			foreach ($list_data as $data)
+			{
+				$nik_sementara = $this->penduduk_model->nik_sementara();
+				$hasil = $hasil && $this->db->where('id', $data->id)->update('tweb_penduduk', ['nik' => $nik_sementara]);
+			}
 		}
 
 		$hasil = $hasil && $this->tambah_indeks('tweb_penduduk', 'nik');
@@ -317,24 +319,6 @@ class Migrasi_fitur_premium_2109 extends MY_Model
 			$hasil = $hasil && $this->db->where('golongan', 1)->update('tweb_aset', ['golongan' => 2]);
 			$hasil = $hasil && $this->db->query("UPDATE inventaris_tanah SET register = CONCAT('2', SUBSTRING(register, 2));");
 		}
-
-		return $hasil;
-	}
-
-	// Tambahan untuk migrasi 21.09-premium-rev03
-	protected function migrasi_2021091751($hasil)
-	{
-		$hasil = $hasil && $this->ubah_modul(101, ['modul'  => 'Status [Desa]']);
-
-		$hasil = $hasil && $this->ubah_modul(301, ['modul'  => 'Buku Administrasi [Desa]']);
-
-		$hasil = $hasil && $this->ubah_modul(311, ['modul'  => 'Buku Lembaran Dan Berita [Desa]']);
-
-		$hasil = $hasil && $this->ubah_modul(319, ['modul'  => 'Buku Tanah Kas [Desa]']);
-
-		$hasil = $hasil && $this->ubah_modul(320, ['modul'  => 'Buku Tanah di [Desa]']);
-
-		$hasil = $hasil && $this->ubah_modul(322, ['modul'  => 'Buku Inventaris dan Kekayaan [Desa]']);
 
 		return $hasil;
 	}

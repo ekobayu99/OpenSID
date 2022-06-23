@@ -29,7 +29,12 @@ class MY_Model extends CI_Model {
 				$data = $this->first_artikel_m->get_kategori($cut[1]);
 				$url = ($data) ? ('artikel/' . $cut[0] . '/' . $data['slug']) : ($url);
 				break;
-				
+			
+			/*
+			 * TODO : Jika semua link pada tabel menu sudah tdk menggunakan first/ lagi
+			 * Ganti hapus case dibawah ini yg datanya diambil dari tabel menu dan ganti default adalah $url;
+			 */
+
 			case 'arsip':
 			case 'peraturan_desa':
 			case 'data_analisis':
@@ -39,11 +44,13 @@ class MY_Model extends CI_Model {
 			case 'load_apbdes':
 			case 'load_aparatur_wilayah':
 			case 'peta':
+			case 'data-wilayah':
 			case 'data-suplemen':
 			case 'data-kelompok':
 			case 'status-idm':
 			case 'status-sdgs':
 			case 'lapak':
+			case 'pembangunan':
 				break;
 
 			default:
@@ -95,15 +102,7 @@ class MY_Model extends CI_Model {
 
 	public function hapus_indeks($tabel, $indeks)
 	{
-		$db = $this->db->database;
-		$ada = $this->db
-			->select("COUNT(index_name) as ada")
-			->from('INFORMATION_SCHEMA.STATISTICS')
-			->where('table_schema', $db)
-			->where('table_name', $tabel)
-			->where('index_name', $indeks)
-			->get()->row()->ada;
-		if ($ada)
+		if ($this->cek_indeks($tabel, $indeks))
 			return $this->db->query("DROP INDEX $indeks ON $tabel");
 		else return true;
 	}
@@ -125,6 +124,13 @@ class MY_Model extends CI_Model {
 			}
 		}
 
+		if ( ! $this->cek_indeks($tabel, $kolom))
+			return $this->db->query("ALTER TABLE $tabel ADD $index $kolom (`$kolom`)");
+		else return true;
+	}
+
+	public function cek_indeks($tabel, $kolom)
+	{
 		$db = $this->db->database;
 		$ada = $this->db
 			->select("COUNT(index_name) as ada")
@@ -133,9 +139,7 @@ class MY_Model extends CI_Model {
 			->where('table_name', $tabel)
 			->where('index_name', $kolom)
 			->get()->row()->ada;
-		if ( ! $ada)
-			return $this->db->query("ALTER TABLE $tabel ADD $index $kolom (`$kolom`)");
-		else return true;
+		return $ada;
 	}
 
 	public function tambah_modul($modul)
@@ -169,7 +173,7 @@ class MY_Model extends CI_Model {
 	{
 		$this->load->library('paging');
 		$cfg['page'] = $page;
-		$cfg['per_page'] = $this->session->per_page;
+		$cfg['per_page'] = $this->session->per_page ?? 10;
 		$cfg['num_links'] = 10;
 		$cfg['num_rows'] = $jml_data;
 		$this->paging->init($cfg);

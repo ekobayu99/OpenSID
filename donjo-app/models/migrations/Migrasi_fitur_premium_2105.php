@@ -298,7 +298,7 @@ class Migrasi_fitur_premium_2105 extends MY_model {
 
 		$this->dbforge->add_key('id', true);
 		$this->dbforge->add_key('id_penduduk');
-		$hasil =& $this->dbforge->create_table('tanah_desa', true);
+		$hasil = $hasil && $this->dbforge->create_table('tanah_desa', true);
 		return $hasil;
 	}
 
@@ -328,7 +328,7 @@ class Migrasi_fitur_premium_2105 extends MY_model {
 		]);
 
 		$this->dbforge->add_key('id', true);
-		$hasil =& $this->dbforge->create_table('tanah_kas_desa', true);
+		$hasil = $hasil && $this->dbforge->create_table('tanah_kas_desa', true);
 		return $hasil;
 	}
 
@@ -718,28 +718,29 @@ class Migrasi_fitur_premium_2105 extends MY_model {
 	// Kosongkan url modul yg mempunyai sub modul
 	private function bersihkan_modul($hasil)
 	{
-		// Semua modul utama
-		$this->db
-			->select('id, modul')
-			->from('setting_modul')
-			->where('parent', 0);
-		$modul = $this->db->get_compiled_select();
-
 		// Modul utama yg mempunyai sub
 		$ada_sub = $this->db
 			->distinct()
-			->select('m.id, m.modul')
-			->from('('.$modul.') as m')
+			->select('m.id')
+			->from('setting_modul as m')
 			->join('setting_modul sub', 'sub.parent = m.id and sub.hidden <> 2' )
+			->where('m.parent', 0)
+			->where('m.url <>', '')
 			->where('sub.id is not null')
 			->order_by('m.id')
-			->get()->result_array();
-		$ada_sub = array_column($ada_sub, 'id');
-		// Kosongkan url modul utama yg mempunyai sub
-		$hasil = $hasil && $this->db
-			->set('url', '')
-			->where_in('id', $ada_sub)
-			->update('setting_modul');
+			->get()
+			->result_array();
+	
+		if ($ada_sub)
+		{
+
+			$ada_sub = array_column($ada_sub, 'id');
+
+			$hasil = $hasil && $this->db
+				->set('url', '')
+				->where_in('id', $ada_sub)
+				->update('setting_modul');	
+		}
 
 		return $hasil;
 	}
@@ -747,7 +748,7 @@ class Migrasi_fitur_premium_2105 extends MY_model {
 	// Beri nilai default setting_modul utk memudahkan menambah modul
 	private function modul_tambahan($hasil)
 	{
-	  $this->db->like('url', 'man_user')->update('setting_modul', ['url' => 'man_user/clear']);
+		$this->db->like('url', 'man_user')->update('setting_modul', ['url' => 'man_user/clear']);
 		$fields = [
 			'ikon' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => true, 'default' => ''],
 			'ikon_kecil' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => true, 'default' => ''],
@@ -770,10 +771,10 @@ class Migrasi_fitur_premium_2105 extends MY_model {
 	protected function bumindes_updates($hasil)
 	{
 		//update nama modul Bumindes Tanah Desa
-		$hasil =& $this->db->where('id', 305)->update('setting_modul', ['url' => 'bumindes_tanah_desa/clear']);
+		$hasil = $hasil && $this->db->where('id', 305)->update('setting_modul', ['url' => 'bumindes_tanah_desa/clear']);
 
 		//menambahkan data pada setting_modul untuk controller 'bumindes_tanah_kas_desa'
-		$hasil =& $this->tambah_modul([
+		$hasil = $hasil && $this->tambah_modul([
 			'id'         => 319,
 			'modul'      => 'Buku Tanah Kas Desa',
 			'url'        => 'bumindes_tanah_kas_desa/clear',
@@ -884,5 +885,4 @@ class Migrasi_fitur_premium_2105 extends MY_model {
 
 		return $hasil;
 	}
-
 }
