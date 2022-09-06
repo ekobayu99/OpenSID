@@ -14,20 +14,21 @@
                         Setting TTE
                     </div>
                     <div class="box-body">
-                        <?=$this->session->flashdata('info');?>
-                        <?=form_open(base_url('index.php/kp_setting_tte/save_new'));?>
+                        <?= $this->session->flashdata('info'); ?>
+                        <?= form_open(base_url('index.php/kp_setting_tte/save_new')); ?>
                         <div class="form-group">
                             <label for="">Username</label>
-                            <?= form_dropdown('user_id', $p_list_user_penandatangan, '', 'class="form-control"'); ?>
+                            <?= form_dropdown('user_id', $p_list_user_penandatangan, '', 'class="form-control select2" id="user_id"'); ?>
                         </div>
                         <div class="form-group">
                             <label for="">Nama Pamong</label>
-                            <?= form_dropdown('pamong_id', $p_list_pamong, '', 'class="form-control"'); ?>
+                            <?= form_dropdown('pamong_id', $p_list_pamong, '', 'class="form-control select2" id="pamong_id"'); ?>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary btn-flat"> Simpan</button>
+                            <a href="<?=site_url('kp_setting_tte');?>" class="btn btn-warning btn-flat">Batal</a>
                         </div>
-                        <?=form_close();?>
+                        <?= form_close(); ?>
                     </div>
                 </div>
             </div>

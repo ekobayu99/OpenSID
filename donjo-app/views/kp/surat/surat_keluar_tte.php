@@ -30,6 +30,7 @@
                                                     </thead>
                                                     <tbody>
                                                         <?php $no = 1; ?>
+                                                        <?php if (!empty($main)): ?>
                                                         <?php foreach ($main as $data) : ?>
                                                             <tr>
                                                                 <td><?= $no ?></td>
@@ -45,6 +46,11 @@
                                                             </tr>
                                                             <?php $no++; ?>
                                                         <?php endforeach; ?>
+                                                        <?php else: ?>
+                                                            <tr>
+                                                                <td colspan="3" class="text-secondary">Belum ada surat</td>
+                                                            </tr>
+                                                        <?php endif ?>
                                                     </tbody>
                                                 </table>
                                             </div>

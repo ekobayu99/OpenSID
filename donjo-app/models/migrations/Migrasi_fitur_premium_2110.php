@@ -41,17 +41,17 @@ class Migrasi_fitur_premium_2110 extends MY_Model
 {
     public function up()
     {
-        log_message('error', 'Jalankan ' . get_class($this));
         $hasil = true;
+
+        // Jalankan migrasi sebelumnya
+        $hasil = $hasil && $this->jalankan_migrasi('migrasi_fitur_premium_2109');
 
         $hasil = $hasil && $this->migrasi_2021090971($hasil);
         $hasil = $hasil && $this->migrasi_2021091771($hasil);
         $hasil = $hasil && $this->migrasi_2021091751($hasil);
         $hasil = $hasil && $this->migrasi_2021092071($hasil);
-        $hasil = $hasil && $this->migrasi_2021092171($hasil);
-    
-        status_sukses($hasil);
-        return $hasil;
+
+        return $hasil && $this->migrasi_2021092171($hasil);
     }
 
     protected function migrasi_2021090971($hasil)
@@ -155,9 +155,9 @@ class Migrasi_fitur_premium_2110 extends MY_Model
     protected function migrasi_2021092171($hasil)
     {
         $sql = "INSERT INTO analisis_ref_subjek (id, subjek) VALUES
-			(6, 'Dusun'), (7, 'Rukun Warga (RW)'), (8, 'Rukun Tetangga (RT)')
-			ON DUPLICATE KEY UPDATE subjek = VALUES(subjek)
-		";
+            (6, 'Dusun'), (7, 'Rukun Warga (RW)'), (8, 'Rukun Tetangga (RT)')
+            ON DUPLICATE KEY UPDATE subjek = VALUES(subjek)
+        ";
 
         return $hasil && $this->db->query($sql);
     }

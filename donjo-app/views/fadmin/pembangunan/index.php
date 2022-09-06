@@ -1,18 +1,16 @@
 <?php
 
-defined('BASEPATH') or exit('No direct script access allowed');
+defined('BASEPATH') || exit('No direct script access allowed');
 
-/**
+/*
  * File ini:
  *
  * View untuk modul Admin Pembangunan
  *
- * donjo-app/views/pembangunan/index.php,
- *
+ * donjo-app/views/pembangunan/fadmin/index.php,
  */
 
-/**
- *
+/*
  * File ini bagian dari:
  *
  * OpenSID
@@ -37,22 +35,21 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * TERSIRAT. PENULIS ATAU PEMEGANG HAK CIPTA SAMA SEKALI TIDAK BERTANGGUNG JAWAB ATAS KLAIM, KERUSAKAN ATAU
  * KEWAJIBAN APAPUN ATAS PENGGUNAAN ATAU LAINNYA TERKAIT APLIKASI INI.
  *
- * @package	OpenSID
- * @author	Tim Pengembang OpenDesa
- * @copyright	Hak Cipta 2009 - 2015 Combine Resource Institution (http://lumbungkomunitas.net/)
- * @copyright	Hak Cipta 2016 - 2020 Perkumpulan Desa Digital Terbuka (https://opendesa.id)
+ * @copyright	  Hak Cipta 2009 - 2015 Combine Resource Institution (http://lumbungkomunitas.net/)
+ * @copyright	  Hak Cipta 2016 - 2020 Perkumpulan Desa Digital Terbuka (https://opendesa.id)
  * @license	http://www.gnu.org/licenses/gpl.html	GPL V3
- * @link 	https://github.com/OpenSID/OpenSID
+ *
+ * @see 	https://github.com/OpenSID/OpenSID
  */
 ?>
 
 
 <div class="content-wrapper">
 	<section class="content-header">
-		<h1>Daftar Pembangunan</h1>
+		<h1>Pembangunan</h1>
 		<ol class="breadcrumb">
 			<li><a href="<?= site_url('hom_sid'); ?>"><i class="fa fa-home"></i> Home</a></li>
-			<li class="active">Daftar Pembangunan</li>
+			<li class="active">Pembangunan</li>
 		</ol>
 	</section>
 	<section class="content" id="maincontent">
@@ -60,13 +57,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
 			<div class="box box-info">
 				<div class="box-header with-border">
 					<?php if ($this->CI->cek_hak_akses('u')): ?>
-						<a href="<?= site_url("$this->controller/form")?>" class="btn btn-social btn-flat btn-success btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Tambah Data Baru"><i class="fa fa-plus"></i>Tambah Data</a>
+						<a href="<?= site_url("{$this->controller}/form")?>" class="btn btn-social btn-flat btn-success btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Tambah Data Baru"><i class="fa fa-plus"></i>Tambah Data</a>
 					<?php endif; ?>
 				</div>
 				<div class="box-body">
 					<div class="row">
 						<div class="col-sm-2">
-						<select class="form-control input-sm select2" id="tahun" name="tahun" style="width:100%;">
+						<select class="form-control input-sm select2" id="tahun" name="tahun">
 							<option selected value="semua">Semua Tahun</option>
 							<?php foreach ($list_tahun as $list) : ?>
 								<option value="<?= $list->tahun_anggaran ?>"><?= $list->tahun_anggaran ?></option>
@@ -138,17 +135,17 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 						return `
 							<?php if ($this->CI->cek_hak_akses('u')): ?>
-								<a href="<?= site_url("$this->controller/form/"); ?>${data.id}" title="Ubah Data"  class="btn bg-orange btn-flat btn-sm"><i class="fa fa-edit"></i></a>
+								<a href="<?= site_url("{$this->controller}/form/"); ?>${data.id}" title="Ubah Data"  class="btn bg-orange btn-flat btn-sm"><i class="fa fa-edit"></i></a>
 							<?php endif; ?>
 							<a href="<?= site_url($this->controller . '/lokasi_maps/'); ?>${data.id}" class="btn bg-olive btn-flat btn-sm" title="Lokasi Pembangunan"><i class="fa fa-map"></i></a>
-							<a href="<?= site_url('pembangunan_dokumentasi/show/'); ?>${data.id}" class="btn bg-purple btn-flat btn-sm" title="Rincian Dokumentasi Kegiatan"><i class="fa fa-list-ol"></i></a>
+							<a href="<?= site_url($this->controller . '/dokumentasi/'); ?>${data.id}" class="btn bg-purple btn-flat btn-sm" title="Rincian Dokumentasi Kegiatan"><i class="fa fa-list-ol"></i></a>
 							<?php if ($this->CI->cek_hak_akses('u')): ?>
 								${status}
 							<?php endif; ?>
 							<?php if ($this->CI->cek_hak_akses('h')): ?>
 								<a href="#" data-href="<?= site_url($this->controller . '/delete/'); ?>${data.id}" class="btn bg-maroon btn-flat btn-sm" title="Hapus" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i></a>
 							<?php endif; ?>
-							<a href="<?= site_url('pembangunan/detail/'); ?>${data.id}" target="_blank" class="btn bg-blue btn-flat btn-sm" title="Lihat Summary"><i class="fa fa-eye"></i></a>
+							<a href="<?= site_url('pembangunan/'); ?>${data.slug}" target="_blank" class="btn bg-blue btn-flat btn-sm" title="Lihat Summary"><i class="fa fa-eye"></i></a>
 							`
 					}
 				},
@@ -159,8 +156,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
 					'data': 'sumber_dana'
 				},
 				{
-					'data': 'anggaran',
-					'render': $.fn.dataTable.render.number( ',', '.', 0, 'Rp ' )
+					'data': 'jml_anggaran',
+					'render': $.fn.dataTable.render.number( '.', ',', 0, 'Rp ' )
 				},
 				{
 					'data': 'max_persentase'
@@ -179,11 +176,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
 				},
 				{
 					'data': function (data) {
-						return `<div class="user-panel">
-									<div class="image2">
-										<img src="<?= base_url(LOKASI_GALERI) ?>${data.foto}" class="img-circle" alt="Gambar Dokumentasi">
-									</div>
-								</div>`
+						if (data.foto) {
+							return `<img src="<?= base_url(LOKASI_GALERI) ?>${data.foto}" class="penduduk_kecil text-center" alt="Gambar Dokumentasi">`
+						}
+
+						return null
 					}
 				},
 			],

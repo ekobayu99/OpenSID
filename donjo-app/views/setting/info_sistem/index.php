@@ -60,7 +60,7 @@
 												<a href="?dl=<?= base64_encode($currentFile) ?>" class="btn btn-social btn-flat btn-success btn-sm" title="Unduh file log"><i class="fa fa-download"></i> Unduh</a>
 												<?php if ($this->CI->cek_hak_akses_url('u')): ?>
 													<a href="#" data-href="?del=<?= base64_encode($currentFile) ?>" class="btn btm-social btn-flat btn-danger btn-sm" title="Hapus log file" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i>Hapus log file</a>
-													<a href="#confirm-delete" title="Hapus Data" onclick="deleteAllBox('mainform','<?=site_url($this->controller . "/remove_log?f=".base64_encode($currentFile))?>')" class="btn btn-social btn-flat btn-danger btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block hapus-terpilih"><i class='fa fa-trash-o'></i> Hapus Data Terpilih</a>
+													<a href="#confirm-delete" title="Hapus Data" onclick="deleteAllBox('mainform','<?=site_url($this->controller . '/remove_log?f=' . base64_encode($currentFile))?>')" class="btn btn-social btn-flat btn-danger btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block hapus-terpilih"><i class='fa fa-trash-o'></i> Hapus Data Terpilih</a>
 												<?php endif; ?>
 											<?php endif ?>
 										</div>
@@ -71,7 +71,7 @@
 														<div class="row">
 															<div class="col-sm-12">
 																<div class="table-responsive">
-																	<?php if (is_null($logs)) : ?>
+																	<?php if (null === $logs) : ?>
 																		<div>
 																			<br><br>
 																			<strong>File log lebig dari 500 Mb, silahkan unduh.</strong>
@@ -92,13 +92,13 @@
 																							<td class="padat"><h6><span class="label label-<?= $log['class'] ?>"><?= $log['level'] ?></span></h6></td>
 																							<td class="padat"><?= $log['date'] ?></td>
 																							<td class="text">
-																								<?php if (array_key_exists("extra", $log)) : ?>
+																								<?php if (array_key_exists('extra', $log)) : ?>
 																									<a class="pull-right btn btn-primary btn-xs" data-toggle="collapse" href="#collapse<?= $key ?>" aria-expanded="false" aria-controls="collapse<?= $key ?>">
 																										<span class="glyphicon glyphicon-search"></span>
 																									</a>
 																								<?php endif; ?>
 																								<?= $log['content']; ?>
-																								<?php if (array_key_exists("extra", $log)) : ?>
+																								<?php if (array_key_exists('extra', $log)) : ?>
 																									<div class="collapse" id="collapse<?= $key ?>">
 																										<?= $log['extra'] ?>
 																									</div>
@@ -142,42 +142,58 @@
 									<p>Update versi PHP supaya minimal <?= $php['versi_minimal'] ?>.</p>
 								</div>
 							<?php endif; ?>
-							<?php if (!$ekstensi['lengkap']) : ?>
+							<?php if (! $ekstensi['lengkap'] || ! $disable_functions['lengkap']) : ?>
 								<div class="alert alert-danger" role="alert">
-									<p>Ada beberapa ekstensi PHP wajib yang tidak tersedia di sistem anda.
+									<p>Ada beberapa ekstensi dan fungsi PHP wajib yang tidak tersedia di sistem anda.
 										Karena itu, mungkin ada fungsi yang akan bermasalah.</p>
-									<p>Aktifkan ekstensi PHP yang belum ada di sistem anda.</p>
+									<p>Aktifkan ekstensi dan fungsi PHP yang belum ada di sistem anda.</p>
 								</div>
 							<?php else : ?>
 								<p>
 									Semua ekstensi PHP yang diperlukan sudah aktif di sistem anda.
 								</p>
 							<?php endif; ?>
-							<?php foreach ($ekstensi['ekstensi'] as $key => $value) : ?>
-								<div class="input-group">
-									<span class="input-group-btn">
-										<button type="button" class="btn btn-flat <?= $value ? 'btn-success' : 'btn-danger' ?>"><i class="fa fa-<?= $value ? 'check' : 'times' ?>"></i></button>
-									</span>
-									<span class="form-control" style="border: 0px;"><?= $key ?></span>
+							<div class="row">
+								<div class="col-sm-6">
+									<h4>EKSTENSI</h4>
+									<?php foreach ($ekstensi['ekstensi'] as $key => $value) : ?>
+										<div class="input-group">
+											<span class="input-group-btn">
+												<button type="button" class="btn btn-flat <?= $value ? 'btn-success' : 'btn-danger' ?>"><i class="fa fa-<?= $value ? 'check' : 'times' ?>"></i></button>
+											</span>
+											<span class="form-control" style="border: 0px;"><?= $key ?></span>
+										</div>
+									<?php endforeach; ?>
 								</div>
-							<?php endforeach; ?>
+								<div class="col-sm-6">
+									<h4>FUNGSI</h4>
+									<?php foreach ($disable_functions['functions'] as $func => $val) : ?>
+										<div class="input-group">
+											<span class="input-group-btn">
+												<button type="button" class="btn btn-flat <?= $val ? 'btn-success' : 'btn-danger' ?>"><i class="fa fa-<?= $val ? 'check' : 'times' ?>"></i></button>
+											</span>
+											<span class="form-control" style="border: 0px;"><?= $func ?></span>
+										</div>
+									<?php endforeach; ?>
+								</div>
+							</div>
 						</div>
 						<div id="info_sistem" class="tab-pane fade in">
 							<?php
-							ob_start();
-							phpinfo();
-							$phpinfo = array('phpinfo' => array());
-							if (preg_match_all('#(?:<h2>(?:<a name=".*?">)?(.*?)(?:</a>)?</h2>)|(?:<tr(?: class=".*?")?><t[hd](?: class=".*?")?>(.*?)\s*</t[hd]>(?:<t[hd](?: class=".*?")?>(.*?)\s*</t[hd]>(?:<t[hd](?: class=".*?")?>(.*?)\s*</t[hd]>)?)?</tr>)#s', ob_get_clean(), $matches, PREG_SET_ORDER)) :
-								foreach ($matches as $match) :
-									if (strlen($match[1])) :
-										$phpinfo[$match[1]] = array();
-									elseif (isset($match[3])) :
-										$phpinfo[end(array_keys($phpinfo))][$match[2]] = isset($match[4]) ? array($match[3], $match[4]) : $match[3];
-									else :
-										$phpinfo[end(array_keys($phpinfo))][] = $match[2];
-									endif;
-								endforeach;
-							?>
+                            ob_start();
+                            phpinfo();
+                            $phpinfo = ['phpinfo' => []];
+                            if (preg_match_all('#(?:<h2>(?:<a name=".*?">)?(.*?)(?:</a>)?</h2>)|(?:<tr(?: class=".*?")?><t[hd](?: class=".*?")?>(.*?)\s*</t[hd]>(?:<t[hd](?: class=".*?")?>(.*?)\s*</t[hd]>(?:<t[hd](?: class=".*?")?>(.*?)\s*</t[hd]>)?)?</tr>)#s', ob_get_clean(), $matches, PREG_SET_ORDER)) :
+                                foreach ($matches as $match) :
+                                    if (strlen($match[1])) :
+                                        $phpinfo[$match[1]] = [];
+                                    elseif (isset($match[3])) :
+                                        $phpinfo[end(array_keys($phpinfo))][$match[2]] = isset($match[4]) ? [$match[3], $match[4]] : $match[3];
+                                    else :
+                                        $phpinfo[end(array_keys($phpinfo))][] = $match[2];
+                                    endif;
+                                endforeach;
+                            ?>
 								<?php $i = 0; ?>
 								<?php foreach ($phpinfo as $name => $section) : ?>
 									<?php $i++; ?>
@@ -227,7 +243,7 @@
 			"processing": true,
 			"autoWidth": false,
 			'pageLength': 10,
-			"order": [[1, "desc"]],
+			"order": [[1, "asc"]],
 			"columnDefs": [ {
 				"targets": [0, 2],
 				"orderable": false

@@ -11,7 +11,7 @@
 			<div class="col-md-12">
 				<div class="box box-info">
 					<div class="box-header with-border">
-						<a href="<?= site_url('kp_keluar/perorangan_clear') ?>" class="btn btn-social btn-flat bg-olive btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block"><i class="fa fa-archive"></i> Rekam Surat Perorangan</a>
+						<a href="<?= site_url('kp_surat') ?>" class="btn btn-social btn-flat bg-olive btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block"><i class="fa fa-archive"></i> Rekam Surat Perorangan</a>
 						<a href="<?= site_url('kp_keluar/graph') ?>" class="btn btn-social btn-flat bg-orange btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block"><i class="fa fa-pie-chart"></i> Pie Surat Keluar</a>
 						<a href="<?= site_url('kp_keluar/dialog_cetak/cetak') ?>" class="btn btn-social btn-flat bg-purple btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" data-remote="false" data-toggle="modal" data-target="#modalBox" data-title="Cetak Arsip Layanan Surat"><i class="fa fa-print"></i> Cetak</a>
 						<a href="<?= site_url('kp_keluar/dialog_cetak/unduh') ?>" class="btn btn-social btn-flat bg-navy btn-sm btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" data-remote="false" data-toggle="modal" data-target="#modalBox" data-title="Unduh Arsip Layanan Surat"><i class="fa fa-download"></i> Unduh</a>
@@ -121,7 +121,16 @@
 																		<?php if ($this->CI->cek_hak_akses('h')) : ?>
 																			<a href="#" data-href="<?= site_url("kp_keluar/delete/$p/$o/$data[id]") ?>" class="btn bg-maroon btn-flat btn-sm" title="Hapus Data" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i></a>
 																		<?php endif; ?>
-																		<a href="<?= site_url("kp_surat/log_surat_preview/$data[id]") ?>" target="_blank" class="btn bg-primary btn-flat btn-sm" title="Cetak Data"><i class="fa fa-print"></i></a>
+
+																		<!-- tombol cetak -->
+																		<?php if ($data['is_ttd'] == 0): ?>
+																		<a href="<?= site_url("kp_surat/log_surat_preview/$data[id]") ?>" target="_blank" class="btn bg-primary btn-flat btn-sm" title="Cetak Data Belum Bertandatangan Elektronik"><i class="fa fa-print"></i></a>
+																		<?php else: ?>
+																		<a href="<?= site_url("kp_surat/log_surat_preview/$data[id]") ?>" target="_blank" class="btn btn-success btn-flat btn-sm" title="Cetak Data Bertandatangan Elektronik"><i class="fa fa-print"></i></a>
+
+																		<?php endif ?>
+
+
 																		<a href="<?= site_url("kp_surat/log_surat_preview/$data[id]?is_manual=1") ?>" target="_blank" class="btn bg-primary btn-flat btn-sm" title="Cetak Data Tanpa TTE">Cetak Manual (Tanpa TTE)</a>
 																		<?php if (intval($data['is_ajukan']) == 0) : ?>
 																			<?php if ($this->CI->cek_hak_akses('u')) : ?>

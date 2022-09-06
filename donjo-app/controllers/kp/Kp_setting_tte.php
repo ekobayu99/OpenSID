@@ -87,7 +87,7 @@ class Kp_setting_tte extends Admin_Controller
         if (!empty($list_user_penandatangan)) {
             foreach ($list_user_penandatangan as $lup) {
                 $idx = $lup['id'];
-                $data['p_list_user_penandatangan'][$idx] = $lup['username']." - ".$lup['nama'];
+                $data['p_list_user_penandatangan'][$idx] = $lup['username'];
             }
         }
 
@@ -98,7 +98,7 @@ class Kp_setting_tte extends Admin_Controller
         if (!empty($list_pamong)) {
             foreach ($list_pamong as $lup) {
                 $idx = $lup['pamong_id'];
-                $data['p_list_pamong'][$idx] = $lup['pamong_nama'];
+                $data['p_list_pamong'][$idx] = $lup['jabatan']." - ". $lup['pamong_nama'];
             }
         }
 

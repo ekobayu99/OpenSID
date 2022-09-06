@@ -50,7 +50,7 @@
                         </div>
                         <div class="form-group">
                             <label for="">Tanggal Surat</label>
-                            <input type="date" name="tanggal_surat" class="form-control input-sm" value="">
+                            <input type="date" value="<?=date('Y-m-d');?>" name="tanggal_surat" class="form-control input-sm" value="">
                         </div>
                         <div class="form-group">
                             <label for="">Perihal Surat</label>
@@ -58,7 +58,8 @@
                         </div>
                         <div class='form-group'>
                             <!-- <button type='reset' class='btn btn-social btn-flat btn-danger btn-sm'><i class='fa fa-times'></i> Batal</button> -->
-                            <button type='submit' class='btn btn-social btn-flat btn-info btn-sm'><i class='fa fa-check'></i> Simpan</button>
+                            <button type='submit' class='btn btn-flat btn-info'><i class='fa fa-check'></i> Simpan</button>
+                            <a href="<?= site_url('kp_suratku_surat_keluar'); ?>" class="btn btn-warning btn-flat"><i class="fa fa-arrow-left"></i> Batal</a>
                         </div>
                         <?= form_close(); ?>
                     </div>

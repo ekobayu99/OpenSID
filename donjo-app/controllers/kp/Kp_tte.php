@@ -72,6 +72,7 @@ class Kp_tte extends Admin_Controller
 
 		$get_data_surat_ditandatangani = $this->db
 			->where('penandatangan_id', $penandatangan_id)
+			->order_by('id', 'desc')
 			->get('akp_surat_tte')->result_array();
 		
 		$data['main'] = $get_data_surat_ditandatangani;
@@ -88,10 +89,10 @@ class Kp_tte extends Admin_Controller
 			->get('akp_surat_tte')->row_array();
 
 		// cek file 
-		if (is_file('./desa/upload/dokumen/'.$detil_surat['file_surat'])) {
+		if (!empty($detil_surat)) {
 			$ret = [
 				'success'=>true,
-				'filesurat' => base_url('desa/upload/dokumen/'.$detil_surat['file_surat']),
+				'filesurat' => base_url('index.php/kp_tte/lihat_file_surat/'.$detil_surat['id_log_surat']),
 				'message'=>'OK',
 			];
 		} else {
@@ -114,10 +115,10 @@ class Kp_tte extends Admin_Controller
 		->get('akp_surat_tte')->row_array();
 
 		// cek file 
-		if (is_file('./desa/upload/dokumen/signed_' . $detil_surat['file_surat'])) {
+		if (!empty($detil_surat)) {
 			$ret = [
 				'success' => true,
-				'filesurat' => base_url('desa/upload/dokumen/signed_' . $detil_surat['file_surat']),
+				'filesurat' => base_url('index.php/kp_tte/lihat_file_surat/'.$detil_surat['id_log_surat']),
 				'message' => 'OK',
 			];
 		} else {
@@ -267,5 +268,34 @@ class Kp_tte extends Admin_Controller
 		$this->output
 		->set_content_type('application/json')
 		->set_output(json_encode($ret));
+	}
+
+	
+
+	public function lihat_file_surat($id_surat)
+	{
+		$get_file_surat = $this->db 
+		->where('id_log_surat', $id_surat)
+		->get('akp_surat_tte')->row();
+		
+		if (!empty($get_file_surat)) {
+			if ($get_file_surat->is_ttd == 0) {
+				if (is_file('./desa/upload/dokumen/' . $get_file_surat->file_surat)) {
+					$content_file_surat = file_get_contents('./desa/upload/dokumen/' . $get_file_surat->file_surat);
+					$this->output
+					->set_content_type('application/pdf')
+					->set_output($content_file_surat);
+				}
+			} else {
+				if (is_file('./desa/upload/dokumen/signed_' . $get_file_surat->file_surat)) {
+					$content_file_surat = file_get_contents('./desa/upload/dokumen/signed_' . $get_file_surat->file_surat);
+					$this->output
+						->set_content_type('application/pdf')
+						->set_output($content_file_surat);
+				}
+			}
+		}
+
+		
 	}
 }

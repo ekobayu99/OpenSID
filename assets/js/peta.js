@@ -1,46 +1,3 @@
-/**
- * File ini:
- *
- * Javascript untuk Modul Pemetaan di OpenSID
- *
- * assets/js/peta.js
- *
- */
-
-/**
- *
- * File ini bagian dari:
- *
- * OpenSID
- *
- * Sistem informasi desa sumber terbuka untuk memajukan desa
- *
- * Aplikasi dan source code ini dirilis berdasarkan lisensi GPL V3
- *
- * Hak Cipta 2009 - 2015 Combine Resource Institution (http://lumbungkomunitas.net/)
- * Hak Cipta 2016 - 2020 Perkumpulan Desa Digital Terbuka (https://opendesa.id)
- *
- * Dengan ini diberikan izin, secara gratis, kepada siapa pun yang mendapatkan salinan
- * dari perangkat lunak ini dan file dokumentasi terkait ("Aplikasi Ini"), untuk diperlakukan
- * tanpa batasan, termasuk hak untuk menggunakan, menyalin, mengubah dan/atau mendistribusikan,
- * asal tunduk pada syarat berikut:
- *
- * Pemberitahuan hak cipta di atas dan pemberitahuan izin ini harus disertakan dalam
- * setiap salinan atau bagian penting Aplikasi Ini. Barang siapa yang menghapus atau menghilangkan
- * pemberitahuan ini melanggar ketentuan lisensi Aplikasi Ini.
- *
- * PERANGKAT LUNAK INI DISEDIAKAN "SEBAGAIMANA ADANYA", TANPA JAMINAN APA PUN, BAIK TERSURAT MAUPUN
- * TERSIRAT. PENULIS ATAU PEMEGANG HAK CIPTA SAMA SEKALI TIDAK BERTANGGUNG JAWAB ATAS KLAIM, KERUSAKAN ATAU
- * KEWAJIBAN APAPUN ATAS PENGGUNAAN ATAU LAINNYA TERKAIT APLIKASI INI.
- *
- * @package	OpenSID
- * @author	Tim Pengembang OpenDesa
- * @copyright	Hak Cipta 2009 - 2015 Combine Resource Institution (http://lumbungkomunitas.net/)
- * @copyright	Hak Cipta 2016 - 2020 Perkumpulan Desa Digital Terbuka (https://opendesa.id)
- * @license	http://www.gnu.org/licenses/gpl.html	GPL V3
- * @link 	https://github.com/OpenSID/OpenSID
- */
-
 $(document).ready(function ()
 {
 	$('#resetme').click(function () {
@@ -874,8 +831,12 @@ function addPetaPoly(layerpeta)
 	return addPetaPoly;
 }
 
-function addPetaLine(layerpeta)
+function addPetaLine(layerpeta, jenis, tebal, warna)
 {
+	var jenis = jenis ?? 'solid';
+	var tebal = tebal ?? 1;
+	var warna = warna ?? '#A9AAAA';
+
 	layerpeta.on('pm:create', function (e) {
 		var type = e.layerType;
 		var layer = e.layer;
@@ -889,8 +850,9 @@ function addPetaLine(layerpeta)
 			latLngs = layer.getLatLngs();
 
 		var p = latLngs;
-		var polygon = L.polyline(p, { color: '#A9AAAA', weight: 4, opacity: 1, showMeasurements: true, measurementOptions: { showSegmentLength: false } })
-			.addTo(layerpeta)
+		var polygon = L.polyline(p, {
+			color: warna, weight: tebal, opacity: 1, dashArray: jenis_garis(jenis), showMeasurements: true, measurementOptions: { showSegmentLength: false }
+		}).addTo(layerpeta)
 
 		polygon.on('pm:edit', function (e) {
 			document.getElementById('path').value = getLatLong('Line', e.target).toString();
@@ -1037,9 +999,9 @@ function showCurrentMultiPolygon(wilayah, layerpeta, warna) {
 	return showCurrentPolygon;	
 }
 
-function showCurrentPoint(posisi1, layerpeta)
+function showCurrentPoint(posisi1, layerpeta, mode = true)
 {
-	var lokasi_kantor = L.marker(posisi1, { draggable: true }).addTo(layerpeta);
+	var lokasi_kantor = L.marker(posisi1, { draggable: mode }).addTo(layerpeta);
 	lokasi_kantor.on('dragend', function (e) {
 		$('#lat').val(e.target._latlng.lat);
 		$('#lng').val(e.target._latlng.lng);
@@ -1049,28 +1011,6 @@ function showCurrentPoint(posisi1, layerpeta)
 
 	layerpeta.on('zoomstart zoomend', function (e) {
 		$('#zoom').val(layerpeta.getZoom());
-	})
-
-	$('#lat').on("input", function (e) {
-		if (!$('#validasi1').valid())
-		{
-			$("#simpan_kantor").attr('disabled', true);
-			return;
-		} else {
-			$("#simpan_kantor").attr('disabled', false);
-		}
-	})
-
-	$('#lng').on("input", function (e) {
-		if (!$('#validasi1').valid())
-		{
-			$("#simpan_kantor").attr('disabled', true);
-			return;
-		}
-		else
-		{
-			$("#simpan_kantor").attr('disabled', false);
-		}
 	})
 
 	var geojson = lokasi_kantor.toGeoJSON();
@@ -1112,10 +1052,15 @@ function showCurrentPoint(posisi1, layerpeta)
 	return showCurrentPoint;
 }
 
-function showCurrentLine(wilayah, layerpeta)
+function showCurrentLine(wilayah, layerpeta, jenis, tebal, warna)
 {
-	var poligon_wilayah = L.polyline(wilayah, { showMeasurements: true, measurementOptions: { showSegmentLength: false } })
-		.addTo(layerpeta)
+	var jenis = jenis ?? 'solid';
+	var tebal = tebal ?? 1;
+	var warna = warna ?? '#A9AAAA';
+
+	var poligon_wilayah = L.polyline(wilayah, {
+		color: warna, weight: tebal, opacity: 1, dashArray: jenis_garis(jenis), showMeasurements: true, measurementOptions: { showSegmentLength: false } 
+	}).addTo(layerpeta)
 
 	poligon_wilayah.on('pm:edit', function (e) {
 		document.getElementById('path').value = getLatLong('Line', e.target).toString();
@@ -1368,8 +1313,9 @@ function set_marker_garis(marker, daftar_path, foto_garis) {
 			var garis_style = {
 				stroke: true,
 				opacity: 1,
-				weight: 3,
-				color: daftar[x].color
+				weight: daftar[x].tebal,
+				color: daftar[x].color,
+				dashArray: jenis_garis(daftar[x].jenis_garis)
 			}
 
 			marker.push(turf.lineString(coords, { content: content_garis, style: garis_style }));
@@ -1479,7 +1425,7 @@ function set_marker_lokasi_pembangunan(marker, daftar_path, path_icon, foto_loka
 				+ '<td>' + daftar[x].tahun_anggaran + '</td>'
 				+ '</tr>'
 				+ '</table>'
-				+ '<center><a href="' + link_progress + daftar[x].id + '" target="_blank" class="btn btn-flat bg-red btn-sm"><i class="fa fa-info"></i> Informasi Rinci</a>'
+				+ '<center><a href="' + link_progress + daftar[x].slug + '" target="_blank" class="btn btn-flat bg-red btn-sm"><i class="fa fa-info"></i> Selengkapnya</a>'
 				+ '</div>';
 
 			marker.push(turf.point([daftar[x].lng, daftar[x].lat], { content: content_lokasi, style: L.icon({ "iconSize": [16, 16], "iconUrl": path_icon }) }));
@@ -1973,4 +1919,17 @@ function get_path_import(coords, multi = false) {
 	}
 
 	return path;
+}
+
+function jenis_garis(jenis) {
+	if (jenis == 'dotted')  {
+		dashArray = '1,15';
+	} else if (jenis == 'dashed') {
+		dashArray = '10,15';
+	} else {
+		// solid
+		dashArray = '0';
+	}
+
+	return dashArray;
 }

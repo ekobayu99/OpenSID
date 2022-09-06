@@ -1,4 +1,4 @@
-											<div class="tab-pane <?php if ($act_tab==2): ?> active<?php endif ?>">
+											<div class="tab-pane <?php if ($act_tab == 2): ?> active<?php endif ?>">
 												<div class="row">
 													<div class="col-md-12">
 														<div class="box-header with-border">
@@ -53,7 +53,9 @@
 																									<button type="button" class="btn btn-info btn-flat"  id="file_browser"><i class="fa fa-search"></i> Browse</button>
 																								</span>
 																							</div>
-																							<p class="help-block"><input type="checkbox" name="hapus_data" value="hapus"></input>	Hapus data penduduk sebelum Impor</p>
+																							<?php if ($boleh_hapus_penduduk): ?>
+																								<p class="help-block"><input type="checkbox" name="hapus_data" value="hapus"></input>	Hapus data penduduk sebelum Impor</p>
+																							<?php endif; ?>
 																						</div>
 																						<div class="col-sm-12 col-md-5 col-lg-4">
 																							<a href="#" class="btn btn-block btn-success btn-sm" title=" Impor Data Penduduk Hapus data penduduk sebelum impor " onclick="document.getElementById('excell').submit();" data-toggle="modal" data-target="#loading"> <i class="fa fa-spin fa-refresh"></i> Impor Data Penduduk</a>
@@ -99,7 +101,7 @@
 														<h3 class="box-title"><strong>Impor Pengelompokan Data Rumah Tangga</strong></h3>
 													</div>
 													<div class="box-body">
-														<form action="<?=$form_action3?>" method="post" enctype="multipart/form-data" id="kelompok" class="form-horizontal">
+														<form action="<?= $form_action3 ?>" method="post" enctype="multipart/form-data" id="form_rtm" class="form-horizontal">
 															<div class="row">
 																<div class="col-sm-12">
 																	<p>Pengelompokan data penduduk yang sudah tersimpan di dalam database SID, sehingga terkelompokkan secara otomatis berdasarkan nomor urut rumah tangga: </p>
@@ -111,8 +113,7 @@
 																				<li>Pastikan format excel ber-ekstensi .xlsx (format Excel versi 2007 ke atas)</li>
 																				<li>Data yang dibutuhkan untuk impor dengan memenuhi aturan data, lihat tautan di bawah ini :
 																					<div class="timeline-footer row">
-																						<a class="btn btn-social btn-flat btn-info btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block margin" href="<?= base_url()?>assets/import/ATURANGRUP.xlsx" ><i class="fa fa-download"></i> Aturan Data</a>
-																						<a class="btn btn-social btn-flat btn-info btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block margin" href="<?= base_url()?>assets/import/ContohGrup.xlsx"><i class="fa fa-download"></i> Contoh Format</a>
+																						<a class="btn btn-social btn-flat btn-info btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block margin" href="<?= base_url('assets/import/FormatImporRTM.xlsx') ?>"><i class="fa fa-download"></i> Aturan dan Contoh Format</a>
 																					</div>
 																				</li>
 																			</ol>
@@ -127,19 +128,25 @@
 																						<label for="file" class="col-md-2 col-lg-3 control-label">Pilih File .xlsx:</label>
 																						<div class="col-sm-12 col-md-5 col-lg-5">
 																							<div class="input-group input-group-sm">
-																								<input type="text" class="form-control" id="file_path2" name="userfile">
-																								<input type="file" class="hidden" id="file2" name="userfile">
+																								<input type="text" class="form-control" id="file_path2" name="userfile"/>
+																								<input type="file" class="hidden" id="file2" name="userfile" accept=".xlsx"/>
 																								<span class="input-group-btn">
-																									<button type="button" class="btn btn-info btn-flat"  id="file_browser2"><i class="fa fa-search"></i> Browse</button>
+																									<button type="button" class="btn btn-info btn-flat" id="file_browser2"><i class="fa fa-search"></i> Browse</button>
 																								</span>
 																							</div>
+																							<p class="help-block"><input type="checkbox" name="hapus_rtm" value="hapus"></input>	Hapus data RTM sebelum Impor</p>
 																						</div>
 																						<div class="col-sm-12 col-md-5 col-lg-4">
-																							<a href="#" class="btn btn-block btn-success btn-sm"  title="Impor Data Pengelompokan Rumah Tangga" onclick="document.getElementById('kelompok').submit();" data-toggle="modal" data-target="#loading"> <i class="fa fa-spin fa-refresh"></i> Impor Data Pengelompokan Rumah Tangga</a>
+																							<a href="#" class="btn btn-block btn-success btn-sm"  title="Impor Data Pengelompokan Rumah Tangga" onclick="document.getElementById('form_rtm').submit();" data-toggle="modal" data-target="#loading"> <i class="fa fa-spin fa-refresh"></i> Impor Data Pengelompokan Rumah Tangga</a>
 																						</div>
 																					</div>
 																				</td>
 																			</tr>
+																			<?php if ($pesan_rtm = $this->session->flashdata('pesan_rtm')): ?>
+																				<tr>
+																					<td><?= $pesan_rtm ?></td>
+																				</tr>
+																			<?php endif; ?>
 																		</tbody>
 																	</table>
 																</div>
@@ -153,7 +160,7 @@
 																	<h4 class='modal-title' id='myModalLabel'>Proses Impor ......</h4>
 																</div>
 																<div class='modal-body'>
-																	Harap tunggu sampai proses impor selesai. Proses ini biasa memakan waktu antara 1 (satu) Menit hingga 45 Menit, tergantung kecepatan komputer dan juga jumlah data penduduk yang di masukkan.
+																	Harap tunggu sampai proses impor selesai. Proses ini biasa memakan waktu antara 1 (satu) Menit hingga 45 Menit, tergantung kecepatan komputer dan juga jumlah data yang di masukkan.
 																	<div class='text-center'>
 																		<img src='<?= base_url()?>assets/images/background/loading.gif'>
 																	</div>
@@ -162,9 +169,9 @@
 														</div>
 													</div>
 												</div>
-												<?php unset($_SESSION['sukses']);?>
-												<?php unset($_SESSION['baris']);?>
-												<?php unset($_SESSION['gagal']);?>
+												<?php unset($_SESSION['sukses']); ?>
+												<?php unset($_SESSION['baris']); ?>
+												<?php unset($_SESSION['gagal']); ?>
 											</div>
 										</div>
 									</div>

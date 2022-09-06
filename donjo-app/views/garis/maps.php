@@ -5,41 +5,6 @@
  * View di modul Pemetaan
  *
  * /donjo-app/views/garis/maps.php
- *
- */
-
-/**
- *
- * File ini bagian dari:
- *
- * OpenSID
- *
- * Sistem informasi desa sumber terbuka untuk memajukan desa
- *
- * Aplikasi dan source code ini dirilis berdasarkan lisensi GPL V3
- *
- * Hak Cipta 2009 - 2015 Combine Resource Institution (http://lumbungkomunitas.net/)
- * Hak Cipta 2016 - 2020 Perkumpulan Desa Digital Terbuka (https://opendesa.id)
- *
- * Dengan ini diberikan izin, secara gratis, kepada siapa pun yang mendapatkan salinan
- * dari perangkat lunak ini dan file dokumentasi terkait ("Aplikasi Ini"), untuk diperlakukan
- * tanpa batasan, termasuk hak untuk menggunakan, menyalin, mengubah dan/atau mendistribusikan,
- * asal tunduk pada syarat berikut:
-
- * Pemberitahuan hak cipta di atas dan pemberitahuan izin ini harus disertakan dalam
- * setiap salinan atau bagian penting Aplikasi Ini. Barang siapa yang menghapus atau menghilangkan
- * pemberitahuan ini melanggar ketentuan lisensi Aplikasi Ini.
-
- * PERANGKAT LUNAK INI DISEDIAKAN "SEBAGAIMANA ADANYA", TANPA JAMINAN APA PUN, BAIK TERSURAT MAUPUN
- * TERSIRAT. PENULIS ATAU PEMEGANG HAK CIPTA SAMA SEKALI TIDAK BERTANGGUNG JAWAB ATAS KLAIM, KERUSAKAN ATAU
- * KEWAJIBAN APAPUN ATAS PENGGUNAAN ATAU LAINNYA TERKAIT APLIKASI INI.
- *
- * @package OpenSID
- * @author  Tim Pengembang OpenDesa
- * @copyright Hak Cipta 2009 - 2015 Combine Resource Institution (http://lumbungkomunitas.net/)
- * @copyright Hak Cipta 2016 - 2020 Perkumpulan Desa Digital Terbuka (https://opendesa.id)
- * @license http://www.gnu.org/licenses/gpl.html  GPL V3
- * @link  https://github.com/OpenSID/OpenSID
  */
 ?>
 
@@ -69,7 +34,7 @@
 		<h1>Peta <?= $garis['nama']?></h1>
 		<ol class="breadcrumb">
 			<li><a href="<?= site_url('hom_sid')?>"><i class="fa fa-home"></i> Home</a></li>
-			<li><a href="<?= site_url("garis")?>"> Pengaturan garis </a></li>
+			<li><a href="<?= site_url('garis')?>"> Pengaturan garis </a></li>
 			<li class="active">Peta <?= $garis['nama']?></li>
 		</ol>
 	</section>
@@ -82,19 +47,22 @@
               <div class="row">
                 <div class="col-sm-12">
                   <div id="map">
-                    <input type="hidden" id="path" name="path" value="<?= $garis['path']?>">
-                    <input type="hidden" name="id" id="id"  value="<?= $garis['id']?>"/>
+                    <input type="hidden" id="path" name="path" value="<?= $garis['path']; ?>">
+                    <input type="hidden" name="id" id="id"  value="<?= $garis['id']; ?>"/>
                   </div>
                 </div>
               </div>
             </div>
             <div class='box-footer'>
               <div class='col-xs-12'>
-                <a href="<?= site_url("garis")?>" class="btn btn-social btn-flat bg-purple btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Kembali"><i class="fa fa-arrow-circle-o-left"></i> Kembali</a>
+                <a href="<?= site_url('garis')?>" class="btn btn-social btn-flat bg-purple btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Kembali"><i class="fa fa-arrow-circle-o-left"></i> Kembali</a>
+                <?php if ($this->CI->cek_hak_akses('u')): ?>
+                  <a href="#" data-href="<?= site_url("garis/kosongkan/{$garis['id']}")?>" class="btn btn-social btn-flat bg-maroon btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" title="Kosongkan Garis" data-toggle="modal" data-target="#confirm-status" data-body="Apakah yakin akan mengosongkan garis wilayah ini?"><i class="fa fa fa-trash-o"></i>Kosongkan</a>
+                <?php endif; ?>
                 <a href="#" class="btn btn-social btn-flat btn-success btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block" download="OpenSID.gpx" id="exportGPX"><i class='fa fa-download'></i> Export ke GPX</a>
 								<button type='reset' class='btn btn-social btn-flat btn-danger btn-sm' id="resetme"><i class='fa fa-times'></i> Reset</button>
                 <?php if ($this->CI->cek_hak_akses('u')): ?>
-  								<button type='submit' class='btn btn-social btn-flat btn-info btn-sm pull-right' id="simpan_kantor"><i class='fa fa-check'></i> Simpan</button>
+                  <button type='submit' class='btn btn-social btn-flat btn-info btn-sm pull-right' id="simpan_kantor"><i class='fa fa-check'></i> Simpan</button>
                 <?php endif; ?>
               </div>
             </div>
@@ -104,21 +72,25 @@
     </div>
   </section>
 </div>
-
+<?php $this->load->view('global/konfirmasi'); ?>
 <script>
   var infoWindow;
   window.onload = function()
   {
-  	<?php if (!empty($desa['lat']) && !empty($desa['lng'])): ?>
-  		var posisi = [<?=$desa['lat'].",".$desa['lng']?>];
-  		var zoom = <?=$desa['zoom'] ?: 18?>;
-  	<?php else: ?>
-  		var posisi = [-1.0546279422758742,116.71875000000001];
-  		var zoom = 18;
-  	<?php endif; ?>
+    <?php if (! empty($desa['lat']) && ! empty($desa['lng'])): ?>
+      var posisi = [<?=$desa['lat'] . ',' . $desa['lng']?>];
+      var zoom = <?= $desa['zoom'] ?? 18 ?>;
+    <?php else: ?>
+      var posisi = [-1.0546279422758742,116.71875000000001];
+      var zoom = 18;
+    <?php endif; ?>
+
+    var jenis = "<?= $garis['jenis_garis']; ?>";
+    var tebal = "<?= $garis['tebal']; ?>";
+    var warna = "<?= $garis['color']; ?>";
 
   	//Inisialisasi tampilan peta
-  	var peta_garis = L.map('map').setView(posisi, zoom);
+    var peta_garis = L.map('map').setView(posisi, zoom);
 
     //1. Menampilkan overlayLayers Peta Semua Wilayah
     var marker_desa = [];
@@ -128,27 +100,27 @@
     var marker_persil = [];
 
     //OVERLAY WILAYAH DESA
-    <?php if (!empty($desa['path'])): ?>
-      set_marker_desa(marker_desa, <?=json_encode($desa)?>, "<?=ucwords($this->setting->sebutan_desa).' '.$desa['nama_desa']?>", "<?= favico_desa()?>");
+    <?php if (! empty($desa['path'])): ?>
+      set_marker_desa(marker_desa, <?=json_encode($desa)?>, "<?=ucwords($this->setting->sebutan_desa) . ' ' . $desa['nama_desa']?>", "<?= favico_desa()?>");
     <?php endif; ?>
 
     //OVERLAY WILAYAH DUSUN
-    <?php if (!empty($dusun_gis)): ?>
+    <?php if (! empty($dusun_gis)): ?>
       set_marker_multi(marker_dusun, '<?=addslashes(json_encode($dusun_gis))?>', '#FFFF00', '<?=ucwords($this->setting->sebutan_dusun)?>', 'dusun');
     <?php endif; ?>
 
     //OVERLAY WILAYAH RW
-    <?php if (!empty($rw_gis)): ?>
+    <?php if (! empty($rw_gis)): ?>
       set_marker(marker_rw, '<?=addslashes(json_encode($rw_gis))?>', '#8888dd', 'RW', 'rw');
     <?php endif; ?>
 
     //OVERLAY WILAYAH RT
-    <?php if (!empty($rt_gis)): ?>
+    <?php if (! empty($rt_gis)): ?>
       set_marker(marker_rt, '<?=addslashes(json_encode($rt_gis))?>', '#008000', 'RT', 'rt');
     <?php endif; ?>
 
     //Menampilkan overlayLayers Peta Semua Wilayah
-    <?php if (!empty($wil_atas['path'])): ?>
+    <?php if (! empty($wil_atas['path'])): ?>
       var overlayLayers = overlayWil(marker_desa, marker_dusun, marker_rw, marker_rt, marker_persil,"<?=ucwords($this->setting->sebutan_desa)?>", "<?=ucwords($this->setting->sebutan_dusun)?>");
     <?php else: ?>
       var overlayLayers = {};
@@ -158,9 +130,9 @@
     var baseLayers = getBaseLayers(peta_garis, '<?=$this->setting->mapbox_key?>');
 
     //Menampilkan Peta wilayah yg sudah ada
-    <?php if (!empty($garis['path'])): ?>
+    <?php if (! empty($garis['path'])): ?>
       var wilayah = <?=$garis['path']?>;
-      showCurrentLine(wilayah, peta_garis);
+      showCurrentLine(wilayah, peta_garis, jenis, tebal, warna);
     <?php endif; ?>
 
     //Menambahkan zoom scale ke peta
@@ -170,7 +142,7 @@
     peta_garis.pm.addControls(editToolbarLine());
 
     //Menambahkan Peta wilayah
-    addPetaLine(peta_garis);
+    addPetaLine(peta_garis, jenis, tebal, warna);
 
     <?php if ($this->CI->cek_hak_akses('u')): ?>
       //Export/Import Peta dari file GPX
@@ -187,7 +159,7 @@
     hapusPeta(peta_garis);
 
     // Menampilkan OverLayer Area, Garis, Lokasi plus Lokasi Pembangunan
-		var layerCustom = tampilkan_layer_area_garis_lokasi_plus(peta_garis, '<?= addslashes(json_encode($all_area)) ?>', '<?= addslashes(json_encode($all_garis)) ?>', '<?= addslashes(json_encode($all_lokasi)) ?>', '<?= addslashes(json_encode($all_lokasi_pembangunan)) ?>', '<?= base_url() . LOKASI_SIMBOL_LOKASI ?>', "<?= favico_desa()?>", '<?= base_url() . LOKASI_FOTO_AREA ?>', '<?= base_url() . LOKASI_FOTO_GARIS ?>', '<?= base_url() . LOKASI_FOTO_LOKASI ?>', '<?= base_url() . LOKASI_GALERI ?>', '<?= site_url("pembangunan/detail/")?>');
+		var layerCustom = tampilkan_layer_area_garis_lokasi_plus(peta_garis, '<?= addslashes(json_encode($all_area)) ?>', '<?= addslashes(json_encode($all_garis)) ?>', '<?= addslashes(json_encode($all_lokasi)) ?>', '<?= addslashes(json_encode($all_lokasi_pembangunan)) ?>', '<?= base_url() . LOKASI_SIMBOL_LOKASI ?>', "<?= favico_desa()?>", '<?= base_url() . LOKASI_FOTO_AREA ?>', '<?= base_url() . LOKASI_FOTO_GARIS ?>', '<?= base_url() . LOKASI_FOTO_LOKASI ?>', '<?= base_url() . LOKASI_GALERI ?>', '<?= site_url('pembangunan/')?>');
 
     L.control.layers(baseLayers, overlayLayers, {position: 'topleft', collapsed: true}).addTo(peta_garis);
     L.control.groupedLayers('', layerCustom, {groupCheckboxes: true, position: 'topleft', collapsed: true}).addTo(peta_garis);

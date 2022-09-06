@@ -4,7 +4,7 @@
 		<title>Data Wilayah</title>
 
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<?php if (is_file(LOKASI_LOGO_DESA . "favicon.ico")): ?>
+		<?php if (is_file(LOKASI_LOGO_DESA . 'favicon.ico')): ?>
 			<link rel="shortcut icon" href="<?= base_url()?><?= LOKASI_LOGO_DESA?>favicon.ico" />
 		<?php else: ?>
 			<link rel="shortcut icon" href="<?= base_url()?>favicon.ico" />
@@ -25,7 +25,6 @@
 				<div class="header" align="center">
 					<label align="left"><?= get_identitas()?></label>
 					<h3> Tabel Data Kependudukan berdasarkan Populasi Per Wilayah </h3>
-					<h4> <?= ucwords($this->setting->sebutan_kabupaten)?> <?= $desa['desa']['nama_kabupaten']?>, <?= ucwords($this->setting->sebutan_kecamatan)?> <?= $desa['desa']['nama_kecamatan']?>, <?= ucwords($this->setting->sebutan_desa)?> <?= $desa['desa']['nama_desa']?></h4>
 				</div>
 				<br>
 				<table class="border thick">
@@ -74,7 +73,7 @@
 						</tr>
 					</tbody>
 				</table>
-				<?php $this->load->view("global/blok_ttd_pamong.php", ['total_col' => 12, 'spasi_kiri' => 2, 'spasi_tengah' => 6]); ?>
+				<?php $this->load->view('global/blok_ttd_pamong.php', ['total_col' => 12, 'spasi_kiri' => 2, 'spasi_tengah' => 6]); ?>
 			</div>
 		</div>
 	</body>

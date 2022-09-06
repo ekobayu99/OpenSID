@@ -20,7 +20,9 @@
 
                                     <div class="row">
                                         <div class="col-sm-6">
-                                            <a href="<?= site_url('kp_suratku_surat_keluar/add'); ?>" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-plus"></i> Kirim Surat</a>
+                                            <?php if ($this->session->userdata('grup') == 1): ?>
+                                            <a href="<?= site_url('kp_suratku_surat_keluar/add'); ?>" class="btn btn-primary btn-flat"><i class="fa fa-paper-plane"></i> Kirim Surat Ke Aplikasi SuratKu</a>
+                                            <?php endif ?>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="box-tools">
@@ -33,7 +35,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                        
+
                                     <div class="row">
                                         <div class="col-sm-12">
                                             <?= $this->session->flashdata('notif'); ?>
@@ -58,8 +60,8 @@
                                                                     <td><?= $no; ?></td>
                                                                     <td>
                                                                         <?php if ($data['is_setuju_pembuat'] == 0 && $data['is_pemeriksa_setuju'] == 0) : ?>
-                                                                            <a href="#" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-edit"></i> Edit</a>
-                                                                            <a href="#" class="btn btn-danger btn-sm btn-flat"><i class="fa fa-times"></i> Hapus</a>
+                                                                            <a href="<?= site_url('kp_suratku_surat_keluar/edit/' . $data['id_surat_keluar']); ?>" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-edit"></i> Edit</a>
+                                                                            <!-- <a href="#" class="btn btn-danger btn-sm btn-flat"><i class="fa fa-times"></i> Hapus</a> -->
                                                                             <a href="<?= site_url('kp_suratku_surat_keluar/to_pemeriksa/' . $data['id_surat_keluar']); ?>" class="btn btn-warning btn-sm btn-flat"><i class="fa fa-send"></i> Kirim Ke Pemeriksa</a>
                                                                         <?php elseif ($data['is_setuju_pembuat'] == 1 && $data['is_pemeriksa_setuju'] == 0 && $data['pemeriksa_id'] == $this->session->userdata('user')) : ?>
                                                                             <a href="#" class="btn btn-warning btn-sm btn-flat" onclick="return detil_surat(<?= $data['id_surat_keluar']; ?>);"><i class=" fa fa-spin fa-spinner"></i> Periksa Surat</a>
@@ -73,7 +75,7 @@
                                                                             <a href="#" title="Dikirim pada <?= $data['tgl_kirim']; ?>" class="btn btn-success btn-sm btn-flat"><i class=" fa fa-check"></i> Terkirim</a>
                                                                         <?php endif ?>
 
-                                                                        <!-- <a href="#" class="btn btn-danger btn-sm btn-flat" onclick="return detil_surat(<?= $data['id_surat_keluar'] ?>);"><i class=" fa fa-spin fa-spinner"></i> Menunggu Disetujui</a> -->
+                                                                        <a href="<?= site_url('kp_suratku_surat_keluar/detil/' . $data['id_surat_keluar']); ?>" class="btn btn-danger btn-sm btn-flat"><i class=" fa fa-search"></i> Lihat Surat</a>
                                                                     </td>
                                                                     <td><?= $data['nomor_urut']; ?> </td>
                                                                     <td><?= $data['nomor_surat']; ?></td>

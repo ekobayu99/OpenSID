@@ -66,8 +66,6 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 	{
 		$user_id = intval($this->session->userdata('user'));
 		
-		// echo json_encode($this->session->userdata());
-		// exit;
 
 		$data['main'] = $this->db
 			->where('surat_keluar.created_by', $this->session->userdata('user'))
@@ -138,6 +136,77 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 		$this->render('kp/suratku/surat_keluar_form', $data);
 	}
 
+	public function edit($id_surat_keluar)
+	{
+		$config = $this->config_model->get_data();
+		$kode_desa = $config['kode_desa'];
+		$username = '003' . $kode_desa;
+
+		$get_list_opd = $this->suratku_model->get_list_opd($username, 2022);
+		$get_klasifikasi_surat = $this->klasifikasi_model->list_kode();
+
+
+		$last_surat = $this->penomoran_surat_model->get_surat_terakhir('surat_keluar');
+		$data['nomor_urut'] = $last_surat['no_surat'] + 1;
+
+		$p_list_opd = [];
+		$p_list_klasifikasi = ['' => '-'];
+		if (!empty($get_list_opd['data'])) {
+			foreach ($get_list_opd['data'] as $opd) {
+				$username_pimpinan = $opd['nip_pimpinan_asli'];
+				if (empty($opd['nip_pimpinan_asli'])) {
+					$username_pimpinan = $opd['nip_plt'];
+				}
+				$idx = $opd['instansi_id'] . "-" . $username_pimpinan;
+				$p_list_opd[$idx] = $opd['instansi_nama'];
+			}
+		}
+
+		if (!empty($get_klasifikasi_surat)) {
+			foreach ($get_klasifikasi_surat as $klasifikasi) {
+				$idx = $klasifikasi['kode'];
+				$p_list_klasifikasi[$idx] = $klasifikasi['kode'] . " - " . $klasifikasi['nama'];
+			}
+		}
+
+		$list_user_penandatangan = $this->db
+		->where('id_grup', 6)
+		->get('user')->result_array();
+
+
+		$data['p_list_user_penandatangan'] = ['' => '-'];
+		if (!empty($list_user_penandatangan)) {
+			foreach ($list_user_penandatangan as $lup) {
+				$idx = $lup['id'];
+				$data['p_list_user_penandatangan'][$idx] = $lup['username'] . " - " . $lup['nama'];
+			}
+		}
+
+		$data['main'] = [];
+		$data['p_list_opd'] = $p_list_opd;
+		$data['p_list_klasifikasi'] = $p_list_klasifikasi;
+
+		$data['detil_surat_keluar'] = $this->db 
+		->where('id', $id_surat_keluar)
+		->get('surat_keluar')->row();
+
+
+		$data['detil_surat_keluar_tujuan'] = $this->db
+		->where('id_surat_keluar', $id_surat_keluar)
+		->get('akp_surat_keluar_detil')->row();
+		
+		$data['detil_surat_keluar_pemeriksa'] = $this->db
+		->where('id_surat_keluar', $id_surat_keluar)
+		->get('akp_surat_keluar_detil_surat')->row();
+
+		log_message('error', $this->db->last_query());
+
+		// echo var_dump($data['detil_surat_keluar_tujuan']);
+		// exit;
+
+		$this->render('kp/suratku/surat_keluar_form_edit', $data);
+	}
+
 	public function insert()
 	{
 		
@@ -202,6 +271,88 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 			}
 		} else {
 			redirect('kp_suratku_surat_keluar/add');
+		}
+	}
+
+	public function update()
+	{
+
+		$pdata = $this->input->post(NULL);
+		$pdata['tanggal_surat'] = strip_tags($pdata['tanggal_surat']);
+		// // Bersihkan data
+		$pdata['nomor_surat'] = nomor_surat_keputusan(strip_tags($pdata['nomor_surat']));
+		$pdata['isi_singkat'] = strip_tags($pdata['isi_singkat']);
+
+		$id_surat = intval($pdata['id_surat']);
+
+
+		$this->load->helper('string');
+		$this->load->library('upload');
+
+		$uploadConfig = array(
+			'upload_path' => './desa/upload/surat_keluar/',
+			'allowed_types' => 'pdf',
+			'max_size' => 2048,
+			'encrypt_name' => true,
+		);
+
+		$insert_data = [
+			'nomor_urut' => $pdata['nomor_urut'],
+			'nomor_surat' => $pdata['nomor_surat'],
+			'kode_surat' => $pdata['kode_surat'],
+			'tanggal_surat' => $pdata['tanggal_surat'],
+			'isi_singkat' => $pdata['isi_singkat'],
+			'updated_at' => date('Y-m-d H:i:s'),
+			'updated_by' => $this->session->user,
+		];
+
+
+		$this->upload->initialize($uploadConfig);
+
+		if ($this->upload->do_upload('satuan')) {
+			$upload_data = $this->upload->data();
+			$file_name = $upload_data['file_name'];
+			$insert_data['berkas_scan'] = $file_name;
+
+			// hapus file lama 
+			$get_file_lama = $this->db 
+			->where('id', $id_surat)
+			->get('surat_keluar')->row();
+
+			@unlink('./desa/upload/surat_keluar/'.$get_file_lama->berkas_scan);
+
+		}
+
+		$this->db->trans_begin();
+		$update = $this->db->where('id', $id_surat)->update('surat_keluar', $insert_data);
+
+
+		// hapus data tujuan lama
+		$this->db 
+		->where('id_surat_keluar', $id_surat)
+		->delete('akp_surat_keluar_detil'); 
+
+		$insert_detil = $this->db->insert('akp_surat_keluar_detil', [
+			'id_surat_keluar' => $id_surat,
+			'kode_tambahan' => $pdata['opd_tujuan'],
+			'teks' => 'OPD Suratku',
+		]);
+
+		$insert_detil_surat = $this->db
+		->where('id_surat_keluar', $id_surat)
+		->update('akp_surat_keluar_detil_surat', [
+			'pemeriksa_id' => $pdata['pemeriksa'],
+			'is_setuju_pembuat' => 0,
+			'is_pemeriksa_setuju' => 0,
+			'is_kirim' => 0,
+		]);
+
+		if ($this->db->trans_status() === false) {
+			$this->session->set_flashdata('info', '<div class="alert alert-danger">Terjadi kesalahan</div>');
+			redirect('kp_suratku_surat_keluar/edit/'.$id_surat);
+		} else {
+			$this->db->trans_commit();
+			redirect('kp_suratku_surat_keluar');
 		}
 	}
 
@@ -314,7 +465,7 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 					'tgl_kirim'=>date('Y-m-d H:i:s'),
 				]);
 
-				$this->session->set_flashdata('notif', '<div class="alert alert-success">'.$send_to_suratku['message'].'</div>');
+				$this->session->set_flashdata('notif', '<div class="alert alert-success" style="margin-top: 5px">'.$send_to_suratku['message'].'</div>');
 				redirect('kp_suratku_surat_keluar');
 			}
 		
@@ -333,5 +484,54 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 		// exit;
 
 		// redirect('kp_suratku_surat_keluar');
+	}
+
+	public function detil($id_surat_keluar)
+	{
+		$detil_surat_keluar = $this->db 
+		->where('id', $id_surat_keluar)
+		->get('surat_keluar')->row();
+
+		$detil_tujuan_surat = $this->db 
+		->where('id_surat_keluar', $id_surat_keluar)
+		->get('akp_surat_keluar_detil')->result();
+		
+		$detil_status_kirim = $this->db 
+		->where('akp_surat_keluar_detil_surat.id_surat_keluar', $id_surat_keluar)
+		->join('user', 'akp_surat_keluar_detil_surat.pemeriksa_id = user.id')
+		->select(
+			'
+			akp_surat_keluar_detil_surat.*,
+			user.nama AS nama_pemeriksa
+			'
+		)
+		->get('akp_surat_keluar_detil_surat')->row();
+
+
+
+		$data['main'] = [];
+		$data['surat_keluar'] = $detil_surat_keluar;
+		$data['detil_tujuan_surat'] = $detil_tujuan_surat;
+		$data['detil_status_kirim'] = $detil_status_kirim;
+
+		$this->render('kp/suratku/surat_keluar_detil', $data);
+	}
+
+	public function lihat_file_surat_keluar($id_surat_keluar)
+	{
+		$folder_surat = './desa/upload/surat_keluar/';
+
+		$get_file_surat = $this->db 
+		->where('id', $id_surat_keluar)
+		->get('surat_keluar')->row();
+
+		if (is_file($folder_surat.$get_file_surat->berkas_scan)) {
+			$content_file_surat = file_get_contents($folder_surat . $get_file_surat->berkas_scan);
+			$this->output
+				->set_content_type('application/pdf')
+				->set_output($content_file_surat);
+		} else {
+			echo "berkas tidak ditemukan";
+		}
 	}
 }
