@@ -65,15 +65,23 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 	public function index()
 	{
 		$user_id = intval($this->session->userdata('user'));
+		$level = intval($this->session->userdata('grup'));
 		
-
-		$data['main'] = $this->db
+		$get_data_main = $this->db
 			->where('surat_keluar.created_by', $this->session->userdata('user'))
 			->or_group_start()
 			->where('akp_surat_keluar_detil_surat.pemeriksa_id', $this->session->userdata('user'))
 			->where('akp_surat_keluar_detil_surat.is_pemeriksa_setuju', 0)
 			->group_end()
-			->join('akp_surat_keluar_detil_surat', 'surat_keluar.id = akp_surat_keluar_detil_surat.id_surat_keluar')
+			->join('akp_surat_keluar_detil_surat', 'surat_keluar.id = akp_surat_keluar_detil_surat.id_surat_keluar');
+
+		if ($level == 6) {
+			$get_data_main->where('is_setuju_pembuat', 1)
+			->where('is_pemeriksa_setuju', 0);
+		}
+
+
+		$data['main'] = $get_data_main
 			->get('surat_keluar')
 			->result_array();
 
@@ -104,7 +112,7 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 				if (empty($opd['nip_pimpinan_asli'])) {
 					$username_pimpinan = $opd['nip_plt'];
 				}
-				$idx = $opd['instansi_id']."-".$username_pimpinan;
+				$idx = $opd['instansi_id']."-". $username_pimpinan . "--" . $opd['instansi_nama'];
 				$p_list_opd[$idx] = $opd['instansi_nama'];
 			}
 		}
@@ -226,6 +234,11 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 			'encrypt_name'=>true,
 		);
 
+		if (count($pdata['opd_tujuan']) < 1) {
+			$this->session->set_flashdata('info', '<div class="alert alert-danger">Pilih minimal 1 tujuan surat</div>');
+			redirect('kp_suratku_surat_keluar/add');
+		}
+
 		$this->upload->initialize($uploadConfig);
 		
 		if ($this->upload->do_upload('satuan')) {
@@ -248,11 +261,21 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 			$insert = $this->db->insert('surat_keluar', $insert_data);
 			$insert_id = $this->db->insert_id();
 
-			$insert_detil = $this->db->insert('akp_surat_keluar_detil', [
-				'id_surat_keluar' => $insert_id,
-				'kode_tambahan' => $pdata['opd_tujuan'],
-				'teks' => 'OPD Suratku',
-			]);
+			foreach ($pdata['opd_tujuan'] as $opd_tujuan) {
+				$pc_opd_tujuan = explode("--", $opd_tujuan);
+
+				if (count($pc_opd_tujuan) == 2) {
+					$instansi_kode = $pc_opd_tujuan[0];
+					$instansi_nama = $pc_opd_tujuan[1];
+
+					$insert_detil = $this->db->insert('akp_surat_keluar_detil', [
+						'id_surat_keluar' => $insert_id,
+						'kode_tambahan' => $instansi_kode,
+						'teks' => $instansi_nama,
+					]);
+				}
+
+			}
 
 			$insert_detil_surat = $this->db->insert('akp_surat_keluar_detil_surat', [
 				'id_surat_keluar' => $insert_id,
@@ -436,7 +459,7 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 
 			$pdata = [
 				'perihal' => $get_detil_surat_keluar->isi_singkat,
-				'opd_tujuan' => $tujuan,
+				// 'opd_tujuan' => $tujuan,
 				'deskripsi' => $get_detil_surat_keluar->isi_singkat,
 				'klasifikasi' => $get_detil_surat_keluar->kode_surat,
 				'nomor_asal' => $get_detil_surat_keluar->nomor_surat,
@@ -454,6 +477,8 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 				}
 			}
 
+			// echo json_encode($pdata);
+			// exit;
 			
 			$send_to_suratku = $this->suratku_model->kirim_surat($username, date('Y'), $pdata);
 			
@@ -463,6 +488,7 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 				->update('akp_surat_keluar_detil_surat', [
 					'is_kirim'=>1,
 					'tgl_kirim'=>date('Y-m-d H:i:s'),
+					'id_surat_suratku'=>$send_to_suratku['id_surat'],
 				]);
 
 				$this->session->set_flashdata('notif', '<div class="alert alert-success" style="margin-top: 5px">'.$send_to_suratku['message'].'</div>');

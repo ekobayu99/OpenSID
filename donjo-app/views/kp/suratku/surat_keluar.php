@@ -64,7 +64,7 @@
                                                                             <!-- <a href="#" class="btn btn-danger btn-sm btn-flat"><i class="fa fa-times"></i> Hapus</a> -->
                                                                             <a href="<?= site_url('kp_suratku_surat_keluar/to_pemeriksa/' . $data['id_surat_keluar']); ?>" class="btn btn-warning btn-sm btn-flat"><i class="fa fa-send"></i> Kirim Ke Pemeriksa</a>
                                                                         <?php elseif ($data['is_setuju_pembuat'] == 1 && $data['is_pemeriksa_setuju'] == 0 && $data['pemeriksa_id'] == $this->session->userdata('user')) : ?>
-                                                                            <a href="#" class="btn btn-warning btn-sm btn-flat" onclick="return detil_surat(<?= $data['id_surat_keluar']; ?>);"><i class=" fa fa-spin fa-spinner"></i> Periksa Surat</a>
+                                                                            <a href="<?=site_url('kp_suratku_surat_keluar/detil/'.$data['id_surat_keluar']);?>" class="btn btn-warning btn-sm btn-flat"><i class=" fa fa-spin fa-spinner"></i> Periksa Surat</a>
                                                                         <?php elseif ($data['is_setuju_pembuat'] == 1 && $data['is_pemeriksa_setuju'] == 0 && $data['pemeriksa_id'] != $this->session->userdata('user')) : ?>
                                                                             <a href="#" class="btn btn-warning btn-sm btn-flat"><i class=" fa fa-spin fa-spinner"></i> Sedang diperiksa</a>
                                                                         <?php endif ?>
@@ -74,8 +74,10 @@
                                                                         <?php if ($data['is_kirim'] == 1) : ?>
                                                                             <a href="#" title="Dikirim pada <?= $data['tgl_kirim']; ?>" class="btn btn-success btn-sm btn-flat"><i class=" fa fa-check"></i> Terkirim</a>
                                                                         <?php endif ?>
-
-                                                                        <a href="<?= site_url('kp_suratku_surat_keluar/detil/' . $data['id_surat_keluar']); ?>" class="btn btn-danger btn-sm btn-flat"><i class=" fa fa-search"></i> Lihat Surat</a>
+                                                                        
+                                                                        <?php if ($data['pemeriksa_id'] != $this->session->userdata('user')) : ?>
+                                                                            <a href="<?= site_url('kp_suratku_surat_keluar/detil/' . $data['id_surat_keluar']); ?>" class="btn btn-danger btn-sm btn-flat"><i class=" fa fa-search"></i> Lihat Surat</a>
+                                                                        <?php endif ?>
                                                                     </td>
                                                                     <td><?= $data['nomor_urut']; ?> </td>
                                                                     <td><?= $data['nomor_surat']; ?></td>

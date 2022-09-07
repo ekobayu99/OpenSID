@@ -13,3 +13,6 @@ CREATE TABLE `ref_penduduk_hamil` (
 
 INSERT INTO `ref_penduduk_hamil` (`id`, `nama`) VALUES (1, 'Hamil');
 INSERT INTO `ref_penduduk_hamil` (`id`, `nama`) VALUES (2, 'Tidak Hamil');
+
+ALTER TABLE `akp_surat_keluar_detil_surat`
+	ADD COLUMN `id_surat_suratku` VARCHAR(50) NULL DEFAULT NULL AFTER `tgl_setuju_pembuat`;
