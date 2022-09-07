@@ -5,7 +5,7 @@ CREATE TABLE `akp_surat_keluar_detil` (
 	`teks` VARCHAR(250) NOT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `id_surat_keluar` (`id_surat_keluar`) USING BTREE,
-	CONSTRAINT `akp_surat_keluar_detil_ibfk_1` FOREIGN KEY (`id_surat_keluar`) REFERENCES `opensid_kranggan`.`surat_keluar` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `akp_surat_keluar_detil_ibfk_1` FOREIGN KEY (`id_surat_keluar`) REFERENCES `surat_keluar` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COMMENT='untuk menyimpan tujuan surat keluar'
 COLLATE='latin1_swedish_ci'
@@ -25,7 +25,7 @@ CREATE TABLE `akp_surat_keluar_detil_surat` (
 	`id_surat_suratku` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`id`) USING BTREE,
 	INDEX `id_surat_keluar` (`id_surat_keluar`) USING BTREE,
-	CONSTRAINT `akp_surat_keluar_detil_surat_ibfk_1` FOREIGN KEY (`id_surat_keluar`) REFERENCES `opensid_kranggan`.`surat_keluar` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	CONSTRAINT `akp_surat_keluar_detil_surat_ibfk_1` FOREIGN KEY (`id_surat_keluar`) REFERENCES `surat_keluar` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
