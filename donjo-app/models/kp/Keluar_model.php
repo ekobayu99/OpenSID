@@ -107,8 +107,8 @@
 			->join('tweb_desa_pamong AS s', 'u.id_pamong = s.pamong_id', 'left')
 			->join('tweb_penduduk AS p', 's.id_pend = p.id', 'left')
 			->join('user AS w', 'u.id_user = w.id', 'left')
-            ->join('akp_log_surat_detil AS l', 'u.id = l.id_log_surat')
-            ->join('akp_surat_tte AS t', 'u.id = t.id_log_surat');
+            ->join('akp_log_surat_detil AS l', 'u.id = l.id_log_surat', 'left')
+            ->join('akp_surat_tte AS t', 'u.id = t.id_log_surat', 'left');
 		$this->search_sql();
 		$this->tahun_sql();
 		$this->bulan_sql();

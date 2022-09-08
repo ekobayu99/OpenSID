@@ -257,12 +257,12 @@ class Kp_keluar extends Admin_Controller
 				->where('log_surat.id', $id_log_surat)
 				->join('tweb_penduduk', 'log_surat.id_pend = tweb_penduduk.id')
 				->join('tweb_desa_pamong', 'log_surat.id_pamong = tweb_desa_pamong.pamong_id')
-				->join('tweb_penduduk_sex', 'tweb_penduduk.sex = tweb_penduduk_sex.id')
-				->join('tweb_penduduk_agama', 'tweb_penduduk.agama_id = tweb_penduduk_agama.id')
-				->join('tweb_penduduk_kawin', 'tweb_penduduk.status_kawin = tweb_penduduk_kawin.id')
-				->join('tweb_penduduk_pendidikan_kk', 'tweb_penduduk.pendidikan_kk_id = tweb_penduduk_pendidikan_kk.id')
-				->join('tweb_penduduk_pekerjaan', 'tweb_penduduk.pekerjaan_id = tweb_penduduk_pekerjaan.id')
-				->join('tweb_penduduk_warganegara', 'tweb_penduduk.warganegara_id = tweb_penduduk_warganegara.id')
+				->join('tweb_penduduk_sex','tweb_penduduk.sex = tweb_penduduk_sex.id', 'left')
+				->join('tweb_penduduk_agama','tweb_penduduk.agama_id = tweb_penduduk_agama.id', 'left')
+				->join('tweb_penduduk_kawin', 'tweb_penduduk.status_kawin = tweb_penduduk_kawin.id', 'left')
+				->join('tweb_penduduk_pendidikan_kk','tweb_penduduk.pendidikan_kk_id = tweb_penduduk_pendidikan_kk.id', 'left')
+				->join('tweb_penduduk_pekerjaan','tweb_penduduk.pekerjaan_id = tweb_penduduk_pekerjaan.id', 'left')
+				->join('tweb_penduduk_warganegara','tweb_penduduk.warganegara_id = tweb_penduduk_warganegara.id', 'left')
 				->join('tweb_wil_clusterdesa', 'tweb_penduduk.id_cluster = tweb_wil_clusterdesa.id', 'left')
 				->select('
 					log_surat.*,

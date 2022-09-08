@@ -293,6 +293,7 @@ class Kp_suratku_surat_keluar extends Admin_Controller
 				redirect('kp_suratku_surat_keluar');
 			}
 		} else {
+			$this->session->set_flashdata('info', '<div class="alert alert-danger">' . $this->upload->display_errors() . '</div>');
 			redirect('kp_suratku_surat_keluar/add');
 		}
 	}
