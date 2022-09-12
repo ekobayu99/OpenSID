@@ -702,4 +702,91 @@ class Kp_surat extends Admin_Controller {
 			->set_output(json_encode($ret));
 
 	}
+
+	public function update_menu_kp()
+	{
+		$menus = [
+			[
+				'modul'=> 'TTE Surat','url'=> 'kp_tte','aktif'=>1,'ikon'=> 'fa-edit','urut'=>5,'level'=>2,'hidden'=>0,'ikon_kecil'=> 'fa-list','parent'=> 4,
+			],
+			[
+				'modul'=> 'Setting TTE Pamong','url'=> 'kp_setting_tte','aktif'=>1,'ikon'=> 'fa-wrench','urut'=>6,'level'=>2,'hidden'=>0,'ikon_kecil'=> 'fa-list','parent'=> 4,
+			],
+			[
+				'modul'=> 'Surat Masuk SuratKu','url'=> 'kp_suratku_surat_masuk','aktif'=>1,'ikon'=> 'fa-download','urut'=>7,'level'=>2,'hidden'=>0,'ikon_kecil'=> 'fa-list','parent'=> 4,
+			],
+			[
+				'modul'=> 'Surat Keluar SuratKu','url'=> 'kp_suratku_surat_keluar','aktif'=>1,'ikon'=> 'fa-upload','urut'=>8,'level'=>2,'hidden'=>0,'ikon_kecil'=> 'fa-list','parent'=> 4,
+			]
+		];
+
+
+		// cek sudah ada role
+		$cekMenuRole0 = $this->db
+			->where('id_grup', 6)
+			->where('id_modul', 4)
+			->get('grup_akses')->row();
+
+
+		if (empty($cekMenuRole0)) {
+			$this->db->insert('grup_akses', [
+				'id_grup'=>6,
+				'id_modul'=>4,
+				'akses'=>0
+			]);
+		}
+
+		$teksOutput = '';
+		foreach ($menus as $menu) {
+			// cek sudah ada 
+			$cekMenu = $this->db 
+			->where('modul', $menu['modul'])
+			->get('setting_modul')->row();
+
+			// $teksOutput .= $menu['modul']."<br/>";
+
+			if (empty($cekMenu)) {
+				$insertMenu = $this->db->insert('setting_modul', $menu);
+				$idMenu = $this->db->insert_id();
+				$teksOutput .= $menu['modul']." ditambahkan. <br/>";
+			} else {
+				$idMenu = $cekMenu->id;
+				$teksOutput .= $menu['modul'] . " sudah ada. <br/>";
+			}
+
+			if ($menu['modul'] == "TTE Surat") {
+
+				// cek sudah ada role
+				$cekMenuRole1 = $this->db
+					->where('id_grup', 6)
+					->where('id_modul', $idMenu)
+					->get('grup_akses')->row();
+				
+				if (empty($cekMenuRole1)) {
+					$this->db->insert('grup_akses', [
+						'id_grup' => 6,
+						'id_modul' => $idMenu,
+						'akses' => 7
+					]);
+				}
+			}
+			if ($menu['modul'] == "Surat Keluar SuratKu") {
+				// cek sudah ada role
+				$cekMenuRole2 = $this->db
+					->where('id_grup', 6)
+					->where('id_modul', $idMenu)
+					->get('grup_akses')->row();
+
+				if (empty($cekMenuRole2)) {
+					$this->db->insert('grup_akses', [
+						'id_grup' => 6,
+						'id_modul' => $idMenu,
+						'akses' => 7
+					]);
+				}
+			} 
+		}
+
+		echo $teksOutput;
+	}
 }
