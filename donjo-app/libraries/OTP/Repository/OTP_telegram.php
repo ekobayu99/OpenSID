@@ -72,10 +72,8 @@ class OTP_telegram implements OTP_interface
                 'chat_id' => $user,
                 'text'    => <<<EOD
                     Kode Verifikasi OTP Anda: {$otp}
-
                     JANGAN BERIKAN KODE RAHASIA INI KEPADA SIAPA PUN,
                     TERMASUK PIHAK YANG MENGAKU DARI DESA ANDA.
-
                     Terima kasih.
                     EOD,
                 'parse_mode' => 'Markdown',
@@ -144,9 +142,7 @@ class OTP_telegram implements OTP_interface
                 'chat_id' => $user,
                 'text'    => <<<EOD
                     HALO {$nama},
-
                     SELAMAT AKUN TELEGRAM ANDA BERHASIL DIVERIFIKASI
-
                     Terima kasih.
                     EOD,
                 'parse_mode' => 'Markdown',
@@ -166,17 +162,13 @@ class OTP_telegram implements OTP_interface
                 'chat_id' => $user,
                 'text'    => <<<EOD
                     HALO {$nama},
-
                     BERIKUT ADALAH KODE PIN YANG BARU SAJA DIHASILKAN,
                     KODE PIN INI SANGAT RAHASIA
                     JANGAN BERIKAN KODE PIN KEPADA SIAPA PUN,
                     TERMASUK PIHAK YANG MENGAKU DARI DESA ANDA.
-
                     KODE PIN: {$pin}
-
                     JIKA BUKAN ANDA YANG MELAKUKAN RESET PIN TERSEBUT
                     SILAHKAN LAPORKAN KEPADA OPERATOR DESA
-
                     EOD,
                 'parse_mode' => 'Markdown',
             ]);
