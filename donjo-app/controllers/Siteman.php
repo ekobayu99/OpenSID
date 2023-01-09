@@ -70,7 +70,7 @@ class Siteman extends MY_Controller
             $this->session->set_userdata('siteman_try', 4);
             $this->session->set_userdata('siteman_wait', 0);
         }
-        $_SESSION['success']    = 0;
+        session_error_clear();
         $_SESSION['per_page']   = 10;
         $_SESSION['cari']       = '';
         $_SESSION['pengumuman'] = 0;
@@ -94,7 +94,7 @@ class Siteman extends MY_Controller
             redirect('siteman');
         }
 
-        if (! $this->user_model->syarat_sandi() && ! ($this->session->user == 1 && config_item('demo_mode'))) {
+        if (! $this->user_model->syarat_sandi() && ! ($this->session->user == 1 && (config_item('demo_mode') || ENVIRONMENT === 'development'))) {
             // Password tidak memenuhi syarat kecuali di website demo
             redirect('user_setting/change_pwd');
         }
@@ -136,6 +136,16 @@ class Siteman extends MY_Controller
 
     public function kirim_lupa_sandi()
     {
+        // Periksa isian captcha
+        include FCPATH . 'securimage/securimage.php';
+        $securimage = new Securimage();
+
+        if (! $securimage->check($this->input->post('captcha_code'))) {
+            $this->session->set_flashdata('notif', 'Kode captcha anda salah. Silakan ulangi lagi.');
+
+            redirect('siteman/lupa_sandi');
+        }
+
         try {
             $status = $this->password->driver('email')->sendResetLink([
                 'email' => $this->input->post('email'),
@@ -161,7 +171,7 @@ class Siteman extends MY_Controller
 
         $data['header']      = $this->config_model->get_data();
         $data['latar_login'] = $this->theme_model->latar_login();
-        $data['email']       = $this->input->get('email');
+        $data['email']       = $this->input->get('email', true);
         $data['token']       = $token;
 
         $this->load->view('reset_kata_sandi', $data);

@@ -49,8 +49,6 @@ class Migrasi_fitur_premium_2109 extends MY_Model
         $this->cache->hapus_cache_untuk_semua('status_langganan');
         $hasil = $hasil && $this->migrasi_2021080771($hasil);
         $hasil = $hasil && $this->migrasi_2021081851($hasil);
-        $hasil = $hasil && $this->migrasi_2021082051($hasil);
-        $hasil = $hasil && $this->migrasi_2021082052($hasil);
         $hasil = $hasil && $this->migrasi_2021082151($hasil);
         $hasil = $hasil && $this->migrasi_2021082871($hasil);
         $hasil = $hasil && $this->migrasi_2021082971($hasil);
@@ -84,28 +82,6 @@ class Migrasi_fitur_premium_2109 extends MY_Model
         return $hasil;
     }
 
-    protected function migrasi_2021082051($hasil)
-    {
-        // Hapus file .htaccess
-        $file = LOKASI_ARSIP . '.htaccess';
-        if (file_exists($file)) {
-            $hasil = $hasil && unlink($file);
-        }
-
-        return $hasil;
-    }
-
-    protected function migrasi_2021082052($hasil)
-    {
-        // Hapus file .htaccess
-        $file = LOKASI_DOKUMEN . '.htaccess';
-        if (file_exists($file)) {
-            $hasil = $hasil && unlink($file);
-        }
-
-        return $hasil;
-    }
-
     protected function migrasi_2021082151($hasil)
     {
         $this->load->model('penduduk_model');
@@ -129,7 +105,7 @@ class Migrasi_fitur_premium_2109 extends MY_Model
             }
         }
 
-        return $hasil && $this->tambah_indeks('tweb_penduduk', 'nik');
+        return $hasil && $this->tambahIndeks('tweb_penduduk', 'nik');
     }
 
     protected function migrasi_2021082871($hasil)

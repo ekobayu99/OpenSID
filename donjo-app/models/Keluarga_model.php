@@ -141,15 +141,24 @@ class Keluarga_model extends MY_Model
                     ->join('program_peserta bt', "bt.peserta = u.no_kk and bt.program_id = {$program_id}", 'left')
                     ->where('bt.id is null');
             } else {
+                if (isset($this->session->status)) {
+                    $status = $this->session->status;
+                    $this->db->join('program_peserta bt', "bt.peserta = u.no_kk AND bt.program_id in (SELECT pro.id from program AS pro WHERE pro.`status` = {$status} and pro.sasaran = 2)", 'left');
+                } else {
+                    $this->db->join('program_peserta bt', 'bt.peserta = u.no_kk', 'left');
+                }
+
                 // Bukan penerima bantuan apa pun
-                $this->db
-                    ->join('program_peserta bt', 'bt.peserta = u.no_kk', 'left')
-                    ->where('bt.id is null');
+                $this->db->where('bt.id is null');
             }
         } elseif ($bantuan_keluarga == JUMLAH && ! $this->session->program_bantuan) {
-            // Penerima bantuan mana pun
-            $this->db
-                ->where('u.no_kk IN (select peserta from program_peserta)');
+            if (isset($this->session->status)) {
+                $status = $this->session->status;
+                $this->db->join('program_peserta bt', "bt.peserta = u.no_kk AND bt.program_id in (SELECT pro.id from program AS pro WHERE pro.`status` = {$status} and pro.sasaran = 2)", 'left')->where('bt.id is not null');
+            } else {
+                // Penerima bantuan mana pun
+                $this->db->where('u.no_kk IN (select peserta from program_peserta)');
+            }
         }
     }
 
@@ -220,19 +229,41 @@ class Keluarga_model extends MY_Model
         $this->list_data_sql();
 
         switch ($o) {
-            case 1: $this->db->order_by('u.no_kk'); break;
+            case 1:
+                $this->db->order_by('u.no_kk');
+                break;
 
-            case 2: $this->db->order_by('u.no_kk DESC'); break;
+            case 2:
+                $this->db->order_by('u.no_kk DESC');
+                break;
 
-            case 3: $this->db->order_by('kepala_kk'); break;
+            case 3:
+                $this->db->order_by('kepala_kk');
+                break;
 
-            case 4: $this->db->order_by('kepala_kk DESC'); break;
+            case 4:
+                $this->db->order_by('kepala_kk DESC');
+                break;
 
-            case 5: $this->db->order_by('u.tgl_daftar'); break;
+            case 5:
+                $this->db->order_by('u.tgl_daftar');
+                break;
 
-            case 6: $this->db->order_by('u.tgl_daftar DESC'); break;
+            case 6:
+                $this->db->order_by('u.tgl_daftar DESC');
+                break;
 
-            default:$this->db->order_by('u.no_kk DESC');
+            case 7:
+                $this->db->order_by('u.tgl_cetak_kk');
+                break;
+
+            case 8:
+                $this->db->order_by('u.tgl_cetak_kk DESC');
+                break;
+
+            default:
+                $this->db->order_by('u.no_kk DESC');
+                break;
         }
         $query_dasar = $this->db->get_compiled_select();
 

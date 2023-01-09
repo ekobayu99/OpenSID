@@ -35,7 +35,7 @@
 			<div class="col-md-12">
 				<div class="box box-info">
 					<div class="box-header with-border">
-						<?php if ($this->CI->cek_hak_akses('u')): ?>
+						<?php if (can('u')): ?>
 							<div class="btn-group btn-group-vertical">
 								<a class="btn btn-social btn-flat btn-success btn-sm" data-toggle="dropdown"><i class='fa fa-plus'></i> Tambah Penduduk</a>
 								<ul class="dropdown-menu" role="menu">
@@ -48,7 +48,7 @@
 								</ul>
 							</div>
 						<?php endif; ?>
-						<?php if ($this->CI->cek_hak_akses('h')): ?>
+						<?php if (can('h')): ?>
 							<a href="#confirm-delete" title="Hapus Data Terpilih" onclick="deleteAllBox('mainform', '<?= site_url("penduduk/delete_all/{$p}/{$o}"); ?>')" class="btn btn-social btn-flat btn-danger btn-sm visible-xs-block visible-sm-inline-block visible-md-inline-block visible-lg-inline-block hapus-terpilih"><i class='fa fa-trash-o'></i> Hapus Data Terpilih</a>
 						<?php endif; ?>
 						<div class="btn-group-vertical">
@@ -74,6 +74,22 @@
 								</li>
 								<li>
 									<a href="<?= site_url('penduduk_log/clear'); ?>" class="btn btn-social btn-flat btn-block btn-sm" title="Log Data Penduduk"><i class="fa fa-book"></i> Log Penduduk</a>
+								</li>
+							</ul>
+						</div>
+						<div class="btn-group-vertical">
+							<a class="btn btn-social btn-flat bg-navy btn-sm" data-toggle="dropdown"><i class='fa fa-arrow-circle-down'></i> Impor / Ekspor</a>
+							<ul class="dropdown-menu" role="menu">
+								<?php if (! config_item('demo_mode')): ?>
+									<li>
+										<a href="<?= route('penduduk.impor') ?>" class="btn btn-social btn-flat btn-block btn-sm" title="Impor Penduduk"><i class="fa fa-upload"></i> Impor Penduduk</a>
+									</li>
+									<li>
+										<a href="<?= route('penduduk.impor_bip') ?>" class="btn btn-social btn-flat btn-block btn-sm" title="Impor BIP"><i class="fa fa-upload"></i> Impor BIP</a>
+									</li>
+								<?php endif ?>
+								<li>
+									<a href="<?= route('penduduk.ekspor') ?>" target="_blank" class="btn btn-social btn-flat btn-block btn-sm" title="Ekspor Penduduk"><i class="fa fa-download"></i> Ekspor Penduduk</a>
 								</li>
 							</ul>
 						</div>
@@ -158,13 +174,13 @@
 																	<li>
 																		<a href="<?= site_url("penduduk/detail/{$p}/{$o}/{$data['id']}"); ?>" class="btn btn-social btn-flat btn-block btn-sm"><i class="fa fa-list-ol"></i> Lihat Detail Biodata Penduduk</a>
 																	</li>
-																	<?php if ($data['status_dasar'] == 9 && $this->CI->cek_hak_akses('u')): ?>
+																	<?php if ($data['status_dasar'] == 9 && can('u')): ?>
 																		<li>
 																			<a href="#" data-href="<?= site_url("penduduk/kembalikan_status/{$p}/{$o}/{$data['id']}"); ?>" class="btn btn-social btn-flat btn-block btn-sm" data-remote="false" data-toggle="modal" data-target="#confirm-status" data-body="Apakah Anda yakin ingin mengembalikan status data penduduk ini?"><i class="fa fa-undo"></i> Kembalikan ke Status HIDUP</a>
 																		</li>
 																	<?php endif; ?>
 																	<?php if ($data['status_dasar'] == 1): ?>
-																		<?php if ($this->CI->cek_hak_akses('u')): ?>
+																		<?php if (can('u')): ?>
 																			<li>
 																				<a href="<?= site_url("penduduk/form/{$p}/{$o}/{$data['id']}"); ?>" class="btn btn-social btn-flat btn-block btn-sm"><i class="fa fa-edit"></i> Ubah Biodata Penduduk</a>
 																			</li>
@@ -181,7 +197,7 @@
 																		<li>
 																			<a href="<?= site_url("penduduk/cetak_biodata/{$data['id']}"); ?>" target="_blank" class="btn btn-social btn-flat btn-block btn-sm"><i class="fa fa-print"></i> Cetak Biodata Penduduk</a>
 																		</li>
-																		<?php if ($this->CI->cek_hak_akses('h')): ?>
+																		<?php if (can('h')): ?>
 																			<li>
 																				<a href="#" data-href="<?= site_url("penduduk/delete/{$p}/{$o}/{$data['id']}"); ?>" class="btn btn-social btn-flat btn-block btn-sm" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash-o"></i> Hapus</a>
 																			</li>

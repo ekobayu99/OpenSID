@@ -164,6 +164,11 @@ $(document).ready(function() {
 		return this.optional(element) || valid;
 	}, "Hanya boleh berisi karakter alpha dan spasi");
 
+	jQuery.validator.addMethod("alfanumerik", function(value, element) {
+		valid = /^[a-zA-Z0-9 ]+$/i.test(value);
+		return this.optional(element) || valid;
+	}, "Hanya boleh berisi karakter alfanumerik");
+
 	jQuery.validator.addMethod("nama_terbatas", function(value, element) {
 		valid = /^[a-zA-Z0-9 \-]+$/i.test(value);
 		return this.optional(element) || valid;
@@ -183,6 +188,11 @@ $(document).ready(function() {
 		valid = /^[a-zA-Z0-9\.]+$/i.test(value);
 		return this.optional(element) || valid;
 	}, "Hanya boleh berisi karakter alfanumerik dan titik");
+
+	jQuery.validator.addMethod("alfanumerik_spasi", function(value, element) {
+		valid = /^[a-zA-Z0-9 ]+$/i.test(value);
+		return this.optional(element) || valid;
+	}, "Hanya boleh berisi karakter alfanumerik dan spasi");
 
 	jQuery.validator.addMethod("bilangan_titik", function(value, element) {
 		valid = /^[0-9\.]+$/.test(value);
@@ -210,6 +220,7 @@ $(document).ready(function() {
 
 	// Ketentuan kata sandi sesuai US National Institute of Standards and Technology (NIST)
 	//https://en.wikipedia.org/wiki/Password_policy#:~:text=Passwords%20must%20be%20at%20least,should%20be%20acceptable%20in%20passwords
+	$("#validate_user").validate();
 	jQuery.validator.addMethod("pwdLengthNist", function(value, element) {
 		valid = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,20}$/.test(value);
 		return this.optional(element) || valid;
@@ -240,9 +251,9 @@ $(document).ready(function() {
 	}, "Hanya boleh berisi karakter alpha, numerik, spasi, titik, koma, strip, tanda petik dan garis miring");
 
 	jQuery.validator.addMethod("username", function(value, element) {
-		valid = /^[a-zA-Z0-9\.\_]{4,30}$/.test(value);
+		valid = /^[a-zA-Z0-9]{4,30}$/.test(value);
 		return this.optional(element) || valid;
-	}, "Username hanya boleh berisi karakter alpha, numerik, titik, dan garis bawah dan terdiri dari 4 hingga 30 karakter");
+	}, "Username hanya boleh berisi karakter alpha, numerik dan terdiri dari 4 hingga 30 karakter");
 
 	jQuery.validator.addMethod("telegram", function(value, element) {
 		valid = /^@[a-zA-Z0-9\_]{5,100}$/.test(value);

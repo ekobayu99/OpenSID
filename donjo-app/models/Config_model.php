@@ -36,6 +36,8 @@
  */
 
 defined('BASEPATH') || exit('No direct script access allowed');
+use App\Models\Config;
+use Illuminate\Support\Facades\Schema;
 
 class Config_model extends CI_Model
 {
@@ -44,6 +46,7 @@ class Config_model extends CI_Model
         parent::__construct();
     }
 
+    // Digunakan dibanyak tempat
     public function get_data()
     {
         $this->db->reset_query(); // TODO: cari query yg menggantung terkait pemanggilan first/dpt
@@ -58,182 +61,37 @@ class Config_model extends CI_Model
             ->row_array();
     }
 
-    public function insert()
+    // Kalau belum diisi, buat identitas desa jika kode_desa ada di file desa/config/config.php
+    public function isi_config()
     {
-        $data       = $this->bersihkan_post();
-        $data['id'] = 1; // Hanya ada satu row data desa
-        // Data lokasi peta default. Diperlukan untuk menampilkan widget peta lokasi
-        $data['lat']      = '-8.488005310891758';
-        $data['lng']      = '116.0406072534065';
-        $data['zoom']     = '19';
-        $data['map_tipe'] = 'roadmap';
-        unset($data['old_logo'], $data['old_kantor_desa']);
-
-        $data['logo']        = $this->upload_gambar_desa('logo');
-        $data['kantor_desa'] = $this->upload_gambar_desa('kantor_desa');
-        if (! empty($data['logo'])) {
-            // Ada logo yang berhasil diunggah --> simpan ukuran 100 x 100
-            $tipe_file = TipeFile($_FILES['logo']);
-            $dimensi   = ['width' => 100, 'height' => 100];
-            resizeImage(LOKASI_LOGO_DESA . $data['logo'], $tipe_file, $dimensi);
-            resizeImage(LOKASI_LOGO_DESA . $data['logo'], $tipe_file, ['width' => 16, 'height' => 16], LOKASI_LOGO_DESA . 'favicon.ico');
-        } else {
-            unset($data['logo']);
+        if (! Schema::hasTable('config') || Config::first() || empty($kode_desa = config_item('kode_desa')) || ! cek_koneksi_internet()) {
+            return;
         }
-        unset($data['file_logo'], $data['file_kantor_desa']);
 
-        $outp = $this->db->insert('config', $data);
-        status_sukses($outp); //Tampilkan Pesan
-    }
+        // Ambil data desa dari tracksid
+        $this->load->library('data_publik');
+        $this->data_publik->set_api_url(config_item('server_pantau') . '/index.php/api/wilayah/kodedesa?token=' . config_item('token_pantau') . '&kode=' . $kode_desa, 'kode_desa');
+        $data_desa = $this->data_publik->get_url_content(true);
 
-    // TODO: tambahkan validasi di form Identitas Desa
-    private function bersihkan_post()
-    {
-        $post                      = $this->input->post();
-        $data['old_logo']          = $post['old_logo'];
-        $data['old_kantor_desa']   = $post['old_kantor_desa'];
-        $data['nama_desa']         = nama_terbatas($post['nama_desa']);
-        $data['kode_desa']         = bilangan($post['kode_desa']);
-        $data['kode_pos']          = bilangan($post['kode_pos']);
-        $data['pamong_id']         = bilangan($post['pamong_id']);
-        $data['alamat_kantor']     = alamat($post['alamat_kantor']);
-        $data['email_desa']        = email($post['email_desa']);
-        $data['telepon']           = bilangan($post['telepon']);
-        $data['website']           = alamat_web($post['website']);
-        $data['nama_kecamatan']    = nama_terbatas($post['nama_kecamatan']);
-        $data['kode_kecamatan']    = bilangan($post['kode_kecamatan']);
-        $data['nama_kepala_camat'] = nama($post['nama_kepala_camat']);
-        $data['nip_kepala_camat']  = nomor_surat_keputusan($post['nip_kepala_camat']);
-        $data['nama_kabupaten']    = nama($post['nama_kabupaten']);
-        $data['kode_kabupaten']    = bilangan($post['kode_kabupaten']);
-        $data['nama_propinsi']     = nama_terbatas($post['nama_propinsi']);
-        $data['kode_propinsi']     = bilangan($post['kode_propinsi']);
-        $data['warna']             = warna($post['warna']);
-
-        return $data;
-    }
-
-    public function update($id = 0)
-    {
-        $_SESSION['success']   = 1;
-        $_SESSION['error_msg'] = '';
-
-        $data                = $this->bersihkan_post();
-        $data['logo']        = $this->upload_gambar_desa('logo');
-        $data['kantor_desa'] = $this->upload_gambar_desa('kantor_desa');
-
-        if (! empty($data['logo'])) {
-            // Ada logo yang berhasil diunggah --> simpan ukuran 100 x 100
-            $tipe_file = TipeFile($_FILES['logo']);
-            $dimensi   = ['width' => 100, 'height' => 100];
-            resizeImage(LOKASI_LOGO_DESA . $data['logo'], $tipe_file, $dimensi);
-            resizeImage(LOKASI_LOGO_DESA . $data['logo'], $tipe_file, ['width' => 16, 'height' => 16], LOKASI_LOGO_DESA . 'favicon.ico');
-            // Hapus berkas logo lama
-            if (! empty($data['old_logo'])) {
-                unlink(LOKASI_LOGO_DESA . $data['old_logo']);
+        if ($data_desa->header->http_code != 200 || empty($data_desa->body)) {
+            set_session('error', "Kode desa {$kode_desa} di desa/config/config.php tidak ditemukan di " . config_item('server_pantau'));
+        } else {
+            $desa = $data_desa->body;
+            $data = [
+                'nama_desa'         => $desa->nama_desa,
+                'kode_desa'         => $kode_desa,
+                'nama_kecamatan'    => $desa->nama_kec,
+                'kode_kecamatan'    => $desa->kode_kec,
+                'nama_kabupaten'    => $desa->nama_kab,
+                'kode_kabupaten'    => $desa->kode_kab,
+                'nama_propinsi'     => $desa->nama_prov,
+                'kode_propinsi'     => $desa->kode_prov,
+                'nama_kepala_camat' => '',
+                'nip_kepala_camat'  => '',
+            ];
+            if (Config::insert($data)) {
+                set_session('success', "Kode desa {$kode_desa} diambil dari desa/config/config.php");
             }
-        } else {
-            unset($data['logo']);
         }
-
-        if (empty($data['kantor_desa'])) {
-            unset($data['kantor_desa']);
-        }
-
-        unset($data['file_logo'], $data['old_logo'], $data['file_kantor_desa'], $data['old_kantor_desa']);
-
-        $this->db->where('id', $id)->update('config', $data);
-
-        // Ubah jabatan pamong saat ditetapkan sebagai kepala desa
-        $kades = ucwords($this->setting->sebutan_kepala_desa);
-
-        $outp = $this->db
-            ->where('pamong_id', $this->session->kades_lama)
-            ->update('tweb_desa_pamong', ['jabatan' => null, 'pamong_status' => 0, 'pamong_ttd' => 0]);
-        $this->session->unset_userdata('kades_lama');
-
-        $outp = $this->db
-            ->where('pamong_id', $data['pamong_id'])
-            ->update('tweb_desa_pamong', ['jabatan' => $kades, 'urut' => 1, 'pamong_status' => 1, 'pamong_ttd' => 1]);
-        status_sukses($outp); //Tampilkan Pesan
-    }
-
-    /*
-        Returns:
-            - success: nama berkas yang diunggah
-            - fail: NULL
-    */
-    private function upload_gambar_desa($jenis)
-    {
-        $this->load->library('upload');
-        $this->uploadConfig = [
-            'upload_path'   => LOKASI_LOGO_DESA,
-            'allowed_types' => 'gif|jpg|jpeg|png',
-            'max_size'      => max_upload() * 1024,
-        ];
-        // Adakah berkas yang disertakan?
-        $adaBerkas = ! empty($_FILES[$jenis]['name']);
-        if ($adaBerkas !== true) {
-            return null;
-        }
-        // Tes tidak berisi script PHP
-        if (isPHP($_FILES['logo']['tmp_name'], $_FILES[$jeniss]['name'])) {
-            $_SESSION['error_msg'] .= ' -> Jenis file ini tidak diperbolehkan ';
-            $_SESSION['success'] = -1;
-            redirect('identitas_desa');
-        }
-
-        $uploadData = null;
-        // Inisialisasi library 'upload'
-        $this->upload->initialize($this->uploadConfig);
-        // Upload sukses
-        if ($this->upload->do_upload($jenis)) {
-            $uploadData = $this->upload->data();
-            // Buat nama file unik agar url file susah ditebak dari browser
-            $namaFileUnik = tambahSuffixUniqueKeNamaFile($uploadData['file_name']);
-            // Ganti nama file asli dengan nama unik untuk mencegah akses langsung dari browser
-            $fileRenamed = rename(
-                $this->uploadConfig['upload_path'] . $uploadData['file_name'],
-                $this->uploadConfig['upload_path'] . $namaFileUnik
-            );
-            // Ganti nama di array upload jika file berhasil di-rename --
-            // jika rename gagal, fallback ke nama asli
-            $uploadData['file_name'] = $fileRenamed ? $namaFileUnik : $uploadData['file_name'];
-        }
-        // Upload gagal
-        else {
-            $_SESSION['success']   = -1;
-            $_SESSION['error_msg'] = $this->upload->display_errors(null, null);
-        }
-
-        return (! empty($uploadData)) ? $uploadData['file_name'] : null;
-    }
-
-    public function update_kantor()
-    {
-        $data = $_POST;
-        $id   = '1';
-        $this->db->where('id', $id);
-        $outp = $this->db->update('config', $data);
-
-        status_sukses($outp); //Tampilkan Pesan
-    }
-
-    public function update_wilayah()
-    {
-        $data = $_POST;
-        $id   = '1';
-        $this->db->where('id', $id);
-        $outp = $this->db->update('config', $data);
-
-        status_sukses($outp); //Tampilkan Pesan
-    }
-
-    public function kosongkan_path($id)
-    {
-        $this->db
-            ->set('path', null)
-            ->where('id', $id)
-            ->update('config');
     }
 }

@@ -51,11 +51,7 @@ defined('BASEPATH') || exit('No direct script access allowed');
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>Layanan Mandiri <?= ucwords($this->setting->sebutan_desa . ' ' . $desa['nama_desa']) ?></title>
 	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-	<?php if (is_file(LOKASI_LOGO_DESA . 'favicon.ico')): ?>
-		<link rel="shortcut icon" href="<?= base_url(LOKASI_LOGO_DESA . 'favicon.ico') ?>"/>
-	<?php else: ?>
-		<link rel="shortcut icon" href="<?= base_url('favicon.ico') ?>"/>
-	<?php endif ?>
+	<link rel="shortcut icon" href="<?= favico_desa() ?>"/>
 	<!-- Bootstrap 3.3.7 -->
 	<link rel="stylesheet" href="<?= asset('bootstrap/css/bootstrap.min.css') ?>">
 	<!-- Font Awesome -->
@@ -134,6 +130,7 @@ defined('BASEPATH') || exit('No direct script access allowed');
 							<li><a href="<?= site_url('layanan-mandiri/pesan-masuk') ?>">Pesan</a></li>
 							<li><a href="<?= site_url('layanan-mandiri/lapak') ?>">Lapak</a></li>
 							<li><a href="<?= site_url('layanan-mandiri/bantuan') ?>">Bantuan</a></li>
+							<li><a href="<?= site_url('layanan-mandiri/kehadiran') ?>">Perangkat</a></li>
 						</ul>
 					</div>
 					<div class="navbar-custom-menu">
@@ -213,12 +210,12 @@ defined('BASEPATH') || exit('No direct script access allowed');
 								</div>
 							</div>
 						</a>
-						<a href="<?= site_url('layanan-mandiri/bantuan') ?>">
+						<a href="<?= site_url('layanan-mandiri/kehadiran') ?>">
 							<div class="col-md-3 col-sm-6 col-xs-12">
 								<div class="info-box bg-red">
-									<span class="info-box-icon"><i class="fa fa-handshake-o"></i></span>
+									<span class="info-box-icon"><i class="fa fa-users"></i></span>
 									<div class="info-box-content">
-										<span class="info-box-text-widget">Bantuan</span>
+										<span class="info-box-text-widget">Perangkat</span>
 									</div>
 								</div>
 							</div>
@@ -234,21 +231,27 @@ defined('BASEPATH') || exit('No direct script access allowed');
 									<img class="img-circle" src="<?= AmbilFoto($this->is_login->foto, '', $this->is_login->sex) ?>" alt="Foto" width="100%">
 								</div>
 								<div class="box-body">
-									<a href="<?= ($this->is_login->ganti_pin === '1') ? '#' : site_url('layanan-mandiri/profil') ?>" class="btn btn-block btn-social bg-blue" rel="noopener noreferrer">
+									<a href="<?= ($this->is_login->ganti_pin === '1') ? '#' : site_url('layanan-mandiri/profil') ?>" class="btn btn-block btn-social bg-blue">
 										<i class="fa fa-user-o"></i> Profil
 									</a>
 									<a href="<?= ($this->is_login->ganti_pin === '1') ? '#' : site_url('layanan-mandiri/cetak-biodata') ?>" class="btn btn-block btn-social bg-green" target="_blank" rel="noopener noreferrer">
 										<i class="fa fa-print"></i> Cetak Biodata
 									</a>
 									<?php if ($this->is_login->id_kk != 0) : ?>
-										<a href="<?= ($this->is_login->ganti_pin === '1') ? '#' : site_url('layanan-mandiri/cetak-kk') ?>" class="btn btn-block btn-social bg-aqua" target="_blank" rel="noopener noreferrer">
+										<a href="<?= ($this->is_login->ganti_pin === '1') ? '#' : site_url('layanan-mandiri/cetak-kk') ?>" class="btn btn-block btn-social bg-green" target="_blank" rel="noopener noreferrer">
 											<i class="fa fa-print"></i> Cetak Salinan KK
 										</a>
 									<?php endif; ?>
+									<a href="<?= ($this->is_login->ganti_pin === '1') ? '#' : site_url('layanan-mandiri/dokumen') ?>" class="btn btn-block btn-social bg-aqua">
+										<i class="fa fa-file"></i> Dokumen
+									</a>
+									<a href="<?= ($this->is_login->ganti_pin === '1') ? '#' : site_url('layanan-mandiri/bantuan') ?>" class="btn btn-block btn-social bg-aqua">
+										<i class="fa fa-handshake-o"></i> Bantuan
+									</a>
 									<a href="<?= site_url('layanan-mandiri/ganti-pin') ?>" class="btn btn-block btn-social bg-navy">
 										<i class="fa fa-key"></i> Ganti PIN
 									</a>
-									<a href="<?= site_url('layanan-mandiri/verifikasi') ?>" class="btn btn-block btn-social bg-purple">
+									<a href="<?= ($this->is_login->ganti_pin === '1') ? '#' : site_url('layanan-mandiri/verifikasi') ?>" class="btn btn-block btn-social bg-purple">
 										<i class="fa fa-key"></i> Verifikasi
 									</a>
 									<button type="button" class="btn btn-block btn-social bg-red" data-toggle="modal" data-target="#pendapat"><i class="fa fa-sign-out"></i>Keluar</button>
@@ -348,7 +351,7 @@ defined('BASEPATH') || exit('No direct script access allowed');
 				$(".callout").fadeTo(500, 0).slideUp(500, function() {
 					$(this).remove();
 				});
-			}, 5000);
+			}, 1000);
 
 			setTimeout(function() {
 				refresh_badge($("#b_pesan"), "<?= site_url('notif_web/inbox') ?>");

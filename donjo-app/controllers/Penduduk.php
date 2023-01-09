@@ -37,6 +37,8 @@
 
 defined('BASEPATH') || exit('No direct script access allowed');
 
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
+
 class Penduduk extends Admin_Controller
 {
     private $_set_page;
@@ -45,7 +47,7 @@ class Penduduk extends Admin_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model(['penduduk_model', 'keluarga_model', 'wilayah_model', 'web_dokumen_model', 'program_bantuan_model', 'lapor_model']);
+        $this->load->model(['penduduk_model', 'keluarga_model', 'wilayah_model', 'web_dokumen_model', 'program_bantuan_model', 'lapor_model', 'referensi_model', 'penduduk_log_model', 'impor_model', 'ekspor_model']);
 
         $this->modul_ini     = 2;
         $this->sub_modul_ini = 21;
@@ -539,6 +541,8 @@ class Penduduk extends Admin_Controller
         $data['nik']             = $this->penduduk_model->get_penduduk($id);
         $data['form_action']     = site_url("{$this->controller}/update_status_dasar/{$p}/{$o}/{$id}");
         $data['list_ref_pindah'] = $this->referensi_model->list_data('ref_pindah');
+        $data['sebab']           = $this->referensi_model->list_ref(SEBAB);
+        $data['penolong_mati']   = $this->referensi_model->list_ref(PENOLONG_MATI);
 
         //Pengecualian status dasar: Penduduk Tetap => ('TIDAK VALID', 'HIDUP', 'PERGI') , Penduduk Tidak Tetap => ('TIDAK VALID', 'HIDUP')
         $excluded_status           = $data['nik']['id_status'] == 1 ? '9, 1, 6' : '9, 1';
@@ -939,5 +943,121 @@ class Penduduk extends Admin_Controller
         // Ambil nama berkas dari database
         $data = $this->web_dokumen_model->get_dokumen($id_dokumen);
         ambilBerkas($data['satuan'], $this->controller, null, LOKASI_DOKUMEN, $tampil);
+    }
+
+    public function impor()
+    {
+        if (config_item('demo_mode')) {
+            redirect($this->controller);
+        }
+
+        $this->redirect_hak_akses('u');
+
+        $data = [
+            'form_action'          => route('penduduk.proses_impor'),
+            'boleh_hapus_penduduk' => $this->impor_model->boleh_hapus_penduduk(),
+        ];
+
+        return view('admin.penduduk.impor', $data);
+    }
+
+    public function proses_impor()
+    {
+        if (config_item('demo_mode')) {
+            redirect($this->controller);
+        }
+
+        $this->redirect_hak_akses('u');
+        $hapus = isset($_POST['hapus_data']);
+        $this->impor_model->impor_excel($hapus);
+        redirect('penduduk/impor');
+    }
+
+    public function impor_bip()
+    {
+        if (config_item('demo_mode')) {
+            redirect($this->controller);
+        }
+
+        $this->redirect_hak_akses('u');
+
+        $data = [
+            'form_action'          => route('penduduk.proses_impor_bip'),
+            'boleh_hapus_penduduk' => $this->impor_model->boleh_hapus_penduduk(),
+        ];
+
+        return view('admin.penduduk.impor_bip', $data);
+    }
+
+    public function proses_impor_bip()
+    {
+        if (config_item('demo_mode')) {
+            redirect($this->controller);
+        }
+
+        $this->redirect_hak_akses('u');
+
+        if ($this->db->get('tweb_penduduk')->num_rows() > 0) {
+            redirect_with('error', 'Tidak dapat mengimpor BIP ketika data penduduk telah ada', 'penduduk/impor_bip');
+        }
+
+        $this->impor_model->impor_bip($this->input->post('hapus_data'));
+        redirect('penduduk/impor_bip');
+    }
+
+    public function ekspor()
+    {
+        try {
+            $daftar_kolom = $this->impor_model->daftar_kolom;
+
+            $writer = WriterEntityFactory::createXLSXWriter();
+            $writer->openToBrowser(namafile('penduduk') . '.xlsx');
+            $writer->addRow(WriterEntityFactory::createRowFromArray($daftar_kolom));
+
+            //Isi Tabel
+            $get = $this->ekspor_model->expor();
+
+            foreach ($get as $row) {
+                $penduduk = [];
+
+                foreach ($daftar_kolom as $kolom) {
+                    $penduduk[] = $row->{$kolom};
+                }
+
+                $writer->addRow(WriterEntityFactory::createRowFromArray($penduduk));
+            }
+            $writer->close();
+        } catch (\Exception $e) {
+            log_message('error', $e);
+
+            $this->session->set_flashdata('notif', 'Tidak berhasil mengekspor data penduduk, harap mencoba kembali.');
+
+            redirect('penduduk');
+        }
+    }
+
+    public function foto_bawaan($id)
+    {
+        $penduduk = $this->db->get_where('tweb_penduduk', ['id' => $id])->row();
+
+        if (empty($penduduk)) {
+            return redirect('penduduk');
+        }
+
+        $this->db->where('id', $penduduk->id)->set('foto', null)->update('tweb_penduduk');
+
+        // Hapus file foto penduduk yg di hapus di folder desa/upload/user_pict
+        $file_foto = LOKASI_USER_PICT . $penduduk->foto;
+        if (is_file($file_foto)) {
+            unlink($file_foto);
+        }
+
+        // Hapus file foto kecil penduduk yg di hapus di folder desa/upload/user_pict
+        $file_foto_kecil = LOKASI_USER_PICT . 'kecil_' . $penduduk->foto;
+        if (is_file($file_foto_kecil)) {
+            unlink($file_foto_kecil);
+        }
+
+        redirect("penduduk/form/1/0/{$penduduk->id}");
     }
 }

@@ -37,6 +37,7 @@
 
 defined('BASEPATH') || exit('No direct script access allowed');
 
+use App\Models\BantuanPeserta;
 use Box\Spout\Common\Entity\Style\Color;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
@@ -119,6 +120,14 @@ class Program_bantuan extends Admin_Controller
         $this->render('program_bantuan/panduan');
     }
 
+    public function detail_clear($program_id)
+    {
+        $this->session->per_page = $this->_set_page[0];
+        $this->session->unset_userdata('cari');
+
+        redirect("program_bantuan/detail/{$program_id}");
+    }
+
     public function detail($program_id = 0, $p = 1)
     {
         $per_page = $this->input->post('per_page');
@@ -172,7 +181,14 @@ class Program_bantuan extends Admin_Controller
     public function add_peserta($program_id = 0)
     {
         $this->redirect_hak_akses('u');
-        $this->program_bantuan_model->add_peserta($program_id);
+
+        $cek = BantuanPeserta::where('program_id', $program_id)->where('kartu_id_pend', $this->input->post('kartu_id_pend'))->first();
+
+        if ($cek) {
+            $this->session->success = -2;
+        } else {
+            $this->program_bantuan_model->add_peserta($program_id);
+        }
 
         $redirect = ($this->session->userdata('aksi') != 1) ? $_SERVER['HTTP_REFERER'] : "program_bantuan/detail/{$program_id}";
 

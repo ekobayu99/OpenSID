@@ -92,7 +92,7 @@ class First_artikel_m extends CI_Model
     {
         $this->db->select('COUNT(a.id) AS jml');
         $this->paging_artikel_sql();
-        $cari = trim($this->input->get('cari'));
+        $cari = trim($this->input->get('cari', true));
         if (! empty($cari)) {
             $cari          = $this->db->escape_like_str($cari);
             $cfg['suffix'] = "?cari={$cari}";
@@ -120,7 +120,7 @@ class First_artikel_m extends CI_Model
             ->where('a.id_kategori NOT IN (1000)')
             ->where('a.tgl_upload <', date('Y-m-d H:i:s'));
 
-        $cari = trim($this->input->get('cari'));
+        $cari = trim($this->input->get('cari', true));
         if (! empty($cari)) {
             $this->db
                 ->group_start()
@@ -404,11 +404,13 @@ class First_artikel_m extends CI_Model
             ->join('user u', 'a.id_user = u.id', 'left')
             ->join('kategori k', 'a.id_kategori = k.id', 'left')
             ->where('a.enabled', 1)
-            ->where('a.tgl_upload <', date('Y-m-d H:i:s'))
-            ->group_start()
-            ->where('a.slug', $url)
-            ->or_where('a.id', $url)
-            ->group_end();
+            ->where('a.tgl_upload <', date('Y-m-d H:i:s'));
+
+        if (is_numeric($url)) {
+            $this->db->where('a.id', $url);
+        } else {
+            $this->db->where('a.slug', $url);
+        }
 
         $query = $this->db->get();
 

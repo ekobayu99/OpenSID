@@ -93,7 +93,7 @@ class Mandiri_model extends CI_Model
     {
         $this->db
             ->from('tweb_penduduk_mandiri pm')
-            ->join('penduduk_hidup p', 'pm.id_pend = p.id', 'LEFT');
+            ->join('penduduk_hidup p', 'pm.id_pend = p.id');
 
         $this->search_sql();
     }
@@ -174,9 +174,11 @@ class Mandiri_model extends CI_Model
 
     public function update($id_pend = null)
     {
+        akun_demo($id_pend);
+
         $post = $this->input->post();
         $pin  = bilangan($post['pin'] ?? $this->generate_pin());
-        $nama = $this->db->select('nama')->where('id', $id_pend)->get('tweb_penduduk')->row()->nama;
+        $nama = $this->db->select('nama')->where('id', $id_pend)->get('penduduk_hidup')->row()->nama;
 
         $pilihan_kirim = $post['pilihan_kirim'];
 
@@ -215,27 +217,13 @@ class Mandiri_model extends CI_Model
         }
     }
 
-    public function delete($id_pend = '', $semua = false)
+    public function delete($id_pend = '')
     {
-        if (! $semua) {
-            $this->session->success = 1;
-        }
+        akun_demo($id_pend);
 
         $outp = $this->db->where('id_pend', $id_pend)->delete('tweb_penduduk_mandiri');
 
-        status_sukses($outp, $gagal_saja = true); //Tampilkan Pesan
-    }
-
-    // TODO : Belum digunakan
-    public function delete_all()
-    {
-        $this->session->success = 1;
-
-        $id_cb = $_POST['id_cb'];
-
-        foreach ($id_cb as $id) {
-            $this->delete($id, $semua = true);
-        }
+        status_sukses($outp);
     }
 
     // TODO : Digunakan dimana ?
@@ -296,7 +284,7 @@ class Mandiri_model extends CI_Model
     {
         return $this->db
             ->select('id, nik, nama')
-            ->from('tweb_penduduk')
+            ->from('penduduk_hidup')
             ->where('status', 1)
             ->where('nik', $nik)
             ->get()
@@ -393,8 +381,8 @@ class Mandiri_model extends CI_Model
     public function cek_pendaftaran($nama, $nik, $tanggallahir, $kk)
     {
         return $this->db->select('p.id, p.nik')
-            ->from('tweb_penduduk p')
-            ->join('tweb_keluarga k', 'p.id_kk = k.id', 'left')
+            ->from('penduduk_hidup p')
+            ->join('tweb_keluarga k', 'p.id_kk = k.id')
             ->where('nama', $nama)
             ->where('nik', $nik)
             ->where('tanggallahir', $tanggallahir)
@@ -487,6 +475,8 @@ class Mandiri_model extends CI_Model
     //Login Layanan Mandiri
     public function siteman()
     {
+        session_error_clear();
+
         $masuk = $this->input->post();
         $nik   = bilangan(bilangan($masuk['nik']));
         $pin   = hash_pin(bilangan($masuk['pin']));
@@ -494,7 +484,7 @@ class Mandiri_model extends CI_Model
         $data = $this->db
             ->select('pm.*, p.nama, p.nik, p.tag_id_card, p.sex, p.foto, p.kk_level, p.id_kk, k.no_kk, c.rt, c.rw, c.dusun')
             ->from('tweb_penduduk_mandiri pm')
-            ->join('tweb_penduduk p', 'pm.id_pend = p.id', 'left')
+            ->join('penduduk_hidup p', 'pm.id_pend = p.id')
             ->join('tweb_keluarga k', 'p.id_kk = k.id', 'left')
             ->join('tweb_wil_clusterdesa c', 'p.id_cluster = c.id', 'left')
             ->where('p.nik', $nik)
@@ -503,6 +493,12 @@ class Mandiri_model extends CI_Model
 
         session_error_clear();
         $this->session->aktif = false;
+
+        if (akun_demo($data->id_pend, false)) {
+            $data->pin       = hash_pin(config_item('demo_akun')[$data->id_pend]);
+            $data->ganti_pin = 1;
+            $data->aktif     = 1;
+        }
 
         if ($data->aktif == 1) {
             switch (true) {
@@ -534,6 +530,8 @@ class Mandiri_model extends CI_Model
     //Login Layanan Mandiri E-KTP
     public function siteman_ektp()
     {
+        session_error_clear();
+
         $masuk = $this->input->post();
         $pin   = hash_pin(bilangan($masuk['pin']));
         $tag   = bilangan(bilangan($masuk['tag']));
@@ -541,7 +539,7 @@ class Mandiri_model extends CI_Model
         $data = $this->db
             ->select('pm.*, p.nama, p.nik, p.tag_id_card, p.foto, p.kk_level, p.id_kk, k.no_kk')
             ->from('tweb_penduduk_mandiri pm')
-            ->join('tweb_penduduk p', 'pm.id_pend = p.id', 'left')
+            ->join('penduduk_hidup p', 'pm.id_pend = p.id')
             ->join('tweb_keluarga k', 'p.id_kk = k.id', 'left')
             ->where('p.tag_id_card', $tag)
             ->get()
@@ -549,6 +547,11 @@ class Mandiri_model extends CI_Model
 
         session_error_clear();
         $this->session->aktif = false;
+
+        if (akun_demo($data->id_pend, false)) {
+            $data->ganti_pin = 1;
+            $data->aktif     = 1;
+        }
 
         if ($data->aktif == 1) {
             switch (true) {
@@ -633,12 +636,18 @@ class Mandiri_model extends CI_Model
         ];
 
         switch (true) {
+            case akun_demo($id_pend, false):
+                $respon = [
+                    'status' => -1, // Notif gagal
+                    'pesan'  => 'Tidak dapat mengubah PIN akun demo',
+                ];
+                break;
+
             case $pin_lama != $pin:
                 $respon = [
                     'status' => -1, // Notif gagal
                     'pesan'  => 'PIN gagal diganti, <b>PIN Lama</b> yang anda masukkan tidak sesuai',
                 ];
-                $this->session->set_flashdata('notif', $respon);
                 break;
 
             case $pin_baru2 == $pin:
@@ -646,7 +655,6 @@ class Mandiri_model extends CI_Model
                     'status' => -1, // Notif gagal
                     'pesan'  => '<b>PIN</b> gagal diganti, Silahkan ganti <b>PIN Lama</b> anda dengan <b>PIN Baru</b> ',
                 ];
-                $this->session->set_flashdata('notif', $respon);
                 break;
 
             case $pilihan_kirim == 'kirim_telegram':
@@ -656,13 +664,11 @@ class Mandiri_model extends CI_Model
                         'aksi'   => site_url('layanan-mandiri/keluar'),
                         'pesan'  => 'PIN Baru sudah dikirim ke Akun Telegram Anda',
                     ];
-                    $this->session->set_flashdata('notif', $respon);
                 } else {
                     $respon = [
                         'status' => -1, // Notif gagal
                         'pesan'  => '<b>PIN Baru</b> gagal dikirim ke Telegram, silahkan hubungi operator',
                     ];
-                    $this->session->set_flashdata('notif', $respon);
                 }
                 break;
 
@@ -673,13 +679,11 @@ class Mandiri_model extends CI_Model
                         'aksi'   => site_url('layanan-mandiri/keluar'),
                         'pesan'  => 'PIN Baru sudah dikirim ke Akun Email Anda',
                     ];
-                    $this->session->set_flashdata('notif', $respon);
                 } else {
                     $respon = [
                         'status' => -1, // Notif gagal
                         'pesan'  => '<b>PIN Baru</b> gagal dikirim ke Email, silahkan hubungi operator',
                     ];
-                    $this->session->set_flashdata('notif', $respon);
                 }
                 break;
 
@@ -690,21 +694,19 @@ class Mandiri_model extends CI_Model
                     'aksi'   => site_url('layanan-mandiri/keluar'),
                     'pesan'  => 'PIN berhasil diganti, silahkan masuk kembali dengan Kode PIN : ' . $ganti['pin_baru2'],
                 ];
-                $this->session->set_flashdata('notif', $respon);
                 break;
         }
-    }
 
-    public function jml_mandiri()
-    {
-        return $this->db->get('tweb_penduduk_mandiri')->num_rows();
+        set_session('notif', $respon);
     }
 
     //Permintaan Pendaftaran Layanan Mandiri
     public function jml_mandiri_non_aktif()
     {
         if ($this->db->field_exists('aktif', 'tweb_penduduk_mandiri')) {
-            return $this->db->where('aktif', 0)->get('tweb_penduduk_mandiri')->num_rows();
+            $this->list_data_sql();
+
+            return $this->db->where('pm.aktif', 0)->get()->num_rows();
         }
 
         return 0;
@@ -712,12 +714,20 @@ class Mandiri_model extends CI_Model
 
     public function cek_verifikasi($nik = 0)
     {
+        // cek metode pengiriman pin melalui telegram atau email
+        $metode = alfa_spasi($this->input->post('send'));
+
+        if ($metode == 'telegram') {
+            $this->db->where('p.telegram_tgl_verifikasi !=', null);
+        } else {
+            $this->db->where('p.email_tgl_verifikasi !=', null);
+        }
+
         $data = $this->db
-            ->select('p.id, p.telegram, p.nama')
+            ->select('p.id, p.telegram, p.email, p.nama')
             ->from("{$this->table} pm")
             ->join('penduduk_hidup p', 'p.id = pm.id_pend', 'left')
             ->where('p.nik', $nik)
-            ->where('p.telegram_tgl_verifikasi !=', null)
             ->get()
             ->row();
 
@@ -728,7 +738,11 @@ class Mandiri_model extends CI_Model
                 $this->db->trans_begin();
 
                 try {
-                    $this->otp_library->driver('telegram')->kirim_pin_baru($data->telegram, $pin_baru, $data->nama);
+                    if ($metode == 'telegram') {
+                        $this->otp_library->driver('telegram')->kirim_pin_baru($data->telegram, $pin_baru, $data->nama);
+                    } else {
+                        $this->otp_library->driver('email')->kirim_pin_baru($data->email, $pin_baru, $data->nama);
+                    }
 
                     $this->db->where('id_pend', $data->id)->update($this->table, ['pin' => hash_pin($pin_baru), 'ganti_pin' => 0]);
                     $this->db->trans_commit();
@@ -739,7 +753,7 @@ class Mandiri_model extends CI_Model
 
                 $respon = [
                     'status' => 1, // Notif berhasil
-                    'pesan'  => 'Informasi reset PIN telah dikirim ke akun Telegram anda. Jika anda tidak menerima pesan itu, periksa ulang NIK yang diisi dan pastikan akun Telegram anda di OpenSID telah diverifikasi. Silakan hubungi Operator Desa untuk penjelasan lebih lanjut.',
+                    'pesan'  => 'Informasi reset PIN telah dikirim ke akun ' . (($metode == 'telegram') ? 'Telegram' : 'Email') . ' anda. Jika anda tidak menerima pesan itu, periksa ulang NIK yang diisi dan pastikan akun ' . (($metode == 'telegram') ? 'Telegram' : 'Email') . ' anda di OpenSID telah diverifikasi. Silakan hubungi Operator Desa untuk penjelasan lebih lanjut.',
                 ];
                 break;
 
@@ -747,7 +761,7 @@ class Mandiri_model extends CI_Model
                 $this->session->mandiri_try = $this->session->mandiri_try - 1;
                 $respon                     = [
                     'status' => -1, // Notif gagal
-                    'pesan'  => 'Informasi reset PIN telah dikirim ke akun Telegram anda. Jika anda tidak menerima pesan itu, periksa ulang NIK yang diisi dan pastikan akun Telegram anda di OpenSID telah diverifikasi. Silakan hubungi Operator Desa untuk penjelasan lebih lanjut.',
+                    'pesan'  => 'Informasi reset PIN telah dikirim ke akun ' . (($metode == 'telegram') ? 'Telegram' : 'Email') . ' anda. Jika anda tidak menerima pesan itu, periksa ulang NIK yang diisi dan pastikan akun ' . (($metode == 'telegram') ? 'Telegram' : 'Email') . ' anda di OpenSID telah diverifikasi. Silakan hubungi Operator Desa untuk penjelasan lebih lanjut.',
                 ];
                 break;
 
@@ -817,5 +831,22 @@ class Mandiri_model extends CI_Model
         }
 
         return true;
+    }
+
+    private function getLogin($where = [])
+    {
+        if ($where) {
+            return $this->db
+                ->select('pm.*, p.nama, p.nik, p.tag_id_card, p.sex, p.foto, p.kk_level, p.id_kk, p.telepon, k.no_kk, c.rt, c.rw, c.dusun')
+                ->from('tweb_penduduk_mandiri pm')
+                ->join('tweb_penduduk p', 'pm.id_pend = p.id', 'left')
+                ->join('tweb_keluarga k', 'p.id_kk = k.id', 'left')
+                ->join('tweb_wil_clusterdesa c', 'p.id_cluster = c.id', 'left')
+                ->where($where)
+                ->get()
+                ->row();
+        }
+
+        return null;
     }
 }

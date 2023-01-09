@@ -42,7 +42,7 @@ class Keuangan_grafik_manual_model extends CI_model
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('keuangan_manual_model');
+        $this->load->model(['keuangan_manual_model', 'keuangan_grafik_model']);
     }
 
     public function rp_apbd_widget($thn, $opt = false)
@@ -155,7 +155,7 @@ class Keuangan_grafik_manual_model extends CI_model
     private function data_widget_pendapatan($tahun, $opt = false)
     {
         if ($opt) {
-            $raw_data       = $this->r_pd_widget($tahun, $opt = true);
+            $raw_data       = $this->r_pd_widget($tahun, $opt       = true);
             $res_pendapatan = [];
             $tmp_pendapatan = [];
 
@@ -171,7 +171,7 @@ class Keuangan_grafik_manual_model extends CI_model
                 $tmp_pendapatan[$r['jenis_pendapatan']]['realisasi'] = ($r['realisasi'] ?: 0);
             }
         } else {
-            $raw_data       = $this->r_pd_widget($tahun, $opt = false);
+            $raw_data       = $this->r_pd_widget($tahun, $opt       = false);
             $res_pendapatan = [];
             $tmp_pendapatan = [];
 
@@ -198,7 +198,7 @@ class Keuangan_grafik_manual_model extends CI_model
     private function data_widget_belanja($tahun, $opt = false)
     {
         if ($opt) {
-            $raw_data    = $this->r_bd_widget($tahun, $opt = true);
+            $raw_data    = $this->r_bd_widget($tahun, $opt    = true);
             $res_belanja = [];
             $tmp_belanja = [];
 
@@ -214,7 +214,7 @@ class Keuangan_grafik_manual_model extends CI_model
                 $tmp_belanja[$r['jenis_belanja']]['realisasi'] = ($r['realisasi'] ?: 0);
             }
         } else {
-            $raw_data    = $this->r_bd_widget($tahun, $opt = false);
+            $raw_data    = $this->r_bd_widget($tahun, $opt    = false);
             $res_belanja = [];
             $tmp_belanja = [];
 
@@ -241,7 +241,7 @@ class Keuangan_grafik_manual_model extends CI_model
     private function data_widget_pelaksanaan($tahun, $opt = false)
     {
         if ($opt) {
-            $raw_data        = $this->rp_apbd_widget($tahun, $opt = true);
+            $raw_data        = $this->rp_apbd_widget($tahun, $opt        = true);
             $res_pelaksanaan = [];
             $tmp_pelaksanaan = [];
 
@@ -257,7 +257,7 @@ class Keuangan_grafik_manual_model extends CI_model
                 $tmp_pelaksanaan[$r['jenis_pelaksanaan']]['realisasi'] = ($r['realisasi'] ?: 0);
             }
         } else {
-            $raw_data        = $this->rp_apbd_widget($tahun, $opt = false);
+            $raw_data        = $this->rp_apbd_widget($tahun, $opt        = false);
             $res_pelaksanaan = [];
             $tmp_pelaksanaan = [];
 
@@ -286,8 +286,8 @@ class Keuangan_grafik_manual_model extends CI_model
         $data = $this->keuangan_manual_model->list_tahun_anggaran_manual();
 
         foreach ($data as $tahun) {
-            $res[$tahun]['res_pendapatan']  = $this->data_widget_pendapatan($tahun, $opt = true);
-            $res[$tahun]['res_belanja']     = $this->data_widget_belanja($tahun, $opt = true);
+            $res[$tahun]['res_pendapatan']  = $this->data_widget_pendapatan($tahun, $opt  = true);
+            $res[$tahun]['res_belanja']     = $this->data_widget_belanja($tahun, $opt     = true);
             $res[$tahun]['res_pelaksanaan'] = $this->data_widget_pelaksanaan($tahun, $opt = true);
         }
 
@@ -302,11 +302,11 @@ class Keuangan_grafik_manual_model extends CI_model
 
     private function data_keuangan_tema($tahun)
     {
-        $data['res_pelaksanaan']            = $this->data_widget_pelaksanaan($tahun, $opt = false);
+        $data['res_pelaksanaan']            = $this->data_widget_pelaksanaan($tahun, $opt            = false);
         $data['res_pelaksanaan']['laporan'] = 'APBDes ' . $tahun . ' Pelaksanaan';
-        $data['res_pendapatan']             = $this->data_widget_pendapatan($tahun, $opt = false);
+        $data['res_pendapatan']             = $this->data_widget_pendapatan($tahun, $opt             = false);
         $data['res_pendapatan']['laporan']  = 'APBDes ' . $tahun . ' Pendapatan';
-        $data['res_belanja']                = $this->data_widget_belanja($tahun, $opt = false);
+        $data['res_belanja']                = $this->data_widget_belanja($tahun, $opt                = false);
         $data['res_belanja']['laporan']     = 'APBDes ' . $tahun . ' Pembelanjaan';
 
         return $data;
@@ -335,18 +335,8 @@ class Keuangan_grafik_manual_model extends CI_model
                     continue;
                 }
 
-                $data['judul']     = $raw['nama'];
-                $data['anggaran']  = $raw['anggaran'];
-                $data['realisasi'] = $raw['realisasi'] + $raw['realisasi_pendapatan'] + $raw['realisasi_belanja'];
-
-                if ($data['anggaran'] != 0 && $data['realisasi'] != 0) {
-                    $data['persen'] = $data['realisasi'] / $data['anggaran'] * 100;
-                } elseif ($data['realisasi'] != 0) {
-                    $data['persen'] = 100;
-                } else {
-                    $data['persen'] = 0;
-                }
-                $data['persen'] = round($data['persen'], 2);
+                $data          = $this->keuangan_grafik_model->raw_perhitungan($raw);
+                $data['judul'] = $raw['nama'];
 
                 $result['data_widget'][$keys][] = $data;
             }

@@ -65,7 +65,7 @@ class Keluarga extends Admin_Controller
         redirect($this->controller);
     }
 
-    public function index($p = 1, $o = 0)
+    public function index($p = 1, $o = 1)
     {
         $data['p'] = $p;
         $data['o'] = $o;
@@ -116,8 +116,7 @@ class Keluarga extends Admin_Controller
 
     public function autocomplete()
     {
-        $data = $this->keluarga_model->autocomplete($this->input->post('cari'));
-        $this->json_output($data);
+        return json($this->keluarga_model->autocomplete($this->input->post('cari')));
     }
 
     public function cetak($o = 0, $aksi = '', $privasi_kk = 0)

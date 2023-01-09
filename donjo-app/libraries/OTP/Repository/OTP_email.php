@@ -88,7 +88,7 @@ class OTP_email implements OTP_interface
             return true;
         }
 
-        $token = $this->ci->db->from('tweb_penduduk')
+        $token                                = $this->ci->db->from('tweb_penduduk')
             ->where('email_token', $raw_token = hash('sha256', $otp))
             ->get()
             ->row();
@@ -172,5 +172,24 @@ class OTP_email implements OTP_interface
         return isset($this->ci->db)
             ? ($this->ci->db->where('email', $user['email'])->where_not_in('id', $user['id'])->get('tweb_penduduk')->num_rows() === 0)
             : false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function kirim_pesan($data = [])
+    {
+        $this->ci->email
+            ->from($this->ci->email->smtp_user, 'OpenSID')
+            ->to($data['tujuan'])
+            ->subject($data['subjek'])
+            ->set_mailtype('html')
+            ->message($this->ci->load->view('sms/template_email', ['subjek' => $data['subjek'], 'isi' => $data['isi']], true));
+
+        if ($this->ci->email->send()) {
+            return true;
+        }
+
+        throw new \Exception($this->ci->email->print_debugger());
     }
 }

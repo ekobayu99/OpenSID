@@ -35,6 +35,43 @@
  *
  */
 
+use App\Models\User;
+
+/*
+ *
+ * File ini bagian dari:
+ *
+ * OpenSID
+ *
+ * Sistem informasi desa sumber terbuka untuk memajukan desa
+ *
+ * Aplikasi dan source code ini dirilis berdasarkan lisensi GPL V3
+ *
+ * Hak Cipta 2009 - 2015 Combine Resource Institution (http://lumbungkomunitas.net/)
+ * Hak Cipta 2016 - 2022 Perkumpulan Desa Digital Terbuka (https://opendesa.id)
+ *
+ * Dengan ini diberikan izin, secara gratis, kepada siapa pun yang mendapatkan salinan
+ * dari perangkat lunak ini dan file dokumentasi terkait ("Aplikasi Ini"), untuk diperlakukan
+ * tanpa batasan, termasuk hak untuk menggunakan, menyalin, mengubah dan/atau mendistribusikan,
+ * asal tunduk pada syarat berikut:
+ *
+ * Pemberitahuan hak cipta di atas dan pemberitahuan izin ini harus disertakan dalam
+ * setiap salinan atau bagian penting Aplikasi Ini. Barang siapa yang menghapus atau menghilangkan
+ * pemberitahuan ini melanggar ketentuan lisensi Aplikasi Ini.
+ *
+ * PERANGKAT LUNAK INI DISEDIAKAN "SEBAGAIMANA ADANYA", TANPA JAMINAN APA PUN, BAIK TERSURAT MAUPUN
+ * TERSIRAT. PENULIS ATAU PEMEGANG HAK CIPTA SAMA SEKALI TIDAK BERTANGGUNG JAWAB ATAS KLAIM, KERUSAKAN ATAU
+ * KEWAJIBAN APAPUN ATAS PENGGUNAAN ATAU LAINNYA TERKAIT APLIKASI INI.
+ *
+ * @package   OpenSID
+ * @author    Tim Pengembang OpenDesa
+ * @copyright Hak Cipta 2009 - 2015 Combine Resource Institution (http://lumbungkomunitas.net/)
+ * @copyright Hak Cipta 2016 - 2022 Perkumpulan Desa Digital Terbuka (https://opendesa.id)
+ * @license   http://www.gnu.org/licenses/gpl.html GPL V3
+ * @link      https://github.com/OpenSID/OpenSID
+ *
+ */
+
 defined('BASEPATH') || exit('No direct script access allowed');
 
 class User_model extends CI_Model
@@ -77,7 +114,7 @@ class User_model extends CI_Model
 
         $this->_username = $username = trim($this->input->post('username'));
         $this->_password = $password = trim($this->input->post('password'));
-        $sql             = 'SELECT id, password, id_grup, nama, session FROM user WHERE username = ?';
+        $sql             = 'SELECT * FROM user WHERE username = ?';
 
         // User 'admin' tidak bisa di-non-aktifkan
         if ($username !== 'admin') {
@@ -138,6 +175,7 @@ class User_model extends CI_Model
                 $this->session->siteman_wait = 0;
                 $this->session->siteman_try  = 4;
                 $this->session->fm_key       = $this->set_fm_key($row->id . $row->id_grup . $row->sesi);
+                $this->session->isAdmin      = $row;
                 $this->last_login($this->session->user);
 
                 if (! empty($this->setting->telegram_token) && cek_koneksi_internet()) {
@@ -340,15 +378,8 @@ class User_model extends CI_Model
 
         $data = $this->sterilkan_input($this->input->post());
 
-        $sql                = 'SELECT username FROM user WHERE username = ?';
-        $dbQuery            = $this->db->query($sql, [$data['username']]);
-        $userSudahTerdaftar = $dbQuery->row();
-        $userSudahTerdaftar = is_object($userSudahTerdaftar) ? $userSudahTerdaftar->username : false;
-
-        if ($userSudahTerdaftar !== false) {
-            $this->session->success   = -1;
-            $this->session->error_msg = ' -> Username ini sudah ada. silahkan pilih username lain';
-            redirect('man_user');
+        if (empty($data['pamong_id'])) {
+            $data['pamong_id'] = null;
         }
 
         $pwHash           = $this->generatePasswordHash($data['password']);
@@ -372,7 +403,7 @@ class User_model extends CI_Model
             $data['username'] = alfanumerik($post['username']);
         }
         if (isset($post['nama'])) {
-            $data['nama'] = alfanumerik_spasi($post['nama']);
+            $data['nama'] = nama($post['nama']);
         }
         if (isset($post['email'])) {
             $data['phone'] = htmlentities($post['phone']);
@@ -382,6 +413,9 @@ class User_model extends CI_Model
         }
         if (isset($post['id_grup'])) {
             $data['id_grup'] = $post['id_grup'];
+        }
+        if (isset($post['pamong_id'])) {
+            $data['pamong_id'] = $post['pamong_id'];
         }
         if (isset($post['foto'])) {
             $data['foto'] = $post['foto'];
@@ -403,9 +437,13 @@ class User_model extends CI_Model
         $this->session->success   = 1;
 
         $data = $this->sterilkan_input($this->input->post());
+
+        if (empty($data['pamong_id'])) {
+            $data['pamong_id'] = null;
+        }
+
         if (empty($idUser)) {
-            $this->session->error_msg = ' -> Pengguna tidak ditemukan datanya.';
-            $this->session->success   = -1;
+            session_error(' -> Pengguna tidak ditemukan datanya.');
             redirect('man_user');
         }
 
@@ -413,8 +451,7 @@ class User_model extends CI_Model
             empty($data['username']) || empty($data['password'])
             || empty($data['nama']) || ! in_array((int) ($data['id_grup']), $this->grup_model->list_id_grup())
         ) {
-            $this->session->error_msg = ' -> Nama, Username dan Kata Sandi harus diisi';
-            $this->session->success   = -1;
+            session_error(' -> Nama, Username dan Kata Sandi harus diisi');
             redirect('man_user');
         }
 
@@ -423,7 +460,7 @@ class User_model extends CI_Model
             unset($data['password']);
         }
         // Untuk demo jangan ubah username atau password
-        if ($idUser == 1 && config_item('demo_mode')) {
+        if ($idUser == 1 && (config_item('demo_mode') || ENVIRONMENT === 'development')) {
             unset($data['username'], $data['password']);
         }
         if ($data['password']) {
@@ -431,10 +468,18 @@ class User_model extends CI_Model
             $data['password'] = $pwHash;
         }
 
+        // cek pamong apakah sudah mempunyai user atau belum
+        if ($data['pamong_id'] != null && $data['pamong_id'] != '') {
+            $pamong = $this->db->where('pamong_id', (int) $data['pamong_id'])->where('id != ', $idUser)->get('user')->num_rows();
+            if ($pamong > 0) {
+                session_error(' -> Pamong sudah dipilih oleh user lainnya. Silahkan pilih Pamong Lainnya');
+                redirect('man_user');
+            }
+        }
+
         $data['foto'] = $this->urusFoto($idUser);
         if (! $this->db->where('id', $idUser)->update('user', $data)) {
-            $this->session->success   = -1;
-            $this->session->error_msg = ' -> Gagal memperbarui data di database';
+            session_error(' -> Gagal memperbarui data di database');
         }
         $this->cache->file->delete("{$idUser}_cache_modul");
     }
@@ -587,6 +632,10 @@ class User_model extends CI_Model
         $data['foto'] = $this->urusFoto($id);
         $hasil        = $this->db->where('id', $id)
             ->update('user', $data);
+
+        // Untuk Blade
+        $this->session->isAdmin = User::whereId($id)->first();
+
         status_sukses($hasil, $gagal_saja = true);
     }
 
@@ -765,10 +814,5 @@ class User_model extends CI_Model
         }
 
         return $ada_akses;
-    }
-
-    public function jml_pengguna()
-    {
-        return $this->db->get('user')->num_rows();
     }
 }

@@ -46,7 +46,13 @@ class Keluar_model extends CI_Model
             ->from('log_surat')
             ->get_compiled_select()
                             . ')';
-        $sql[] = '(' . $this->db->select('n.nama')
+        $sql[] = '(' . $this->db->select(
+            '(
+                CASE WHEN n.nama IS NOT NULL
+                    THEN n.nama
+                    ELSE u.nama_non_warga
+                END) as nama'
+        )
             ->from('log_surat u')
             ->join('tweb_penduduk n', 'u.id_pend = n.id', 'left')
             ->get_compiled_select()
@@ -57,9 +63,7 @@ class Keluar_model extends CI_Model
             ->join('tweb_penduduk p', 's.id_pend = p.id', 'left')
             ->get_compiled_select()
                             . ')';
-        $sql = implode('
-		UNION
-		', $sql);
+        $sql  = implode('UNION', $sql);
         $data = $this->db->query($sql)->result_array();
 
         return autocomplete_data_ke_str($data);
@@ -205,19 +209,16 @@ class Keluar_model extends CI_Model
             $berkas_rtf      = $nama_surat . '.rtf';
             $berkas_pdf      = $nama_surat . '.pdf';
             $berkas_php      = $nama_surat . '.php';
-            $berkas_qr       = $nama_surat . '.png';
             $berkas_lampiran = $nama_surat . '_lampiran.pdf';
         } else {
             $berkas_rtf      = $data[$i]['berkas'] . '_' . $data[$i]['nik'] . '_' . date('Y-m-d') . '.rtf';
             $berkas_pdf      = $data[$i]['berkas'] . '_' . $data[$i]['nik'] . '_' . date('Y-m-d') . '.pdf';
             $berkas_php      = $data[$i]['berkas'] . '_' . $data[$i]['nik'] . '_' . date('Y-m-d') . '.php';
-            $berkas_qr       = $data[$i]['berkas'] . '_' . $data[$i]['nik'] . '_' . date('Y-m-d') . '.png';
             $berkas_lampiran = $data[$i]['berkas'] . '_' . $data[$i]['nik'] . '_' . date('Y-m-d') . '._lampiran.pdf';
         }
 
         $data[$i]['file_rtf']      = LOKASI_ARSIP . $berkas_rtf;
         $data[$i]['file_pdf']      = LOKASI_ARSIP . $berkas_pdf;
-        $data[$i]['file_qr']       = LOKASI_MEDIA . $berkas_qr;
         $data[$i]['file_lampiran'] = LOKASI_ARSIP . $berkas_lampiran;
     }
 
@@ -418,11 +419,6 @@ class Keluar_model extends CI_Model
         }
 
         return $data;
-    }
-
-    public function jml_surat_keluar()
-    {
-        return $this->db->select('count(*) as jml')->get('log_surat')->row()->jml;
     }
 
     public function list_tahun_surat()

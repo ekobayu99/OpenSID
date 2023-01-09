@@ -125,7 +125,7 @@ class Penduduk_model extends MY_Model
             $this->db
                 ->group_start()
                 ->where("{$kolom} IS NOT NULL")
-                ->or_where("{$kolom} <>", '')
+                ->where("{$kolom} !=", '')
                 ->group_end();
         } elseif ($kf == BELUM_MENGISI) {
             $this->db
@@ -513,8 +513,8 @@ class Penduduk_model extends MY_Model
 				WHEN u.status_kawin <> 2 THEN k.nama
 				ELSE
 					CASE
-                        WHEN u.akta_perkawinan IS NULL THEN 'KAWIN BELUM TERCATAT'
-						ELSE 'KAWIN TERCATAT'
+                    WHEN (u.akta_perkawinan IS NULL OR u.akta_perkawinan = '') AND u.tanggalperkawinan IS NULL THEN 'KAWIN BELUM TERCATAT'
+                    ELSE 'KAWIN TERCATAT'
 					END
 			END) AS kawin,
 			(DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(u.tanggallahir)), '%Y')+0) AS umur,
@@ -753,8 +753,6 @@ class Penduduk_model extends MY_Model
         $data['cacat_id']           = $data['cacat_id'] ?: null;
         $data['sakit_menahun_id']   = $data['sakit_menahun_id'] ?: null;
         $data['kk_level']           = $data['kk_level'];
-        $data['email']              = empty($data['email']) ? null : strip_tags($data['email']);
-        $data['telegram']           = empty($data['telegram']) ? null : strip_tags($data['telegram']);
         if (empty($data['id_asuransi']) || $data['id_asuransi'] == 1) {
             $data['no_asuransi'] = null;
         }
@@ -775,6 +773,10 @@ class Penduduk_model extends MY_Model
         }
         if ($data['warganegara_id'] == 1 || empty($data['dokumen_kitas'])) {
             $data['dokumen_kitas'] = null;
+        }
+        // Tanggal cetak ktp harus <= tanggal input
+        if ($data['tanggal_cetak_ktp'] > date('Y-m-d')) {
+            $data['tanggal_cetak_ktp'] = date('Y-m-d');
         }
 
         switch ($data['status_kawin']) {
@@ -804,13 +806,16 @@ class Penduduk_model extends MY_Model
         $data['dokumen_pasport']      = nomor_surat_keputusan($data['dokumen_pasport']);
         $data['nama_ayah']            = nama($data['nama_ayah']);
         $data['nama_ibu']             = nama($data['nama_ibu']);
-        $data['telepon']              = preg_replace('/[^0-9 \-\+\.]/', '', strip_tags($data['telepon']));
         $data['alamat_sebelumnya']    = strip_tags($data['alamat_sebelumnya']);
         $data['alamat_sekarang']      = strip_tags($data['alamat_sekarang']);
         $data['akta_perkawinan']      = nomor_surat_keputusan($data['akta_perkawinan']);
         $data['akta_perceraian']      = nomor_surat_keputusan($data['akta_perceraian']);
         $data['bpjs_ketenagakerjaan'] = nomor_surat_keputusan($data['bpjs_ketenagakerjaan']);
         $data['suku']                 = nama_terbatas($data['suku']);
+
+        $data['telepon']  = empty($data['telepon']) ? null : bilangan($data['telepon']);
+        $data['email']    = empty($data['email']) ? null : email($data['email']);
+        $data['telegram'] = empty($data['telegram']) ? null : bilangan($data['telegram']);
 
         $valid = [];
         if (preg_match("/[^a-zA-Z '\\.,\\-]/", $data['nama'])) {
@@ -925,7 +930,7 @@ class Penduduk_model extends MY_Model
             return;
         }
 
-        unset($data['file_foto'], $data['old_foto'], $data['kk_level_lama'], $data['dusun'], $data['rw'], $data['no_kk']);
+        unset($data['file_foto'], $data['old_foto'], $data['nik_lama'], $data['kk_level_lama'], $data['dusun'], $data['rw'], $data['no_kk']);
 
         $maksud_tujuan = $data['maksud_tujuan_kedatangan'];
         unset($data['maksud_tujuan_kedatangan']);
@@ -1124,9 +1129,12 @@ class Penduduk_model extends MY_Model
 
     public function update_status_dasar($id = 0)
     {
-        $data['status_dasar'] = $_POST['status_dasar'];
-        $data['updated_at']   = date('Y-m-d H:i:s');
-        $data['updated_by']   = $this->session->user;
+        akun_demo($id);
+
+        $data['kelahiran_anak_ke'] = (int) $this->input->post('anak_ke');
+        $data['status_dasar']      = $this->input->post('status_dasar');
+        $data['updated_at']        = date('Y-m-d H:i:s');
+        $data['updated_by']        = $this->session->user;
         $this->db
             ->where('id', $id)
             ->update('tweb_penduduk', $data);
@@ -1137,15 +1145,21 @@ class Penduduk_model extends MY_Model
             'id_pend'        => $id,
             'no_kk'          => $penduduk['no_kk'],
             'nama_kk'        => $penduduk['kepala_kk'],
-            'tgl_peristiwa'  => rev_tgl($_POST['tgl_peristiwa']),
-            'tgl_lapor'      => rev_tgl($_POST['tgl_lapor']),
+            'tgl_peristiwa'  => rev_tgl($this->input->post('tgl_peristiwa')),
+            'tgl_lapor'      => rev_tgl($this->input->post('tgl_lapor')),
             'kode_peristiwa' => $data['status_dasar'],
-            'catatan'        => $_POST['catatan'],
-            'meninggal_di'   => $_POST['meninggal_di'],
+            'catatan'        => alfanumerik_spasi($this->input->post('catatan')),
+            'meninggal_di'   => alfanumerik_spasi($this->input->post('meninggal_di')),
+            'jam_mati'       => $this->input->post('jam_mati'),
+            'sebab'          => (int) ($this->input->post('sebab')),
+            'penolong_mati'  => (int) ($this->input->post('penolong_mati')),
+            'akta_mati'      => $this->input->post('akta_mati'),
         ];
+
         if ($log['kode_peristiwa'] == 3) {
-            $log['ref_pindah']    = ! empty($_POST['ref_pindah']) ? $_POST['ref_pindah'] : 1;
-            $log['alamat_tujuan'] = $_POST['alamat_tujuan'];
+            $pindah               = $this->input->post('ref_pindah');
+            $log['ref_pindah']    = ! empty($pindah) ? $pindah : 1;
+            $log['alamat_tujuan'] = $this->input->post('alamat_tujuan');
         }
         $id_log_penduduk = $this->tulis_log_penduduk_data($log);
 
@@ -1181,9 +1195,7 @@ class Penduduk_model extends MY_Model
 
     public function delete($id = '', $semua = false)
     {
-        if (! $semua) {
-            $this->session->success = 1;
-        }
+        akun_demo($id);
 
         // Catat data penduduk yg di hapus di log_hapus_penduduk
         $penduduk_hapus = $this->get_penduduk($id);
@@ -1273,8 +1285,8 @@ class Penduduk_model extends MY_Model
 				WHEN u.status_kawin <> 2 THEN k.nama
 				ELSE
 					case
-                        WHEN u.akta_perkawinan IS NULL THEN 'KAWIN BELUM TERCATAT'
-						ELSE 'KAWIN TERCATAT'
+                    WHEN (u.akta_perkawinan IS NULL OR u.akta_perkawinan = '') AND u.tanggalperkawinan IS NULL THEN 'KAWIN BELUM TERCATAT'
+                            ELSE 'KAWIN TERCATAT'
 					END
 			END) AS kawin,
 			DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(`tanggallahir`)), '%Y')+0  AS umur,
@@ -1761,11 +1773,6 @@ class Penduduk_model extends MY_Model
         }
 
         return ($umur > 16) || (! empty($data['status_kawin']) && $data['status_kawin'] != 1);
-    }
-
-    public function jml_penduduk()
-    {
-        return $this->db->select('count(id) as jml')->where('status', '1')->get('tweb_penduduk')->row()->jml;
     }
 
     public function get_suku()

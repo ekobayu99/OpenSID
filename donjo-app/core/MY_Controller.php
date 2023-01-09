@@ -35,8 +35,25 @@
  *
  */
 
+use App\Models\Pesan;
+
 defined('BASEPATH') || exit('No direct script access allowed');
 
+/**
+ * @property CI_Benchmark        $benchmark
+ * @property CI_Config           $config
+ * @property CI_DB_query_builder $db
+ * @property CI_Input            $input
+ * @property CI_Lang             $lang
+ * @property CI_Loader           $loader
+ * @property CI_log              $log
+ * @property CI_Output           $output
+ * @property CI_Router           $router
+ * @property CI_Security         $security
+ * @property CI_Session          $session
+ * @property CI_URI              $uri
+ * @property CI_Utf8             $utf8
+ */
 class MY_Controller extends CI_Controller
 {
     // Common data
@@ -53,9 +70,20 @@ class MY_Controller extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        $error = $this->session->db_error;
+        if ($error['code'] == 1049 && ! $this->db) {
+            return;
+        }
+        /*
+        | Tambahkan model yg akan diautoload di sini.
+        | donjo-app/config/autoload.php digunakan untuk autoload model untuk mengisi data awal
+        | pada waktu install, di mana database masih kosong
+        */
+        $this->load->model(['config_model', 'setting_model']);
         $this->controller = strtolower($this->router->fetch_class());
         $this->setting_model->init();
-        $this->header = $this->config_model->get_data();
+        $this->header  = $this->config_model->get_data();
+        $this->request = $this->input->post();
     }
 
     // Bersihkan session cluster wilayah
@@ -67,17 +95,6 @@ class MY_Controller extends CI_Controller
             $this->session->unset_userdata($session);
         }
     }
-
-    public function json_output($parm, $header = 200)
-    {
-        $this->output
-            ->set_status_header($header)
-            ->set_content_type('application/json', 'utf-8')
-            ->set_output(json_encode($parm))
-            ->_display();
-
-        exit();
-    }
 }
 
 class Web_Controller extends MY_Controller
@@ -86,73 +103,43 @@ class Web_Controller extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        // Gunakan tema klasik kalau setting tema kosong atau folder di desa/themes untuk tema pilihan tidak ada
-        // if (empty($this->setting->web_theme) OR !is_dir(FCPATH.'desa/themes/'.$this->setting->web_theme))
-        $theme        = preg_replace('/desa\\//', '', strtolower($this->setting->web_theme));
-        $theme_folder = preg_match('/desa\\//', strtolower($this->setting->web_theme)) ? 'desa/themes' : 'themes';
-        if (empty($this->setting->web_theme) || !is_dir(FCPATH . $theme_folder . '/' . $theme)) {
-            $this->theme        = 'klasik';
-            $this->theme_folder = 'themes';
-        } else {
-            $this->theme        = $theme;
-            $this->theme_folder = $theme_folder;
+        if ($this->setting->offline_mode == 2) {
+            $this->view_maintenance();
+        } elseif ($this->setting->offline_mode == 1) {
+            $this->load->model('user_model');
+            $grup = $this->user_model->sesi_grup($this->session->sesi);
+            if (! $this->user_model->hak_akses($grup, 'web', 'b')) {
+                $this->view_maintenance();
+            }
         }
+
+        $this->load->model('theme_model');
+        $this->theme        = $this->theme_model->tema;
+        $this->theme_folder = $this->theme_model->folder;
+
         // Variabel untuk tema
-        $this->template                  = "../../{$this->theme_folder}/{$this->theme}/template.php";
-        $this->includes['folder_themes'] = '../../' . $this->theme_folder . '/' . $this->theme;
+        $this->set_template();
+        $this->includes['folder_themes'] = "../../{$this->theme_folder}/{$this->theme}";
 
         $this->load->model('web_menu_model');
     }
 
-    /*
-     * Jika file theme/view tidak ada, gunakan file klasik/view
-     * Supaya tidak semua layout atau partials harus diulangi untuk setiap tema
-     */
-    public static function fallback_default($theme, $view)
-    {
-        $view         = trim($view, '/');
-        $theme_folder = self::get_instance()->theme_folder;
-        $theme_view   = "../../{$theme_folder}/{$theme}/{$view}";
-
-        if (!is_file(APPPATH . 'views/' . $theme_view)) {
-            $theme_view = "../../themes/klasik/{$view}";
-        }
-
-        return $theme_view;
-    }
-
     /**
-     * Set Template
-     * sometime, we want to use different template for different page
-     * for example, 404 template, login template, full-width template, sidebar template, etc.
-     * so, use this function
-     * --------------------------------------
+     * set_template function
      *
-     * @since	Version 3.1.0
+     * @param string $template_file
      *
-     * @param	string, template file name
-     * @param mixed $template_file
-     *
-     * @return chained object
+     * @return void
      */
-    public function set_template($template_file = 'template.php')
+    public function set_template($template_file = 'template')
     {
-        // make sure that $template_file has .php extension
-        $template_file = substr($template_file, -4) == '.php' ? $template_file : ($template_file . '.php');
-
-        $template_file_path = FCPATH . $this->theme_folder . '/' . $this->theme . '/' . $template_file;
-        if (is_file($template_file_path)) {
-            $this->template = "../../{$this->theme_folder}/{$this->theme}/{$template_file}";
-        } else {
-            $this->template = '../../themes/klasik/' . $template_file;
-        }
+        $this->template = "../../{$this->theme_folder}/{$this->theme}/{$template_file}";
     }
 
     public function _get_common_data(&$data)
     {
         $this->load->library('statistik_pengunjung');
 
-        $this->load->model('theme_model');
         $this->load->model('first_menu_m');
         $this->load->model('teks_berjalan_model');
         $this->load->model('first_artikel_m');
@@ -195,6 +182,22 @@ class Web_Controller extends MY_Controller
         foreach ($list_kolom as $kolom) {
             $data[$kolom] = $this->security->xss_clean($data[$kolom]);
         }
+    }
+
+    private function view_maintenance()
+    {
+        $this->load->model('pamong_model');
+
+        $data['main']         = $this->header;
+        $data['pamong_kades'] = $this->pamong_model->get_ttd();
+
+        if (file_exists(DESAPATH . 'offline_mode.php')) {
+            include DESAPATH . 'offline_mode.php';
+        } else {
+            include VIEWPATH . 'offline_mode.php';
+        }
+
+        exit();
     }
 }
 
@@ -271,7 +274,8 @@ class Admin_Controller extends MY_Controller
             session_error('Fitur ini tidak aktif');
             redirect($_SERVER['HTTP_REFERER']);
         }
-        if (!$this->user_model->hak_akses($this->grup, $this->controller, 'b')) {
+
+        if (! $this->user_model->hak_akses($this->grup, $this->controller, 'b')) {
             if (empty($this->grup)) {
                 $_SESSION['request_uri'] = $_SERVER['REQUEST_URI'];
                 redirect('siteman');
@@ -281,12 +285,14 @@ class Admin_Controller extends MY_Controller
                 redirect('main');
             }
         }
-        $this->cek_pengumuman();
+        $cek_kotak_pesan                        = $this->db->table_exists('pesan') && $this->db->table_exists('pesan_detail');
         $this->header                           = $this->header_model->get_data();
         $this->header['notif_permohonan_surat'] = $this->notif_model->permohonan_surat_baru();
         $this->header['notif_inbox']            = $this->notif_model->inbox_baru();
         $this->header['notif_komentar']         = $this->notif_model->komentar_baru();
         $this->header['notif_langganan']        = $this->notif_model->status_langganan();
+        $this->header['notif_pesan_opendk']     = $cek_kotak_pesan ? Pesan::where('sudah_dibaca', '=', 0)->where('diarsipkan', '=', 0)->count() : 0;
+        $this->header['notif_pengumuman']       = $this->cek_pengumuman();
     }
 
     private function cek_pengumuman()
@@ -299,10 +305,14 @@ class Admin_Controller extends MY_Controller
         if ($this->grup == 1) {
             $notifikasi = $this->notif_model->get_semua_notif();
             foreach ($notifikasi as $notif) {
-                $this->pengumuman = $this->notif_model->notifikasi($notif);
-                if ($notif['jenis'] == 'persetujuan') break;
+                $pengumuman = $this->notif_model->notifikasi($notif);
+                if ($notif['jenis'] == 'persetujuan') {
+                    break;
+                }
             }
         }
+
+        return $pengumuman;
     }
 
     // Untuk kasus di mana method controller berbeda hak_akses. Misalnya 'setting_qrcode' readonly, tetapi 'setting/analisis' boleh ubah

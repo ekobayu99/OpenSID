@@ -56,7 +56,7 @@ class Migrasi_fitur_premium_2101 extends MY_model
             [
                 'key'        => 'api_opendk_server',
                 'value'      => '',
-                'keterangan' => 'Alamat Server OpenDK (contoh: https://demo.opendk.my.id)',
+                'keterangan' => 'Alamat Server OpenDK (contoh: https://demodk.opendesa.id)',
             ],
             [
                 'key'        => 'api_opendk_key',
@@ -82,10 +82,9 @@ class Migrasi_fitur_premium_2101 extends MY_model
         // setting_aplikasi.valud diperpanjang
         $field = [
             'value' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 1000,
-                'null'       => true,
-                'default'    => null,
+                'type'    => 'TEXT',
+                'null'    => true,
+                'default' => null,
             ],
         ];
 

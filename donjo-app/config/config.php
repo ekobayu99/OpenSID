@@ -259,7 +259,7 @@ $config['allow_get_array'] = true;
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = ENVIRONMENT === 'development' ? 1 : 1;
+$config['log_threshold'] = 1;
 
 /*
 |--------------------------------------------------------------------------
@@ -270,7 +270,7 @@ $config['log_threshold'] = ENVIRONMENT === 'development' ? 1 : 1;
 | application/logs/ directory. Use a full server path with trailing slash.
 |
 */
-$config['log_path'] = FCPATH . 'logs/';
+$config['log_path'] = STORAGEPATH . '/logs/';
 
 /*
 |--------------------------------------------------------------------------
@@ -597,4 +597,28 @@ $config['server_layanan'] = 'https://layanan.opendesa.id';
 |
 */
 $config['rilis_umum']    = 'https://api.github.com/repos/opensid/opensid/releases/latest';
-$config['rilis_premium'] = 'https://api.github.com/repos/opensid/berputar/releases/latest';
+$config['rilis_premium'] = 'https://api.github.com/repos/opensid/rilis-premium/releases/latest';
+
+/*
+|--------------------------------------------------------------------------
+| API IDM Kemendesa
+|--------------------------------------------------------------------------
+|
+*/
+$config['api_idm'] = 'https://idm.kemendesa.go.id/open/api/desa/rumusan';
+
+/*
+|--------------------------------------------------------------------------
+| Path View Blade
+|--------------------------------------------------------------------------
+|
+*/
+$config['views_blade'] = RESOURCESPATH . '/views/';
+
+/*
+|--------------------------------------------------------------------------
+| Path Cache Balde
+|--------------------------------------------------------------------------
+|
+*/
+$config['cache_blade'] = STORAGEPATH . '/framework/views/';

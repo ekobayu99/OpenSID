@@ -37,12 +37,15 @@
 
 defined('BASEPATH') || exit('No direct script access allowed');
 
+use App\Models\Pembangunan;
+
 class Admin_pembangunan extends Admin_Controller
 {
     public function __construct()
     {
         parent::__construct();
         $this->modul_ini = 220;
+        $this->load->library('zip');
         $this->load->library('upload');
         $this->load->model('pembangunan_model', 'pembangunan');
         $this->load->model('pembangunan_dokumentasi_model', 'dokumentasi');
@@ -65,7 +68,7 @@ class Admin_pembangunan extends Admin_Controller
 
             $this->pembangunan->set_tipe(''); // Ambil semua pembangunan
 
-            $this->json_output([
+            return json([
                 'draw'            => $this->input->post('draw'),
                 'recordsTotal'    => $this->pembangunan->get_data()->count_all_results(),
                 'recordsFiltered' => $this->pembangunan->get_data($search, $tahun)->count_all_results(),
@@ -176,6 +179,7 @@ class Admin_pembangunan extends Admin_Controller
         $data['pamong_ttd']     = $this->pamong_model->get_data($request['pamong_ttd']);
         $data['pamong_ketahui'] = $this->pamong_model->get_data($request['pamong_ketahui']);
         $data['aksi']           = $aksi;
+        $data['ekstensi']       = 'doc';
         $data['file']           = 'Laporan Pembangunan';
         $data['isi']            = ADMIN . '/pembangunan/cetak';
 
@@ -214,7 +218,7 @@ class Admin_pembangunan extends Admin_Controller
             $order  = $this->dokumentasi::ORDER_ABLE[$this->input->post('order[0][column]')];
             $dir    = $this->input->post('order[0][dir]');
 
-            $this->json_output([
+            return json([
                 'draw'            => $this->input->post('draw'),
                 'recordsTotal'    => $this->dokumentasi->get_data($id)->count_all_results(),
                 'recordsFiltered' => $this->dokumentasi->get_data($id, $search)->count_all_results(),

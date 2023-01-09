@@ -7,11 +7,7 @@
 			<?= $this->setting->admin_title . ' ' . ucwords($this->setting->sebutan_desa) . (($desa['nama_desa']) ? ' ' . $desa['nama_desa'] : '') . get_dynamic_title_page_from_path() ?>
 		</title>
 		<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-		<?php if (is_file(LOKASI_LOGO_DESA . 'favicon.ico')): ?>
-			<link rel="shortcut icon" href="<?= base_url(LOKASI_LOGO_DESA . 'favicon.ico') ?>"/>
-		<?php else: ?>
-			<link rel="shortcut icon" href="<?= base_url('favicon.ico') ?>"/>
-		<?php endif ?>
+		<link rel="shortcut icon" href="<?= favico_desa() ?>"/>
 		<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="<?= base_url('rss.xml') ?>" />
 
 		<!-- Bootstrap 3.3.7 -->
@@ -54,6 +50,14 @@
 		<link rel="stylesheet" href="<?= asset('css/leaflet.groupedlayercontrol.min.css') ?>">
 		<link rel="stylesheet" href="<?= asset('css/peta.css') ?>">
 		<link rel="stylesheet" href="<?= asset('css/toastr.min.css') ?>">
+
+		<style>
+			@media (max-width: 576px) {
+				.komunikasi-opendk {
+					display: none !important;
+				}
+			}
+		</style>
 
 		<!-- Untuk ubahan style desa -->
 		<?php if (is_file('desa/css/siteman.css')): ?>
@@ -126,7 +130,17 @@
 									</a>
 								</li>
 							<?php endif ?>
-							<?php if ($this->CI->cek_hak_akses('b', 'permohonan_surat_admin')): ?>
+							<?php if (in_array('343', array_column($modul, 'id')) && can('b', 'opendk_pesan')) : ?>
+								<li class="komunikasi-opendk">
+									<a href="<?=  route('opendk_pesan.clear') ?>">
+										<span><i class="fa fa-university fa-lg" title="Komunikasi OpenDk"></i>&nbsp;</span>
+										<?php if ($notif_pesan_opendk) : ?>
+											<span class="badge" id="b_opendkpesan"><?=  $notif_pesan_opendk ?></span>
+										<?php endif ?>
+									</a>
+								</li>
+							<?php endif ?>
+							<?php if (can('b', 'permohonan_surat_admin')): ?>
 								<li>
 									<a href="<?= site_url('kp_permohonan_surat_admin/clear'); ?>">
 										<span><i class="fa fa-print fa-lg" title="Permohonan Surat"></i>&nbsp;</span>
@@ -136,7 +150,7 @@
 									</a>
 								</li>
 							<?php endif ?>
-							<?php if ($this->CI->cek_hak_akses('b', 'komentar')): ?>
+							<?php if (can('b', 'komentar')): ?>
 								<li>
 									<a href="<?= site_url('komentar') ?>">
 										<span><i class="fa fa-commenting-o fa-lg" title="Komentar"></i>&nbsp;</span>
@@ -146,7 +160,7 @@
 									</a>
 								</li>
 							<?php endif ?>
-							<?php if ($this->CI->cek_hak_akses('b', 'mailbox')): ?>
+							<?php if (can('b', 'mailbox')): ?>
 								<li>
 									<a href="<?= site_url('mailbox') ?>">
 										<span><i class="fa fa-envelope-o fa-lg" title="Pesan Masuk"></i>&nbsp;</span>
@@ -179,18 +193,23 @@
 									</li>
 								</ul>
 							</li>
-							<?php if ($this->controller == 'pelanggan' && $this->CI->cek_hak_akses('u', $this->controller)): ?>
-								<li>
-									<a href="#" data-remote="false" data-toggle="modal" data-title="Pengaturan <?= ucwords($this->controller); ?>" data-target="#pengaturan">
-										<span><i class="fa fa-gear"></i>&nbsp;</span>
-									</a>
-								</li>
-							<?php endif; ?>
+							<li>
+								<a href="#" data-toggle="control-sidebar" title="Informasi">
+									<span><i class="fa fa-question-circle fa-lg""></i>&nbsp;</span>
+								</a>
+							</li>
+							<?php if ($this->header['kategori'] && can('u', $this->controller)): ?>
+							<li>
+								<a href="#" data-remote="false" data-toggle="modal" data-title="Pengaturan <?= ucwords($this->controller) ?>" data-target="#pengaturan">
+									<span><i class="fa fa-gear"></i>&nbsp;</span>
+								</a>
+							</li>
+							<?php endif ?>
 						</ul>
 					</div>
 				</nav>
 			</header>
-			<input id="success-code" type="hidden" value="<?= $_SESSION['success']?>">
+
 			<!-- Untuk menampilkan modal bootstrap umum -->
 			<div class="modal fade" id="modalBox" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 				<div class="modal-dialog">
@@ -205,19 +224,22 @@
 			</div>
 
 			<!-- Untuk menampilkan pengaturan -->
-			<?php if ($this->controller == 'pelanggan' && $this->CI->cek_hak_akses('u', $this->controller)): ?>
+			<?php if ($this->header['kategori'] && can('u', $this->controller)): ?>
 				<div class="modal fade" id="pengaturan" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 					<div class="modal-dialog">
 						<div class="modal-content">
 							<div class="modal-header">
 								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-								<h4 class="modal-title" id="myModalLabel"> Pengaturan <?= ucwords($this->controller) ?></h4>
+								<h4 class="modal-title" id="myModalLabel"> Pengaturan <?= ucwords(str_replace('_', ' ', $this->header['kategori'])) ?></h4>
 							</div>
-							<?php $this->load->view('global/modal_setting', ['kategori' => [$this->controller]]) ?>
+							<?php $this->load->view('global/modal_setting', ['kategori' => [$this->header['kategori']]]) ?>
 						</div>
 					</div>
 				</div>
 			<?php endif ?>
 
-			<!-- Untuk menampilkan dialog pengumuman -->
-			<?= $this->pengumuman ?>
+			<?php
+                if ($notif_pengumuman):
+                    $this->load->view('notif/pengumuman', $notif_pengumuman);
+                endif
+            ?>

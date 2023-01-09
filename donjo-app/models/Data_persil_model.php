@@ -35,6 +35,8 @@
  *
  */
 
+require_once APPPATH . '/libraries/MyException.php';
+
 defined('BASEPATH') || exit('No direct script access allowed');
 
 class Data_persil_model extends MY_Model
@@ -322,6 +324,9 @@ class Data_persil_model extends MY_Model
                 ->result_array();
             $data = array_combine(array_column($data, 'id'), $data);
         }
+        if (empty($data)) {
+            throw new Referensi_kosong('ref_persil_kelas');
+        }
 
         return $data;
     }
@@ -354,10 +359,5 @@ class Data_persil_model extends MY_Model
         $mutasi['path']           = $data['path'];
         $mutasi['id_peta']        = ($data['area_tanah'] == 1 || $data['area_tanah'] == null) ? $data['id_peta'] : null;
         $this->db->insert('mutasi_cdesa', $mutasi);
-    }
-
-    public function jml_persil()
-    {
-        return $this->db->get('persil')->num_rows();
     }
 }

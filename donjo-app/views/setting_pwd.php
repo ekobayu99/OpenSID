@@ -11,12 +11,7 @@
 		<?php if (is_file('desa/pengaturan/siteman/siteman.css')): ?>
 			<link rel='Stylesheet' href="<?= base_url('desa/pengaturan/siteman/siteman.css') ?>">
 		<?php endif; ?>
-		<?php if (is_file(LOKASI_LOGO_DESA . 'favicon.ico')): ?>
-			<link rel="shortcut icon" href="<?= base_url(LOKASI_LOGO_DESA . 'favicon.ico') ?>"/>
-		<?php else: ?>
-			<link rel="shortcut icon" href="<?= base_url('favicon.ico') ?>"/>
-		<?php endif ?>
-
+		<link rel="shortcut icon" href="<?= favico_desa() ?>"/>
 		<style type="text/css">
 			span.input-group-btn {
 				position: absolute;
@@ -63,7 +58,7 @@
 								<form action="<?=site_url("user_setting/update_password/{$main['id']}")?>" method="POST" id="validasi" enctype="multipart/form-data">
 									<div class="form-group">
 										<div class="input-group">
-											<input class="form-control input-sm required" type="password" name="pass_lama" placeholder="Kata Sandi Lama" ></input>
+											<input class="form-control input-sm required" type="password" name="pass_lama" autocomplete="off" placeholder="Kata Sandi Lama" ></input>
 											<span class="input-group-btn">
 												<button class="btn btn-default reveal" type="button"><i class="glyphicon glyphicon-eye-open"></i></button>
 											</span>
@@ -71,7 +66,7 @@
 									</div>
 									<div class="form-group">
 										<div class="input-group">
-											<input class="form-control input-sm required pwdLengthNist" type="password" id="pass_baru" name="pass_baru" placeholder="Kata Sandi Baru"></input>
+											<input class="form-control input-sm required pwdLengthNist" type="password" id="pass_baru" name="pass_baru" autocomplete="off" placeholder="Kata Sandi Baru"></input>
 											<span class="input-group-btn">
 												<button class="btn btn-default reveal" type="button"><i class="glyphicon glyphicon-eye-open"></i></button>
 											</span>
@@ -79,7 +74,7 @@
 									</div>
 									<div class="form-group">
 										<div class="input-group">
-											<input class="form-control input-sm required pwdLengthNist" type="password" id="pass_baru1" name="pass_baru1" placeholder="Kata Sandi Baru (Ulangi)"></input>
+											<input class="form-control input-sm required pwdLengthNist" type="password" id="pass_baru1" name="pass_baru1" autocomplete="off" placeholder="Kata Sandi Baru (Ulangi)"></input>
 											<span class="input-group-btn">
 												<button class="btn btn-default reveal" type="button"><i class="glyphicon glyphicon-eye-open"></i></button>
 											</span>

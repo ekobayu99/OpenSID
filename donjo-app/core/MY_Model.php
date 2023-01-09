@@ -37,6 +37,23 @@
 
 defined('BASEPATH') || exit('No direct script access allowed');
 
+/**
+ * @property CI_Benchmark        $benchmark
+ * @property CI_Config           $config
+ * @property CI_DB_query_builder $db
+ * @property CI_DB_forge         $dbforge
+ * @property CI_Input            $input
+ * @property CI_Lang             $lang
+ * @property CI_Loader           $load
+ * @property CI_Loader           $loader
+ * @property CI_log              $log
+ * @property CI_Output           $output
+ * @property CI_Router           $router
+ * @property CI_Security         $security
+ * @property CI_Session          $session
+ * @property CI_URI              $uri
+ * @property CI_Utf8             $utf8
+ */
 class MY_Model extends CI_Model
 {
     /**
@@ -45,7 +62,9 @@ class MY_Model extends CI_Model
     public function __construct()
     {
         parent::__construct();
+
         $this->load->driver('cache');
+        $this->load->dbforge();
     }
 
     // Konversi url menu menjadi slug tanpa mengubah data
@@ -57,7 +76,6 @@ class MY_Model extends CI_Model
 
         switch ($cut[0]) {
             case 'artikel':
-
                 $data = $this->first_artikel_m->get_artikel($cut[1]);
                 $url  = ($data) ? ($cut[0] . '/' . buat_slug($data)) : ($url);
                 break;
@@ -74,6 +92,7 @@ class MY_Model extends CI_Model
                 break;
 
             case 'data-kelompok':
+            case 'data-lembaga':
                 $this->load->model('kelompok_model');
                 $data = $this->kelompok_model->get_kelompok($cut[1]);
                 $url  = ($data) ? ($cut[0] . '/' . $data['slug']) : ($url);
@@ -100,6 +119,8 @@ class MY_Model extends CI_Model
             case 'pembangunan':
             case 'galeri':
             case 'pengaduan':
+            case 'data-vaksinasi':
+            case 'pemerintah':
                 break;
 
             default:
@@ -175,7 +196,7 @@ class MY_Model extends CI_Model
         return true;
     }
 
-    public function tambah_indeks($tabel, $kolom, $index = 'UNIQUE')
+    public function tambahIndeks($tabel, $kolom, $index = 'UNIQUE')
     {
         if ($index == 'UNIQUE') {
             $duplikat = $this->db
@@ -189,8 +210,6 @@ class MY_Model extends CI_Model
             if ($duplikat > 0) {
                 session_error('--> Silahkan Cek <a href="' . site_url('info_sistem') . '">Info Sistem > Log</a>.');
                 log_message('error', "Data kolom {$kolom} pada tabel {$tabel} ada yang duplikat dan perlu diperbaiki sebelum migrasi dilanjutkan.");
-
-                return false;
             }
         }
 
@@ -211,7 +230,7 @@ class MY_Model extends CI_Model
             ->where('table_schema', $db)
             ->where('table_name', $tabel)
             ->where('index_name', $kolom)
-            ->get()->row()->ada;
+            ->get()->row()->ada > 0;
     }
 
     public function tambah_modul($modul)
@@ -224,7 +243,7 @@ class MY_Model extends CI_Model
         // Hak Akses Default Operator
         // Hanya lakukan jika tabel grup_akses sudah ada. Tabel ini belum ada sebelum Migrasi_fitur_premium_2105.php
         if ($this->db->table_exists('grup_akses')) {
-            $hasil = $hasil && $this->grup_akses(2, $modul['id'], 3);
+            $hasil = $hasil && $this->grupAkses(2, $modul['id'], 3);
         }
 
         // Hapus cache menu navigasi
@@ -233,7 +252,7 @@ class MY_Model extends CI_Model
         return $hasil;
     }
 
-    public function grup_akses($id_grup, $id_modul, $akses)
+    public function grupAkses($id_grup, $id_modul, $akses)
     {
         return $this->db->insert('grup_akses', ['id_grup' => $id_grup, 'id_modul' => $id_modul, 'akses' => $akses]);
     }
@@ -257,9 +276,11 @@ class MY_Model extends CI_Model
 
     public function tambah_setting($setting)
     {
-        $sql = $this->db->insert_string('setting_aplikasi', $setting) . ' ON DUPLICATE KEY UPDATE keterangan = VALUES(keterangan), jenis = VALUES(jenis), kategori = VALUES(kategori)';
+        $sql   = $this->db->insert_string('setting_aplikasi', $setting) . ' ON DUPLICATE KEY UPDATE keterangan = VALUES(keterangan), jenis = VALUES(jenis), kategori = VALUES(kategori)';
+        $hasil = $this->db->query($sql);
+        $this->cache->hapus_cache_untuk_semua('setting_aplikasi');
 
-        return $this->db->query($sql);
+        return $hasil;
     }
 
     // fungsi untuk format paginasi
@@ -276,7 +297,7 @@ class MY_Model extends CI_Model
     }
 
     // Buat FOREIGN KEY $nama_constraint $di_tbl untuk $fk menunjuk $ke_tbl di $ke_kolom
-    public function tambah_foreign_key($nama_constraint, $di_tbl, $fk, $ke_tbl, $ke_kolom)
+    public function tambahForeignKey($nama_constraint, $di_tbl, $fk, $ke_tbl, $ke_kolom)
     {
         $query = $this->db
             ->from('INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS')
@@ -288,6 +309,24 @@ class MY_Model extends CI_Model
             $hasil = $hasil && $this->dbforge->add_column($di_tbl, [
                 "CONSTRAINT `{$nama_constraint}` FOREIGN KEY (`{$fk}`) REFERENCES `{$ke_tbl}` (`{$ke_kolom}`) ON DELETE CASCADE ON UPDATE CASCADE",
             ]);
+        }
+
+        return $hasil;
+    }
+
+    // Hapus FOREIGN KEY $tabel, $nama_constraint
+    public function hapus_foreign_key($tabel, $nama_constraint, $drop)
+    {
+        $query = $this->db
+            ->from('INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS')
+            ->where('CONSTRAINT_SCHEMA', $this->db->database)
+            ->where('REFERENCED_TABLE_NAME', $tabel)
+            ->where('CONSTRAINT_NAME', $nama_constraint)
+            ->get();
+
+        $hasil = true;
+        if ($query->num_rows() > 0) {
+            $hasil = $hasil && $this->db->query("ALTER TABLE `{$drop}` DROP FOREIGN KEY `{$nama_constraint}`");
         }
 
         return $hasil;
@@ -310,5 +349,45 @@ class MY_Model extends CI_Model
         log_message('error', 'Gagal Jalankan ' . $migrasi);
 
         return false;
+    }
+
+    public function timestamps($tabel = '', $creator = false)
+    {
+        $hasil  = true;
+        $fields = [];
+
+        // Kolom created_at
+        if (! $this->db->field_exists('created_at', $tabel)) {
+            $fields[] = 'created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP';
+        }
+
+        // Kolom created_by
+        if ($creator && ! $this->db->field_exists('created_by', $tabel)) {
+            $fields['created_by'] = [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'null'       => true,
+            ];
+        }
+
+        // Kolom updated_at
+        if (! $this->db->field_exists('updated_at', $tabel)) {
+            $fields[] = 'updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+        }
+
+        // Kolom updated_by
+        if ($creator && ! $this->db->field_exists('updated_by', $tabel)) {
+            $fields['updated_by'] = [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'null'       => true,
+            ];
+        }
+
+        if ($fields) {
+            $hasil = $hasil && $this->dbforge->add_column($tabel, $fields);
+        }
+
+        return $hasil;
     }
 }

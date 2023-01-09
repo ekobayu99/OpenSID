@@ -83,26 +83,6 @@ switch (ENVIRONMENT) {
 
 /*
  *---------------------------------------------------------------
- * CATATAN
- *---------------------------------------------------------------
- *
- * Setiap kali melakukan define folder,
- * Lakukan juga di file assets/filemanager/init.php
- * 
- */
-
-/*
- *---------------------------------------------------------------
- * DESA DIRECTORY NAME
- *---------------------------------------------------------------
- *
- * This variable must contain the name of your "desa" directory.
- * Set the path if it is not in the same directory as this file.
- */
-	$desa_path = 'desa';
-
-/*
- *---------------------------------------------------------------
  * SYSTEM DIRECTORY NAME
  *---------------------------------------------------------------
  *
@@ -142,27 +122,6 @@ $application_folder = 'donjo-app';
  * NO TRAILING SLASH!
  */
 $view_folder = '';
-
-/**
- *---------------------------------------------------------------
- * WEB DIRECTORY NAME
- *---------------------------------------------------------------
- */
-	$web_folder = 'fweb';
-
-/**
- *---------------------------------------------------------------
- * MANDIRI DIRECTORY NAME
- *---------------------------------------------------------------
- */
-	$mandiri_folder = 'fmandiri';
-
-/**
- *---------------------------------------------------------------
- * ADMIN DIRECTORY NAME
- *---------------------------------------------------------------
- */
-	$admin_folder = 'fadmin';
 
 /*
  * --------------------------------------------------------------------
@@ -314,15 +273,7 @@ if (! isset($view_folder[0]) && is_dir(APPPATH . 'views' . DIRECTORY_SEPARATOR))
 
 define('VIEWPATH', $view_folder . DIRECTORY_SEPARATOR);
 
-/**
- * Custom path
- */
-	define('WEB', $web_folder);
-    define('MANDIRI', $mandiri_folder);
-	define('ADMIN', $admin_folder);
-	define('DESAPATH', $desa_path.DIRECTORY_SEPARATOR);
-
-/**
+/*
  * --------------------------------------------------------------------
  * LOAD THE BOOTSTRAP FILE
  * --------------------------------------------------------------------

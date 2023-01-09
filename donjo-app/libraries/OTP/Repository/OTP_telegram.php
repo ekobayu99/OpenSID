@@ -92,7 +92,7 @@ class OTP_telegram implements OTP_interface
             return true;
         }
 
-        $token = $this->ci->db->from('tweb_penduduk')
+        $token                                   = $this->ci->db->from('tweb_penduduk')
             ->where('telegram_token', $raw_token = hash('sha256', $otp))
             ->get()
             ->row();
@@ -185,5 +185,27 @@ class OTP_telegram implements OTP_interface
         return isset($this->ci->db)
             ? ($this->ci->db->where('telegram', $user['telegram'])->where_not_in('id', $user['id'])->get('tweb_penduduk')->num_rows() === 0)
             : false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function kirim_pesan($data = [])
+    {
+        try {
+            $this->telegram->sendMessage([
+                'chat_id' => $data['tujuan'],
+                'text'    => <<<EOD
+                    SUBJEK :
+                    {$data['subjek']}
+
+                    ISI :
+                    {$data['isi']}
+                    EOD,
+                'parse_mode' => 'Markdown',
+            ]);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }

@@ -77,6 +77,7 @@ define('LINK_TIPE', serialize([
     '5'  => 'Halaman Statis Lainnya',
     '6'  => 'Artikel Keuangan',
     '7'  => 'Kelompok',
+    '11' => 'Lembaga',
     '9'  => 'Data Suplemen',
     '10' => 'Status IDM',
     '99' => 'Eksternal',
@@ -132,11 +133,13 @@ define('STAT_LAINNYA', serialize([
     'informasi_publik' => 'Informasi Publik',
     'peta'             => 'Peta',
     'data_analisis'    => 'Data Analisis',
-    'status-sdgs'      => 'SDGs Desa',
-    'lapak'            => 'Lapak Desa',
+    'status-sdgs'      => 'SDGs [Desa]',
+    'lapak'            => 'Lapak [Desa]',
     'pembangunan'      => 'Pembangunan',
     'galeri'           => 'Galeri',
     'pengaduan'        => 'Pengaduan',
+    'data-vaksinasi'   => 'Vaksin',
+    'pemerintah'       => 'Pemerintah [Desa]',
 ]));
 
 // Jabatan Kelompok
@@ -198,6 +201,23 @@ define('JENIS_VAKSIN', serialize([
 define('STATUS', serialize([
     1 => 'Ya',
     2 => 'Tidak',
+]));
+
+// Sebab Kematian
+define('SEBAB', serialize([
+    1 => 'Sakit biasa / tua',
+    2 => 'Wabah Penyakit',
+    3 => 'Kecelakaan',
+    4 => 'Kriminalitas',
+    5 => 'Bunuh Diri',
+    6 => 'Lainnya',
+]));
+
+define('PENOLONG_MATI', serialize([
+    '1' => 'Dokter',
+    '2' => 'Tenaga Kesehatan',
+    '3' => 'Kepolisian',
+    '4' => 'Lainnya',
 ]));
 
 class Referensi_model extends CI_Model
