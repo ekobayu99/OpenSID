@@ -74,169 +74,169 @@ $config = [
     ],
 
     'config' => <<<'EOS'
-        <?php
-        // ----------------------------------------------------------------------------
-        // Konfigurasi aplikasi dalam berkas ini merupakan setting konfigurasi tambahan
-        // SID. Letakkan setting konfigurasi ini di desa/config/config.php.
-        // ----------------------------------------------------------------------------
+<?php
+// ----------------------------------------------------------------------------
+// Konfigurasi aplikasi dalam berkas ini merupakan setting konfigurasi tambahan
+// SID. Letakkan setting konfigurasi ini di desa/config/config.php.
+// ----------------------------------------------------------------------------
 
-        // Uncomment jika situs ini untuk demo. Pada demo, user admin tidak bisa dihapus
-        // dan username/password tidak bisa diubah
+// Uncomment jika situs ini untuk demo. Pada demo, user admin tidak bisa dihapus
+// dan username/password tidak bisa diubah
 
-        // $config['demo_mode'] = false;
+// $config['demo_mode'] = false;
 
-        // Setting ini untuk menentukan user yang dipercaya. User dengan id di setting ini
-        // dapat membuat artikel berisi video yang aktif ditampilkan di Web.
-        // Misalnya, ganti dengan id = 1 jika ingin membuat pengguna admin sebagai pengguna terpecaya.
-        $config['user_admin'] = 0;
+// Setting ini untuk menentukan user yang dipercaya. User dengan id di setting ini
+// dapat membuat artikel berisi video yang aktif ditampilkan di Web.
+// Misalnya, ganti dengan id = 1 jika ingin membuat pengguna admin sebagai pengguna terpecaya.
+$config['user_admin'] = 0;
 
 
-        // config email
-        $config['protocol']       = 'smtp';  // mail	mail, sendmail, or smtp	The mail sending protocol.
-        $config['smtp_host']      = '';      // SMTP Server Address.
-        $config['smtp_user']      = '';      // SMTP Username.
-        $config['smtp_pass']      = '';      // SMTP Password.
-        $config['smtp_port']      = '';      // SMTP Port."
-        EOS,
+// config email
+$config['protocol']       = 'smtp';  // mail	mail, sendmail, or smtp	The mail sending protocol.
+$config['smtp_host']      = '';      // SMTP Server Address.
+$config['smtp_user']      = '';      // SMTP Username.
+$config['smtp_pass']      = '';      // SMTP Password.
+$config['smtp_port']      = '';      // SMTP Port."
+EOS,
 
     'database' => <<<'EOS'
-        <?php
-        // -------------------------------------------------------------------------
-        //
-        // Letakkan username, password dan database sebetulnya di file ini.
-        // File ini JANGAN di-commit ke GIT. TAMBAHKAN di .gitignore
-        // -------------------------------------------------------------------------
+<?php
+// -------------------------------------------------------------------------
+//
+// Letakkan username, password dan database sebetulnya di file ini.
+// File ini JANGAN di-commit ke GIT. TAMBAHKAN di .gitignore
+// -------------------------------------------------------------------------
 
-        // Data Konfigurasi MySQL yang disesuaikan
+// Data Konfigurasi MySQL yang disesuaikan
 
-        $db['default']['hostname'] = 'localhost';
-        $db['default']['username'] = 'root';
-        $db['default']['password'] = '';
-        $db['default']['port']     = 3306;
-        $db['default']['database'] = 'premium';
+$db['default']['hostname'] = 'localhost';
+$db['default']['username'] = 'root';
+$db['default']['password'] = '';
+$db['default']['port']     = 3306;
+$db['default']['database'] = 'premium';
 
-        /*
-        | Untuk setting koneksi database 'Strict Mode'
-        | Sesuaikan dengan ketentuan hosting
-        */
-        $db['default']['stricton'] = TRUE;
-        EOS,
+/*
+| Untuk setting koneksi database 'Strict Mode'
+| Sesuaikan dengan ketentuan hosting
+*/
+$db['default']['stricton'] = TRUE;
+EOS,
 
     'index_html' => <<<'EOS'
-        <html>
-        <head>
-            <title>403 Forbidden</title>
-        </head>
-        <body>
+<html>
+<head>
+    <title>403 Forbidden</title>
+</head>
+<body>
 
-        <p>Directory access is forbidden.</p>
+<p>Directory access is forbidden.</p>
 
-        </body>
-        </html>
-        EOS,
+</body>
+</html>
+EOS,
 
     'htaccess1' => <<<'EOS'
-        <FilesMatch "\.(php|php\.|php3?|phtml|phpjpeg)$">
-            Order Allow,Deny
-            Deny from all
-        </FilesMatch>
-        EOS,
+<FilesMatch "\.(php|php\.|php3?|phtml|phpjpeg)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+EOS,
 
     'htaccess2' => <<<'EOS'
-        <FilesMatch "\.(rtf|pdf|jpe?g|png|php|php\.|php3?|phtml|phpjpeg)$">
-            Order Allow,Deny
-            Deny from all
-        </FilesMatch>
-        EOS,
+<FilesMatch "\.(rtf|pdf|jpe?g|png|php|php\.|php3?|phtml|phpjpeg)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+EOS,
 
     'offline_mode' => <<<'EOS'
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Offline Mode - <?= ucwords($this->setting->sebutan_desa).' '.$main['nama_desa'] ?></title>
-        </head>
-        <body>
-            <br/><br/><br/>
-            <div align="center">
-                <img class="profile-user-img img-responsive img-circle" src="<?= gambar_desa($main['logo']); ?>" alt="Logo">
-                <p>
-                    Selamat datang di Halaman Situs Resmi <?= ucwords($this->setting->sebutan_desa).' '.$main['nama_desa'] ?><br/>
-                    Kami mohon maaf untuk sementara halaman tidak dapat di akses, dikarenakan sedang adanya perbaikan oleh tim terkait.
-                </p>
-                <p>
-                    Jika ada keperluan yang mendesak silakan langsung datang ke Kantor <?= ucwords($this->setting->sebutan_desa)?>.<br>
-                    Alamat : <?= $main['alamat_kantor'] ?><br>
-                    Email : <?= $main['email_desa'] ?><br>
-                    Telepon : <?= $main['telepon'] ?>
-                </p>
-                <p>
-                    <?= ucwords($pamong_kades['jabatan']).' '.$main['nama_desa'] ?>
-                    <br>
-                    <u><b><?= $main['nama_kepala_desa'] ?></b></u><br>
-                    NIP. <?= $main['nip_kepala_desa'] ?>
-                </p>
-            </div>
-        </body>
-        </html>
-        EOS,
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Offline Mode - <?= ucwords($this->setting->sebutan_desa).' '.$main['nama_desa'] ?></title>
+</head>
+<body>
+    <br/><br/><br/>
+    <div align="center">
+        <img class="profile-user-img img-responsive img-circle" src="<?= gambar_desa($main['logo']); ?>" alt="Logo">
+        <p>
+            Selamat datang di Halaman Situs Resmi <?= ucwords($this->setting->sebutan_desa).' '.$main['nama_desa'] ?><br/>
+            Kami mohon maaf untuk sementara halaman tidak dapat di akses, dikarenakan sedang adanya perbaikan oleh tim terkait.
+        </p>
+        <p>
+            Jika ada keperluan yang mendesak silakan langsung datang ke Kantor <?= ucwords($this->setting->sebutan_desa)?>.<br>
+            Alamat : <?= $main['alamat_kantor'] ?><br>
+            Email : <?= $main['email_desa'] ?><br>
+            Telepon : <?= $main['telepon'] ?>
+        </p>
+        <p>
+            <?= ucwords($pamong_kades['jabatan']).' '.$main['nama_desa'] ?>
+            <br>
+            <u><b><?= $main['nama_kepala_desa'] ?></b></u><br>
+            NIP. <?= $main['nip_kepala_desa'] ?>
+        </p>
+    </div>
+</body>
+</html>
+EOS,
 
     'siteman_css' => <<<'EOS'
-        /*
-        * File ini berisi CSS ubahan desa untuk tampilan siteman
-        * Letakkan file ini di: desa/css/siteman.css
-        */
+/*
+* File ini berisi CSS ubahan desa untuk tampilan siteman
+* Letakkan file ini di: desa/css/siteman.css
+*/
 
-        /* Sebagai contoh:
-        * - Perubahan css di bawah memungkinkan penggunaan gambar untuk latar belakang halaman siteman.
-        *   Gambar yang digunakan harus ditempatkan di desa/css/images/latar_login.jpg
-        *
-        */
+/* Sebagai contoh:
+* - Perubahan css di bawah memungkinkan penggunaan gambar untuk latar belakang halaman siteman.
+*   Gambar yang digunakan harus ditempatkan di desa/css/images/latar_login.jpg
+*
+*/
 
-        /*
-        * Ubah latar login/siteman pd halaman admin Pengaturan > Aplikasi, upload dan ganti latar login sesuia yg diinginkan.
-        *
-        */
-        body.login{
-        background: url(images/latar_login.jpg) no-repeat center fixed; /*gambar background */
-            background-size: cover;
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
-        }
-        /* Contoh mengubah warna latar belakang deretan tombol menu utama
-        */
-        div.contentm{
-            background-color: #f4f4da; /* misalnya coba ganti menjadi #c8f1c8 */
-        }
-        EOS,
+/*
+* Ubah latar login/siteman pd halaman admin Pengaturan > Aplikasi, upload dan ganti latar login sesuia yg diinginkan.
+*
+*/
+body.login{
+background: url(images/latar_login.jpg) no-repeat center fixed; /*gambar background */
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+}
+/* Contoh mengubah warna latar belakang deretan tombol menu utama
+*/
+div.contentm{
+    background-color: #f4f4da; /* misalnya coba ganti menjadi #c8f1c8 */
+}
+EOS,
 
     'siteman_mandiri_css' => <<<'EOS'
-        /*
-        * File ini berisi CSS ubahan desa untuk tampilan siteman
-        * Letakkan file ini di: desa/css/siteman.css
-        */
+/*
+* File ini berisi CSS ubahan desa untuk tampilan siteman
+* Letakkan file ini di: desa/css/siteman.css
+*/
 
-        /* Sebagai contoh:
-        * - Perubahan css di bawah memungkinkan penggunaan gambar untuk latar belakang halaman siteman.
-        *   Gambar yang digunakan harus ditempatkan di desa/css/images/latar_login.jpg
-        *
-        */
+/* Sebagai contoh:
+* - Perubahan css di bawah memungkinkan penggunaan gambar untuk latar belakang halaman siteman.
+*   Gambar yang digunakan harus ditempatkan di desa/css/images/latar_login.jpg
+*
+*/
 
-        /*
-        * Ubah latar login/siteman pd halaman admin Pengaturan > Aplikasi, upload dan ganti latar login sesuia yg diinginkan.
-        *
-        */
-        body.login{
-        background: url(images/latar_login.jpg) no-repeat center fixed; /*gambar background */
-            background-size: cover;
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
-        }
-        /* Contoh mengubah warna latar belakang deretan tombol menu utama
-        */
-        div.contentm{
-            background-color: #f4f4da; /* misalnya coba ganti menjadi #c8f1c8 */
-        }
-        EOS,
+/*
+* Ubah latar login/siteman pd halaman admin Pengaturan > Aplikasi, upload dan ganti latar login sesuia yg diinginkan.
+*
+*/
+body.login{
+background: url(images/latar_login.jpg) no-repeat center fixed; /*gambar background */
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+}
+/* Contoh mengubah warna latar belakang deretan tombol menu utama
+*/
+div.contentm{
+    background-color: #f4f4da; /* misalnya coba ganti menjadi #c8f1c8 */
+}
+EOS,
 ];
