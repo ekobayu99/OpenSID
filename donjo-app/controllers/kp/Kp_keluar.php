@@ -295,8 +295,17 @@ class Kp_keluar extends Admin_Controller
 			$isi_qr = base_url() . "surat/detil/" . $id_log_surat;
 			$logoqr1 = gambar_desa($desa['logo'], false, $file = true);
 
-			$create_qr_code = qrcode_generate($pathqr, $namaqr1, $isi_qr, $logoqr1, 3, "#000000");
-			$alamat_qr_code = base_url() . "desa/upload/media/" . $namaqr1 . ".png";
+
+			$create_qr_code = qrcode_generate([
+				'sizeqr' => 3,
+				'foreqr' => "#000000",
+				'isiqr' => $isi_qr,
+				'logoqr' => $logoqr1,
+			], true);
+			$data['alamat_qr_code'] = $create_qr_code;
+
+			// $create_qr_code = qrcode_generate($pathqr, $namaqr1, $isi_qr, $logoqr1, 3, "#000000");
+			// $alamat_qr_code = base_url() . "desa/upload/media/" . $namaqr1 . ".png";
 
 			ob_start();
 			include $file_format_surat;

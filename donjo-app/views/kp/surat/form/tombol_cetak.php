@@ -26,7 +26,7 @@
 
 		$.ajax({
 			type: "POST",
-			url: base_url + "index.php/kp_surat/simpan_data_surat",
+			url: BASE_URL + "index.php/kp_surat/simpan_data_surat",
 			data: data,
 			success: function(res) {
 				console.log(res);

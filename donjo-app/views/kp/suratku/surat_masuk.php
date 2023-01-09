@@ -30,6 +30,7 @@
                                                 <div class="input-group input-group-sm pull-right">
                                                     <?= form_dropdown('tahun', [
                                                         '' => '-Pilih tahun masuk-',
+                                                        '2023' => 'Surat Masuk Tahun 2023',
                                                         '2022' => 'Surat Masuk Tahun 2022',
                                                         '2021' => 'Surat Masuk Tahun 2021',
                                                         '2020' => 'Surat Masuk Tahun 2020'
@@ -113,7 +114,7 @@
             type: "GET",
             url: uri,
             beforeSend: function() {
-                $("#table_surat").html('<tr><td colspan="5"><i class="fa fa-spin fa-spinner"></i> Memuat...</td></tr>');
+                $("#table_surat").html('<tr><td colspan="7"><i class="fa fa-spin fa-spinner"></i> Memuat...</td></tr>');
             },
             success: function(r, textStatus, jqXHR) {
                 let htm = '';
@@ -232,10 +233,12 @@
 
         let tahun = $("#tahun").val();
 
-        let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/simpan_surat_masuk'); ?>";
-        if (tahun == "2020") {
-            uri = "<?= base_url('index.php/kp_suratku_surat_masuk/simpan_surat_masuk/2020'); ?>";
-        }
+        console.log(tahun);
+
+        let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/simpan_surat_masuk'); ?>/"+tahun;
+        // if (tahun == "2020") {
+        //     uri = "<?= base_url('index.php/kp_suratku_surat_masuk/simpan_surat_masuk/2020'); ?>";
+        // }
 
         $.ajax({
             type: "POST",
