@@ -69,6 +69,7 @@ class Surat_masuk_suratku_model extends CI_Model {
             'id_surat'=>$params['id_surat'],
             'penerima_id_instansi'=>$params['penerima_id_instansi'],
             'penerima_id_user'=>$params['penerima_id_user'],
+            'is_tembusan'=>$params['is_tembusan'],
         ];
 
         $url = $this->suratku_api[$tahun]['detil_surat'];
@@ -99,6 +100,7 @@ class Surat_masuk_suratku_model extends CI_Model {
             'id_surat'=>$params['id_surat'],
             'penerima_id_instansi'=>$params['penerima_id_instansi'],
             'penerima_id_user'=>$params['penerima_id_user'],
+            'is_tembusan'=>$params['is_tembusan'],
         ];
 
         $url = $this->suratku_api[$tahun]['status_baca'];
@@ -128,6 +130,7 @@ class Surat_masuk_suratku_model extends CI_Model {
             'id_surat'=>$params['id_surat'],
             'penerima_id_instansi'=>$params['penerima_id_instansi'],
             'penerima_id_user'=>$params['penerima_id_user'],
+            'is_tembusan'=>$params['is_tembusan'],
         ];
 
         $url = $this->suratku_api[$tahun]['status_berinomor'];

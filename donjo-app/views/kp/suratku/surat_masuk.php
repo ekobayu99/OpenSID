@@ -52,6 +52,7 @@
                                                             <th>Aksi</th>
                                                             <th>Dibaca</th>
                                                             <th>Diagenda</th>
+                                                            <th>Tembusan</th>
                                                             <th>Surat Dari</th>
                                                             <th>Tgl Surat / Nomor</th>
                                                             <th>Perihal</th>
@@ -82,6 +83,7 @@
                 <input type="hidden" name="mdl_detil_surat_id_surat" id="mdl_detil_surat_id_surat">
                 <input type="hidden" name="mdl_detil_surat_penerima_id_instansi" id="mdl_detil_surat_penerima_id_instansi">
                 <input type="hidden" name="mdl_detil_surat_penerima_id_user" id="mdl_detil_surat_penerima_id_user">
+                <input type="hidden" name="mdl_detil_surat_penerima_is_tembusan" id="mdl_detil_surat_penerima_is_tembusan">
                 <div class='modal-header'>
                     <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
                     <h4 class='modal-title' id='myModalLabel'><i class='fa fa-search'></i> &nbsp;&nbsp;Detil Surat</h4>
@@ -111,41 +113,36 @@
         let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/index_ajax/'); ?>" + tahun;
 
         $.ajax({
-            type: "GET",
-            url: uri,
-            beforeSend: function() {
-                $("#table_surat").html('<tr><td colspan="7"><i class="fa fa-spin fa-spinner"></i> Memuat...</td></tr>');
-            },
-            success: function(r, textStatus, jqXHR) {
-                let htm = '';
-                let no = 1;
-                let belum_dibaca = 0;
-                let belum_diagenda = 0;
-                $.each(r.results, function(k, v) {
-                    let tgl = v.tgl_surat;
-                    let pc_tgl = tgl.split('-');
-                    let new_tgl = pc_tgl[2] + "-" + pc_tgl[1] + "-" + pc_tgl[0];
-                    let link_detil = '<a href="#" onclick="return detil_surat(\'' + v.id_surat + '\', \'' + v.penerima_id_instansi + '\', \'' + v.penerima_id_user + '\');" class="btn btn-success btn-sm btn-flat"><i class="fa fa-search"></i> Detil</a>';
-                    let is_read = (v.is_read == "1") ? '<div class="btn btn-success btn-sm"><i class="fa fa-check"></i></div>' : '<div class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i></div>';
-                    let is_agenda = (v.is_agenda == "1") ? '<div class="btn btn-success btn-sm"><i class="fa fa-check"></i></div>' : '<div class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i></div>';
-                    if (v.is_read != "1") {
-                        belum_dibaca++;
-                    }
-                    if (v.is_agenda != "1") {
-                        belum_diagenda++;
-                    }
+                type: "GET",
+                url: uri,
+                beforeSend: function() {
+                    $("#table_surat").html('<tr><td colspan="7"><i class="fa fa-spin fa-spinner"></i> Memuat...</td></tr>');
+                },
+                success: function(r, textStatus, jqXHR) {
+                    let htm = '';
+                    let no = 1;
+                    let belum_dibaca = 0;
+                    let belum_diagenda = 0;
+                    $.each(r.results, function(k, v) {
+                            let tgl = v.tgl_surat;
+                            let pc_tgl = tgl.split('-');
+                            let new_tgl = pc_tgl[2] + "-" + pc_tgl[1] + "-" + pc_tgl[0];
+                            let link_detil = '<a href="#" onclick="return detil_surat(\'' + v.id_surat + '\', \'' + v.penerima_id_instansi + '\', \'' + v.penerima_id_user + '\', ' + v.is_tembusan);
+                        " class="
+                        btn btn - success btn - sm btn - flat "><i class="
+                        fa fa - search "></i> Detil</a>';
+                        let is_read = (v.is_read == "1") ? '<div class="btn btn-success btn-sm"><i class="fa fa-check"></i></div>' : '<div class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i></div>';
+                        let is_agenda = (v.is_agenda == "1") ? '<div class="btn btn-success btn-sm"><i class="fa fa-check"></i></div>' : '<div class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i></div>';
+                        let is_tembusan = (v.is_tembusan == "1") ? '<div class="btn btn-success btn-sm"><i class="fa fa-check"></i></div>' : '<div class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i></div>';
+                        if (v.is_read != "1") {
+                            belum_dibaca++;
+                        }
+                        if (v.is_agenda != "1") {
+                            belum_diagenda++;
+                        }
 
-                    htm += '<tr>';
-                    htm += '<td class="text-center">' + no + '</td>';
-                    htm += '<td class="text-center">' + link_detil + '</td>';
-                    htm += '<td>' + is_read + '</i></td>';
-                    htm += '<td>' + is_agenda + '</i></td>';
-                    htm += '<td>' + v.nm_instansi_pengirim + '</td>';
-                    htm += '<td>' + new_tgl + '<br><i>No: ' + v.nomor_surat + '</i></td>';
-                    htm += '<td>' + v.judul + '<br><i>' + v.deskripsi + '</i></td>';
-                    htm += '</tr>';
-                    no++;
-                });
+                        htm += '<tr>'; htm += '<td class="text-center">' + no + '</td>'; htm += '<td class="text-center">' + link_detil + '</td>'; htm += '<td>' + is_read + '</i></td>'; htm += '<td>' + is_agenda + '</i></td>'; htm += '<td>' + is_tembusan + '</i></td>'; htm += '<td>' + v.nm_instansi_pengirim + '</td>'; htm += '<td>' + new_tgl + '<br><i>No: ' + v.nomor_surat + '</i></td>'; htm += '<td>' + v.judul + '<br><i>' + v.deskripsi + '</i></td>'; htm += '</tr>'; no++;
+                    });
 
                 $("#belum_dibaca").html(belum_dibaca);
                 $("#belum_diagenda").html(belum_diagenda);
@@ -158,21 +155,23 @@
 
     }
 
-    function detil_surat(id_surat, id_instansi_penerima, id_user_penerima) {
+    function detil_surat(id_surat, id_instansi_penerima, id_user_penerima, is_tembusan) {
         $("#mdl_detil_surat_id_surat").val(id_surat);
         $("#mdl_detil_surat_penerima_id_instansi").val(id_instansi_penerima);
         $("#mdl_detil_surat_penerima_id_user").val(id_user_penerima);
+        $("#mdl_detil_surat_penerima_is_tembusan").val(is_tembusan);
 
         let tahun = $("#tahun").val();
 
         let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/detil_surat/'); ?>" + tahun;
-        
+
         $.ajax({
             type: "POST",
             data: {
                 id_surat: id_surat,
                 penerima_id_instansi: id_instansi_penerima,
-                penerima_id_user: id_user_penerima
+                penerima_id_user: id_user_penerima,
+                is_tembusan: is_tembusan,
             },
             url: uri,
             success: function(r, textStatus, jqXHR) {
@@ -235,7 +234,7 @@
 
         console.log(tahun);
 
-        let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/simpan_surat_masuk'); ?>/"+tahun;
+        let uri = "<?= base_url('index.php/kp_suratku_surat_masuk/simpan_surat_masuk'); ?>/" + tahun;
         // if (tahun == "2020") {
         //     uri = "<?= base_url('index.php/kp_suratku_surat_masuk/simpan_surat_masuk/2020'); ?>";
         // }
