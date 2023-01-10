@@ -222,6 +222,7 @@ class Surat_masuk_suratku_model extends CI_Model {
         unset($data['mdl_detil_surat_id_surat']);
         unset($data['mdl_detil_surat_penerima_id_instansi']);
         unset($data['mdl_detil_surat_penerima_id_user']);
+        unset($data['mdl_detil_surat_penerima_is_tembusan']);
 
         // file_put_contents("Tmpfile.zip", fopen("http://someurl/file.zip", 'r'));
 

@@ -150,7 +150,7 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 			'id_surat' => $p['mdl_detil_surat_id_surat'],
 			'penerima_id_instansi' => $p['mdl_detil_surat_penerima_id_instansi'],
 			'penerima_id_user' => $p['mdl_detil_surat_penerima_id_user'],
-			'is_tembusan' => $p['is_tembusan']
+			'is_tembusan' => $p['mdl_detil_surat_penerima_is_tembusan']
 		];
 
 		if ($tahun == 0) {

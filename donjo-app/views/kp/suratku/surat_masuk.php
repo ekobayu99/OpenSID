@@ -124,13 +124,11 @@
                     let belum_dibaca = 0;
                     let belum_diagenda = 0;
                     $.each(r.results, function(k, v) {
-                            let tgl = v.tgl_surat;
-                            let pc_tgl = tgl.split('-');
-                            let new_tgl = pc_tgl[2] + "-" + pc_tgl[1] + "-" + pc_tgl[0];
-                            let link_detil = '<a href="#" onclick="return detil_surat(\'' + v.id_surat + '\', \'' + v.penerima_id_instansi + '\', \'' + v.penerima_id_user + '\', ' + v.is_tembusan);
-                        " class="
-                        btn btn - success btn - sm btn - flat "><i class="
-                        fa fa - search "></i> Detil</a>';
+                        let tgl = v.tgl_surat;
+                        let pc_tgl = tgl.split('-');
+                        let new_tgl = pc_tgl[2] + "-" + pc_tgl[1] + "-" + pc_tgl[0];
+                        let link_detil = '<a href="#" onclick="return detil_surat(\'' + v.id_surat + '\', \'' + v.penerima_id_instansi + '\', \'' + v.penerima_id_user + '\', ' + v.is_tembusan+');" class="btn btn-success btn-sm btn-flat"><i class="fa fa-search"></i> Detil</a>';
+                        
                         let is_read = (v.is_read == "1") ? '<div class="btn btn-success btn-sm"><i class="fa fa-check"></i></div>' : '<div class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i></div>';
                         let is_agenda = (v.is_agenda == "1") ? '<div class="btn btn-success btn-sm"><i class="fa fa-check"></i></div>' : '<div class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i></div>';
                         let is_tembusan = (v.is_tembusan == "1") ? '<div class="btn btn-success btn-sm"><i class="fa fa-check"></i></div>' : '<div class="btn btn-warning btn-sm"><i class="fa fa-minus-circle"></i></div>';
