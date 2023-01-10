@@ -112,7 +112,8 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 		$params = [
 			'id_surat' => $p['id_surat'],
 			'penerima_id_instansi' => $p['penerima_id_instansi'],
-			'penerima_id_user' => $p['penerima_id_user']
+			'penerima_id_user' => $p['penerima_id_user'],
+			'is_tembusan' => $p['is_tembusan']
 		];
 
 		if ($tahun == 0) {
@@ -148,7 +149,8 @@ class Kp_suratku_surat_masuk extends Admin_Controller
 		$params = [
 			'id_surat' => $p['mdl_detil_surat_id_surat'],
 			'penerima_id_instansi' => $p['mdl_detil_surat_penerima_id_instansi'],
-			'penerima_id_user' => $p['mdl_detil_surat_penerima_id_user']
+			'penerima_id_user' => $p['mdl_detil_surat_penerima_id_user'],
+			'is_tembusan' => $p['is_tembusan']
 		];
 
 		if ($tahun == 0) {
