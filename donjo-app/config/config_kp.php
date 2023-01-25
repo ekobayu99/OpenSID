@@ -46,3 +46,14 @@ foreach ($kp as $menu) {
 	$route["{$menu}/([a-z_]+)"] = "kp/{$menu}/$1";
 	$route["{$menu}"] = "kp/{$menu}";
 }
+
+//tambahan kulon progo (eb)
+$buku_umum = ['ekspedisi', 'lembaran_desa', 'pengurus', 'surat_keluar', 'surat_masuk'];
+
+foreach ($buku_umum as $menu) {
+    $route["{$menu}/([a-z_]+)/(:any)/(:any)/(:any)"] = "kp/buku_umum/{$menu}/$1/$2/$3/$4";
+    $route["{$menu}/([a-z_]+)/(:any)/(:any)"]        = "kp/buku_umum/{$menu}/$1/$2/$3";
+    $route["{$menu}/([a-z_]+)/(:any)"]               = "kp/buku_umum/{$menu}/$1/$2";
+    $route["{$menu}/([a-z_]+)"]                      = "kp/buku_umum/{$menu}/$1";
+    $route["{$menu}"]                                = "kp/buku_umum/{$menu}";
+}
