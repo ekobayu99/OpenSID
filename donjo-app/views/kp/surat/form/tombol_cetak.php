@@ -32,7 +32,7 @@
 				console.log(res);
 				if (res.success) {
 					alert(res.message);
-					// window.open(base_url + "index.php/kp_keluar", "_self");
+					window.open(BASE_URL + "index.php/kp_keluar", "_self");
 				} else {
 					alert('Arsip surat gagal disimpan');
 				}
