@@ -30,7 +30,7 @@
 	function new_penduduk() {
 		$.ajax({
 			type: "GET",
-			url: base_url + 'index.php/kp_surat/get_data_master',
+			url: BASE_URL + 'index.php/kp_surat/get_data_master',
 			success: function(res) {
 				let opt_agama = '<option value="">-</option>';
 				let opt_pendidikan = '<option value="">-</option>';
@@ -91,7 +91,7 @@
 
 		$.ajax({
 			type: "POST",
-			url: base_url + 'index.php/kp_surat/validasi_penduduk',
+			url: BASE_URL + 'index.php/kp_surat/validasi_penduduk',
 			data: formData,
 			contentType: false,
 			processData: false,
@@ -132,7 +132,7 @@
 
 		$.ajax({
 			type: "POST",
-			url: base_url + 'index.php/kp_surat/simpan_penduduk',
+			url: BASE_URL + 'index.php/kp_surat/simpan_penduduk',
 			data: formData,
 			contentType: false,
 			processData: false,
@@ -172,7 +172,7 @@
 
 		$.ajax({
 			type: "GET",
-			url: base_url + 'index.php/kp_surat/get_data_wilayah',
+			url: BASE_URL + 'index.php/kp_surat/get_data_wilayah',
 			success: function(res) {
 				let opt_alamat = '<option value="">-</option>';
 
@@ -201,7 +201,7 @@
 
 		$.ajax({
 			type: "POST",
-			url: base_url + 'index.php/kp_surat/update_alamat',
+			url: BASE_URL + 'index.php/kp_surat/update_alamat',
 			data: formData,
 			contentType: false,
 			processData: false,
